@@ -38,8 +38,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div>
             <h4 className="font-bold text-slate-900 mb-4">Product</h4>
             <ul className="space-y-3 text-sm text-slate-600">
-              <li className="hover:text-indigo-600 cursor-pointer transition-colors" onClick={() => handleNav('wizard')}>Pitch Deck</li>
-              <li className="hover:text-indigo-600 cursor-pointer transition-colors" onClick={() => handleNav('profile')}>Startup Profile Wizard</li>
+              <li className="hover:text-indigo-600 cursor-pointer transition-colors" onClick={() => handleNav('wizard')}>Pitch Deck Wizard</li>
+              <li className="hover:text-indigo-600 cursor-pointer transition-colors" onClick={() => handleNav('startup-profile')}>Startup Profile Wizard</li>
+              <li className="hover:text-indigo-600 cursor-pointer transition-colors" onClick={() => handleNav('profile')}>Account Settings</li>
               <li className="hover:text-indigo-600 cursor-pointer transition-colors" onClick={() => handleNav('gtm')}>GTM Strategy</li>
               <li className="hover:text-indigo-600 cursor-pointer transition-colors" onClick={() => handleNav('insights')}>Market Research</li>
               <li className="hover:text-indigo-600 cursor-pointer transition-colors" onClick={() => handleNav('pricing')}>Pricing</li>

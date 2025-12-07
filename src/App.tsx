@@ -9,6 +9,7 @@ import { ContactsDashboard } from './components/crm/ContactsDashboard';
 import { ContactDiscovery } from './components/crm/ContactDiscovery';
 import { GTMStrategy } from './components/crm/GTMStrategy';
 import { PitchDeckWizard } from './components/crm/PitchDeckWizard';
+import { StartupProfileWizard } from './components/wizard/StartupProfileWizard';
 import { PitchDeckEditor } from './components/crm/PitchDeckEditor';
 import { LeanCanvasBuilder } from './components/crm/LeanCanvasBuilder';
 import { DocumentWorkspace } from './components/crm/DocumentWorkspace';
@@ -23,7 +24,13 @@ import { steps, investorSteps } from './components/crm/data';
 import { cn } from "./components/ui/utils";
 import { Toaster } from "sonner@2.0.3";
 
-type View = 'dashboard' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'editor' | 'landing' | 'landing-v2' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile';
+import { ProfileSettings } from './components/settings/ProfileSettings';
+import { AccountSettings } from './components/settings/AccountSettings';
+import { BillingSettings } from './components/settings/BillingSettings';
+import { WorkspaceSettings } from './components/settings/WorkspaceSettings';
+import { HelpCenter } from './components/support/HelpCenter';
+
+type View = 'dashboard' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'startup-profile' | 'editor' | 'landing' | 'landing-v2' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile' | 'settings-account' | 'settings-billing' | 'settings-workspaces' | 'support';
 type PipelineMode = 'sales' | 'investor';
 
 export default function App() {
@@ -131,8 +138,13 @@ export default function App() {
           {currentView === 'gtm' && <GTMStrategy />}
 
           {currentView === 'wizard' && <PitchDeckWizard onNavigate={(view) => setCurrentView(view as View)} />}
+          {currentView === 'startup-profile' && <StartupProfileWizard onNavigate={(view) => setCurrentView(view as View)} />}
 
-          {currentView === 'profile' && <PitchDeckWizard onNavigate={(view) => setCurrentView(view as View)} />}
+          {currentView === 'profile' && <ProfileSettings />}
+          {currentView === 'settings-account' && <AccountSettings />}
+          {currentView === 'settings-billing' && <BillingSettings />}
+          {currentView === 'settings-workspaces' && <WorkspaceSettings />}
+          {currentView === 'support' && <HelpCenter />}
 
           {currentView === 'editor' && <PitchDeckEditor />}
           

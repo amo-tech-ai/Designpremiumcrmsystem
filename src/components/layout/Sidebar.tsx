@@ -31,7 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, class
   const navItems = [
     { id: 'landing-v2', label: 'Home', icon: Home },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'profile', label: 'Startup Profile', icon: Sparkles },
+    { id: 'startup-profile', label: 'Startup Profile', icon: Sparkles },
     { id: 'wizard', label: 'Pitch Decks', icon: Presentation },
     { id: 'pipeline', label: 'Deals', icon: Trello },
     { id: 'contacts', label: 'Contacts', icon: Users },

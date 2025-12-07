@@ -22,6 +22,8 @@ import { Input } from "../ui/input";
 import { cn } from "../ui/utils";
 import { Badge } from "../ui/badge";
 
+import { ProfileDropdown } from "../ProfileDropdown";
+
 interface TopNavbarProps {
   currentView: string;
   onNavigate: (view: string) => void;
@@ -144,10 +146,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ currentView, onNavigate, s
                   <span className="text-sm font-bold text-slate-700 leading-none">Alex D.</span>
                   <span className="text-[10px] text-slate-500 uppercase tracking-wide">Pro Plan</span>
                 </div>
-                <Avatar className="h-9 w-9 border border-slate-200 cursor-pointer hover:ring-2 hover:ring-indigo-100 transition-all">
-                  <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" />
-                  <AvatarFallback>AD</AvatarFallback>
-                </Avatar>
+                <ProfileDropdown onNavigate={onNavigate} />
               </div>
 
               {/* Mobile Hamburger */}

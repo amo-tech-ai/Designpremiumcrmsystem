@@ -36,7 +36,8 @@ import {
   RefreshCw,
   ExternalLink,
   PieChart,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -46,6 +47,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui
 import { Progress } from "../ui/progress";
 import { toast } from "sonner@2.0.3";
 import { Separator } from "../ui/separator";
+import { EditProfilePanel } from "./EditProfilePanel";
 
 // --- Mock Data: SkyOffice ---
 const STARTUP_PROFILE = {
@@ -146,6 +148,7 @@ interface FounderDashboardProps {
 
 export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }) => {
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false); // Mobile toggle
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false); // New state for Edit Panel
 
   // --- Components ---
 
@@ -186,9 +189,23 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
               </div>
 
               {/* Edit Action */}
-              <Button onClick={() => onNavigate('wizard')} className="hidden md:flex bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm">
-                <Edit2 className="w-4 h-4 mr-2" /> Edit Profile
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={() => setIsEditProfileOpen(true)} 
+                  className="hidden md:flex bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm"
+                  title="Edit profile details"
+                >
+                  <Edit2 className="w-4 h-4 mr-2" /> Edit Profile
+                </Button>
+                <Button 
+                   variant="outline" 
+                   size="icon"
+                   className="md:hidden" 
+                   onClick={() => setIsEditProfileOpen(true)}
+                >
+                   <Edit2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -205,9 +222,6 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
             <Progress value={STARTUP_PROFILE.profile_strength} className="h-2" />
             <p className="text-[10px] text-slate-400 mt-1">Complete more fields to reach 100%</p>
           </div>
-          <Button variant="outline" size="sm" className="md:hidden ml-auto" onClick={() => onNavigate('wizard')}>
-             <Edit2 className="w-3 h-3" />
-          </Button>
         </div>
       </div>
     </div>
@@ -302,9 +316,99 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
     </InfoCard>
   );
 
+  // Ai Assistant Content
+  const AiAssistantContent = () => (
+     <Card className="border-violet-100 shadow-lg shadow-violet-100/50 bg-gradient-to-b from-white to-violet-50/50 overflow-hidden h-full">
+        <CardHeader className="bg-violet-600 text-white pb-6 pt-6 relative overflow-hidden shrink-0">
+          <div className="relative z-10">
+              <CardTitle className="flex items-center justify-between text-lg">
+                <div className="flex items-center gap-2">
+                   <Sparkles className="w-5 h-5 text-violet-200" /> Gemini Coach
+                </div>
+                <div className="xl:hidden">
+                   <Button size="icon" variant="ghost" onClick={() => setIsAiPanelOpen(false)} className="text-violet-100 hover:bg-violet-500">
+                      <X className="w-5 h-5" />
+                   </Button>
+                </div>
+              </CardTitle>
+              <CardDescription className="text-violet-100 mt-1 opacity-90 flex items-center gap-2">
+                <RefreshCw className="w-3 h-3" /> Updated {STARTUP_PROFILE.ai_insights.last_updated}
+              </CardDescription>
+          </div>
+          {/* Background blobs */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
+        </CardHeader>
+        
+        <CardContent className="pt-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-none">
+          {/* Match Score */}
+          <div className="flex flex-col items-center justify-center p-4 bg-white/60 rounded-xl border border-violet-100 backdrop-blur-sm">
+              <div className="relative w-24 h-24 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-100" />
+                    <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-violet-600" strokeDasharray={251.2} strokeDashoffset={251.2 * (1 - STARTUP_PROFILE.ai_insights.match_score / 100)} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-2xl font-bold text-violet-700">{STARTUP_PROFILE.ai_insights.match_score}%</span>
+                    <span className="text-[10px] uppercase font-bold text-violet-400">Match</span>
+                </div>
+              </div>
+          </div>
+
+          {/* Summary */}
+          <div>
+              <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Summary</h4>
+              <p className="text-sm text-slate-700 leading-relaxed italic">
+                "{STARTUP_PROFILE.ai_insights.summary}"
+              </p>
+          </div>
+
+          {/* Risks */}
+          <div>
+              <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Detected Risks</h4>
+              <div className="space-y-2">
+                {STARTUP_PROFILE.ai_insights.risks.map((item, i) => (
+                    <div key={i} className="flex gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-100 items-start">
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </div>
+                ))}
+              </div>
+          </div>
+
+          {/* Next Steps */}
+          <div>
+              <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Recommended Steps</h4>
+              <div className="space-y-2">
+                {STARTUP_PROFILE.ai_insights.steps.map((item, i) => (
+                    <div key={i} className="flex gap-2 text-xs text-violet-700 bg-violet-50 p-2 rounded-lg border border-violet-100 items-start">
+                      <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </div>
+                ))}
+              </div>
+          </div>
+
+          <Separator className="bg-violet-100" />
+
+          <div className="grid grid-cols-1 gap-2">
+              <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200">
+                Generate Tasks
+              </Button>
+              <Button variant="outline" className="w-full border-violet-200 text-violet-700 hover:bg-violet-50">
+                Improve Profile
+              </Button>
+              <Button variant="ghost" className="w-full text-slate-500 hover:text-violet-600">
+                Ask Gemini Anything
+              </Button>
+          </div>
+        </CardContent>
+     </Card>
+  );
+
   // --- Main Layout ---
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-[#F8FAFC]">
+    <div className="flex flex-col h-full overflow-hidden bg-[#F8FAFC] relative">
       <div className="flex-grow overflow-y-auto scrollbar-thin">
         <div className="max-w-[1440px] mx-auto p-4 md:p-6 lg:p-8 pb-32 md:pb-8">
           
@@ -319,7 +423,7 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
             {/* LEFT COLUMN (Main Content) */}
             <div className="xl:col-span-9 space-y-6">
               
-              {/* Row: Overview Cards */}
+              {/* Overview Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <InfoCard title="Problem & Solution" icon={Target}>
                    <div className="space-y-4">
@@ -365,7 +469,7 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
                 </InfoCard>
               </div>
 
-              {/* Row: Business & Metrics */}
+              {/* Business & Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <InfoCard title="Business Model" icon={Briefcase}>
                    <div className="space-y-3 text-sm">
@@ -434,7 +538,7 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
                 </InfoCard>
               </div>
 
-              {/* Row: Funding & Links & Competitors */}
+              {/* Funding & Links & Competitors */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <FundraisingCard />
                 <LinksCard />
@@ -474,114 +578,26 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
 
             </div>
 
-            {/* RIGHT COLUMN (AI Panel) */}
-            <div className="xl:col-span-3">
-               {/* Mobile Toggle */}
-               <div className="xl:hidden mb-4">
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-between bg-white border-violet-200 text-violet-700 hover:bg-violet-50 h-12"
-                    onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
-                  >
-                    <span className="flex items-center gap-2 font-bold"><Sparkles className="w-4 h-4 fill-violet-200" /> AI Insights</span>
-                    {isAiPanelOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </Button>
-               </div>
-
-               {/* AI Panel Content */}
-               <div className={cn(
-                  "space-y-4 xl:sticky xl:top-6",
-                  !isAiPanelOpen && "hidden xl:block"
-               )}>
-                  <Card className="border-violet-100 shadow-lg shadow-violet-100/50 bg-gradient-to-b from-white to-violet-50/50 overflow-hidden">
-                     <CardHeader className="bg-violet-600 text-white pb-6 pt-6 relative overflow-hidden">
-                        <div className="relative z-10">
-                           <CardTitle className="flex items-center gap-2 text-lg">
-                              <Sparkles className="w-5 h-5 text-violet-200" /> Gemini Coach
-                           </CardTitle>
-                           <CardDescription className="text-violet-100 mt-1 opacity-90 flex items-center gap-2">
-                             <RefreshCw className="w-3 h-3" /> Updated {STARTUP_PROFILE.ai_insights.last_updated}
-                           </CardDescription>
-                        </div>
-                        {/* Background blobs */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
-                     </CardHeader>
-                     
-                     <CardContent className="pt-6 space-y-6">
-                        
-                        {/* Match Score */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-white/60 rounded-xl border border-violet-100 backdrop-blur-sm">
-                           <div className="relative w-24 h-24 flex items-center justify-center">
-                              <svg className="w-full h-full transform -rotate-90">
-                                <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-100" />
-                                <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-violet-600" strokeDasharray={251.2} strokeDashoffset={251.2 * (1 - STARTUP_PROFILE.ai_insights.match_score / 100)} strokeLinecap="round" />
-                              </svg>
-                              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                 <span className="text-2xl font-bold text-violet-700">{STARTUP_PROFILE.ai_insights.match_score}%</span>
-                                 <span className="text-[10px] uppercase font-bold text-violet-400">Match</span>
-                              </div>
-                           </div>
-                        </div>
-
-                        {/* Summary */}
-                        <div>
-                           <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Summary</h4>
-                           <p className="text-sm text-slate-700 leading-relaxed italic">
-                              "{STARTUP_PROFILE.ai_insights.summary}"
-                           </p>
-                        </div>
-
-                        {/* Risks */}
-                        <div>
-                           <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Detected Risks</h4>
-                           <div className="space-y-2">
-                              {STARTUP_PROFILE.ai_insights.risks.map((item, i) => (
-                                 <div key={i} className="flex gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-100 items-start">
-                                    <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                                    <span>{item}</span>
-                                 </div>
-                              ))}
-                           </div>
-                        </div>
-
-                        {/* Next Steps */}
-                        <div>
-                           <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Recommended Steps</h4>
-                           <div className="space-y-2">
-                              {STARTUP_PROFILE.ai_insights.steps.map((item, i) => (
-                                 <div key={i} className="flex gap-2 text-xs text-violet-700 bg-violet-50 p-2 rounded-lg border border-violet-100 items-start">
-                                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                                    <span>{item}</span>
-                                 </div>
-                              ))}
-                           </div>
-                        </div>
-
-                        <Separator className="bg-violet-100" />
-
-                        <div className="grid grid-cols-1 gap-2">
-                           <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200">
-                              Generate Tasks
-                           </Button>
-                           <Button variant="outline" className="w-full border-violet-200 text-violet-700 hover:bg-violet-50">
-                              Improve Profile
-                           </Button>
-                           <Button variant="ghost" className="w-full text-slate-500 hover:text-violet-600">
-                              Ask Gemini Anything
-                           </Button>
-                        </div>
-                     </CardContent>
-                  </Card>
-               </div>
+            {/* RIGHT COLUMN (AI Panel - Desktop) */}
+            <div className="hidden xl:block xl:col-span-3 sticky top-6">
+               <AiAssistantContent />
             </div>
 
           </div>
         </div>
       </div>
 
-      {/* Mobile Floating Action Bar */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 z-50">
+      {/* Mobile Floating Action Bar & Toggle */}
+      <div className="md:hidden fixed bottom-6 left-6 right-6 z-40">
+         <div className="flex justify-end mb-4">
+             <Button 
+                size="lg" 
+                className="rounded-full bg-violet-600 hover:bg-violet-700 shadow-xl shadow-violet-200/50 h-14 w-14 p-0"
+                onClick={() => setIsAiPanelOpen(true)}
+             >
+                 <Sparkles className="w-6 h-6" />
+             </Button>
+         </div>
          <div className="bg-slate-900/90 backdrop-blur-md text-white rounded-full p-2 shadow-2xl flex items-center justify-between pl-6 pr-2 border border-slate-700">
             <span className="font-semibold text-sm">Actions</span>
             <div className="flex gap-2">
@@ -594,6 +610,36 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
             </div>
          </div>
       </div>
+
+      {/* Mobile AI Panel (Bottom Sheet) */}
+      <AnimatePresence>
+        {isAiPanelOpen && (
+           <>
+             <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               onClick={() => setIsAiPanelOpen(false)}
+               className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 xl:hidden"
+             />
+             <motion.div 
+               initial={{ y: "100%" }}
+               animate={{ y: 0 }}
+               exit={{ y: "100%" }}
+               transition={{ type: "spring", damping: 25, stiffness: 300 }}
+               className="fixed bottom-0 left-0 right-0 h-[85vh] bg-white z-50 rounded-t-3xl xl:hidden shadow-2xl overflow-hidden"
+             >
+                <div className="h-1.5 w-12 bg-slate-300 rounded-full mx-auto mt-3 mb-1" />
+                <div className="h-full pb-10">
+                  <AiAssistantContent />
+                </div>
+             </motion.div>
+           </>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Profile Panel */}
+      <EditProfilePanel isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} />
       
     </div>
   );

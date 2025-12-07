@@ -20,7 +20,8 @@ import {
   ListTodo,
   ChevronRight,
   Maximize2,
-  X
+  X,
+  Grid
 } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -187,12 +188,12 @@ const canvasSections: CanvasSection[] = [
 ];
 
 const journeySteps = [
-  { id: 'profile', label: 'Startup Profile', icon: FileText, status: 'complete' },
-  { id: 'canvas', label: 'Lean Canvas', icon: LayoutGrid, status: 'current' },
-  { id: 'deck', label: 'Pitch Deck', icon: Presentation, status: 'pending' },
-  { id: 'gtm', label: 'GTM Strategy', icon: Target, status: 'pending' },
-  { id: 'personas', label: 'CRM Personas', icon: Users, status: 'pending' },
-  { id: 'tasks', label: 'Tasks', icon: ListTodo, status: 'pending' },
+  { id: 'profile', label: 'Startup Profile', subtitle: 'Define your startup fundamentals.', icon: FileText, route: 'dashboard' },
+  { id: 'canvas', label: 'Lean Canvas', subtitle: 'Map your problem, solution, UVP, and strategy.', icon: LayoutGrid, route: 'lean-canvas' },
+  { id: 'deck', label: 'Pitch Deck', subtitle: 'Generate investor-ready slides.', icon: Presentation, route: 'wizard' },
+  { id: 'gtm', label: 'GTM Strategy', subtitle: 'Build channels, ICP, messaging, and launch plan.', icon: Target, route: 'gtm' },
+  { id: 'personas', label: 'CRM Personas', subtitle: 'Create buyer personas for outreach.', icon: Users, route: 'contacts' },
+  { id: 'tasks', label: 'Tasks', subtitle: 'AI-generated actions for your next steps.', icon: ListTodo, route: 'tasks' },
 ];
 
 // --- Components ---
@@ -274,6 +275,161 @@ const ChatMessage = ({ msg }: { msg: { role: 'ai' | 'user', text: string } }) =>
   </div>
 );
 
+// AI Assistant Panel Component
+const AiAssistantPanel = ({ 
+  isMobileMenuOpen, 
+  setIsMobileMenuOpen, 
+  chatMessages, 
+  isAiThinking, 
+  inputMessage, 
+  setInputMessage, 
+  handleSendMessage 
+}: any) => (
+  <>
+    {/* Desktop Sidebar */}
+    <aside className="hidden lg:flex w-80 bg-white border-l border-slate-200 flex-col shadow-none z-30 relative">
+       <div className="h-16 flex items-center px-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
+          <div className="flex items-center gap-3">
+             <div className="relative">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full absolute -right-0.5 -bottom-0.5 border-2 border-white" />
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-sm">
+                   <Bot className="w-4 h-4" />
+                </div>
+             </div>
+             <div>
+                <div className="text-sm font-bold text-slate-900">Canvas AI</div>
+                <div className="text-[10px] text-slate-500">Always active</div>
+             </div>
+          </div>
+       </div>
+
+       <div className="flex-grow p-4 overflow-y-auto bg-slate-50/30">
+          {chatMessages.map((msg: any, i: number) => (
+             <ChatMessage key={i} msg={msg} />
+          ))}
+          {isAiThinking && (
+             <div className="flex gap-3 mb-4">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shrink-0">
+                   <Bot className="w-4 h-4 text-white" />
+                </div>
+                <div className="bg-white border border-slate-100 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
+                   <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                   <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100" />
+                   <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200" />
+                </div>
+             </div>
+          )}
+       </div>
+
+       <div className="p-4 border-t border-slate-200 bg-white">
+          <div className="flex gap-2 items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
+             <input 
+                className="flex-grow bg-transparent text-sm outline-none placeholder:text-slate-400"
+                placeholder="Ask Canvas AI..."
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+             />
+             <Button 
+                size="icon" 
+                className={cn(
+                   "h-7 w-7 rounded-lg transition-all", 
+                   inputMessage ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-400"
+                )}
+                onClick={handleSendMessage}
+             >
+                <ArrowRight className="w-3.5 h-3.5" />
+             </Button>
+          </div>
+          <div className="mt-3 flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+             <Badge variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-slate-50 text-[10px] py-1">Refine UVP</Badge>
+             <Badge variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-slate-50 text-[10px] py-1">Competitors?</Badge>
+             <Badge variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-slate-50 text-[10px] py-1">Monetization</Badge>
+          </div>
+       </div>
+    </aside>
+
+    {/* Mobile Bottom Sheet */}
+    <AnimatePresence>
+      {isMobileMenuOpen && (
+        <>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
+          />
+          <motion.div 
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed bottom-0 left-0 right-0 h-[80vh] bg-white z-50 rounded-t-3xl lg:hidden shadow-2xl overflow-hidden flex flex-col"
+          >
+             <div className="h-1.5 w-12 bg-slate-300 rounded-full mx-auto mt-3 mb-1 shrink-0" />
+             
+             <div className="h-14 flex items-center px-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 shrink-0">
+                <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-sm">
+                      <Bot className="w-4 h-4" />
+                   </div>
+                   <div>
+                      <div className="text-sm font-bold text-slate-900">Canvas AI</div>
+                      <div className="text-[10px] text-slate-500">Assistant</div>
+                   </div>
+                </div>
+                <Button variant="ghost" size="icon" className="ml-auto h-8 w-8" onClick={() => setIsMobileMenuOpen(false)}>
+                   <X className="w-4 h-4" />
+                </Button>
+             </div>
+
+             <div className="flex-grow p-4 overflow-y-auto bg-slate-50/30">
+                {chatMessages.map((msg: any, i: number) => (
+                   <ChatMessage key={i} msg={msg} />
+                ))}
+                {isAiThinking && (
+                   <div className="flex gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shrink-0">
+                         <Bot className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="bg-white border border-slate-100 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
+                         <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                         <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100" />
+                         <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200" />
+                      </div>
+                   </div>
+                )}
+             </div>
+
+             <div className="p-4 border-t border-slate-200 bg-white shrink-0 safe-area-bottom">
+                <div className="flex gap-2 items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
+                   <input 
+                      className="flex-grow bg-transparent text-sm outline-none placeholder:text-slate-400"
+                      placeholder="Ask Canvas AI..."
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                   />
+                   <Button 
+                      size="icon" 
+                      className={cn(
+                         "h-7 w-7 rounded-lg transition-all", 
+                         inputMessage ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-400"
+                      )}
+                      onClick={handleSendMessage}
+                   >
+                      <ArrowRight className="w-3.5 h-3.5" />
+                   </Button>
+                </div>
+             </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  </>
+);
+
 export const LeanCanvasBuilder = ({ onNavigate }: { onNavigate?: (view: string) => void }) => {
   const [chatMessages, setChatMessages] = useState([
     { role: 'ai', text: "I've pre-filled your Lean Canvas based on your Startup Profile for 'TaxEasy AI'. How does the Problem section look to you?" }
@@ -306,69 +462,7 @@ export const LeanCanvasBuilder = ({ onNavigate }: { onNavigate?: (view: string) 
   return (
     <div className="flex h-screen bg-[#F8F9FC] font-sans text-slate-900 overflow-hidden">
       
-      {/* 1. Sidebar Navigation (Left) */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex-col hidden lg:flex z-20">
-        <div className="h-16 flex items-center px-6 border-b border-slate-100">
-           <div className="flex items-center gap-2 font-bold text-lg text-slate-900">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-                 <LayoutGrid className="w-5 h-5" />
-              </div>
-              Canvas AI
-           </div>
-        </div>
-        
-        <div className="p-6 flex-grow overflow-y-auto">
-           <div className="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Builder Journey</div>
-           <nav className="space-y-1 relative">
-              {/* Connector Line */}
-              <div className="absolute left-3.5 top-4 bottom-4 w-px bg-slate-100 -z-10" />
-              
-              {journeySteps.map((step, i) => (
-                 <div 
-                    key={step.id}
-                    className={cn(
-                       "group flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer",
-                       step.status === 'current' ? "bg-indigo-50 border border-indigo-100" : "hover:bg-slate-50 border border-transparent"
-                    )}
-                    onClick={() => {
-                       if (!onNavigate) return;
-                       if (step.id === 'canvas') onNavigate('lean-canvas');
-                       else if (step.id === 'deck') onNavigate('wizard');
-                       else if (step.id === 'personas') onNavigate('contacts');
-                       else if (step.id === 'profile') onNavigate('dashboard');
-                       else onNavigate(step.id);
-                    }}
-                 >
-                    <div className={cn(
-                       "w-7 h-7 rounded-full flex items-center justify-center border-2 z-10 bg-white transition-colors",
-                       step.status === 'complete' ? "border-emerald-500 text-emerald-500" : 
-                       step.status === 'current' ? "border-indigo-600 text-indigo-600 shadow-md shadow-indigo-200" : 
-                       "border-slate-200 text-slate-300"
-                    )}>
-                       {step.status === 'complete' ? <CheckCircle2 className="w-4 h-4" /> : <step.icon className="w-3.5 h-3.5" />}
-                    </div>
-                    <div>
-                       <div className={cn("text-sm font-medium", step.status === 'current' ? "text-indigo-900" : "text-slate-600")}>{step.label}</div>
-                       {step.status === 'current' && <div className="text-[10px] text-indigo-500 font-medium">In Progress</div>}
-                    </div>
-                 </div>
-              ))}
-           </nav>
-        </div>
-
-        <div className="p-4 border-t border-slate-100">
-           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-              <div className="relative z-10">
-                 <div className="text-sm font-bold mb-1">Pro Plan</div>
-                 <div className="text-xs text-slate-300 mb-3">Unlock unlimited AI generations and export to PPTX.</div>
-                 <Button size="sm" variant="secondary" className="w-full text-xs h-8 bg-white text-slate-900 hover:bg-slate-100">Upgrade</Button>
-              </div>
-           </div>
-        </div>
-      </aside>
-
-      {/* 2. Main Content Area */}
+      {/* Main Content Area */}
       <div className="flex-grow flex flex-col h-full overflow-hidden relative">
          
          {/* Top Navigation Bar */}
@@ -395,7 +489,7 @@ export const LeanCanvasBuilder = ({ onNavigate }: { onNavigate?: (view: string) 
                <Button 
                   size="sm" 
                   className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 gap-2"
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  onClick={() => setIsMobileMenuOpen(true)}
                >
                   <Sparkles className="w-4 h-4" /> <span className="hidden sm:inline">AI Assistant</span>
                </Button>
@@ -403,12 +497,20 @@ export const LeanCanvasBuilder = ({ onNavigate }: { onNavigate?: (view: string) 
          </header>
 
          {/* Canvas Workspace - Scrollable */}
-         <main className="flex-grow overflow-y-auto lg:overflow-hidden p-4 md:p-8 relative">
+         <main className="flex-grow overflow-y-auto p-4 md:p-8 relative">
             
             {/* Background Pattern */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.4] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" />
 
-            <div className="max-w-[1400px] mx-auto">
+            <div className="max-w-[1600px] mx-auto pb-32">
+               
+               {/* Breadcrumb */}
+               <div className="text-sm font-medium text-slate-500 mb-6 flex items-center gap-2">
+                  <span className="text-slate-400">Builder Journey</span>
+                  <ChevronRight className="w-4 h-4 text-slate-300" />
+                  <span className="text-slate-800">Lean Canvas</span>
+               </div>
+
                {/* 
                   LEAN CANVAS GRID LAYOUT 
                */}
@@ -467,34 +569,50 @@ export const LeanCanvasBuilder = ({ onNavigate }: { onNavigate?: (view: string) 
                </div>
 
                {/* Bottom Row: Cost & Revenue */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-auto lg:h-[250px]">
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-auto lg:h-[250px] mb-16">
                   <CanvasCard section={getSection('cost-structure')} isAiThinking={isAiThinking} />
                   <CanvasCard section={getSection('revenue-streams')} isAiThinking={isAiThinking} />
                </div>
+
+               {/* Builder Journey Navigation */}
+               <div className="mt-16">
+                 <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                   <Grid className="w-5 h-5 text-indigo-600" /> Builder Journey
+                 </h2>
+                 <div className="flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 snap-x">
+                   {journeySteps.map((step) => (
+                     <div 
+                       key={step.id}
+                       onClick={() => onNavigate && onNavigate(step.route)}
+                       className="group flex-shrink-0 w-80 md:w-64 bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-200 hover:-translate-y-1 transition-all cursor-pointer snap-start"
+                     >
+                       <div className="flex items-center justify-between mb-3">
+                         <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                           <step.icon className="w-5 h-5" />
+                         </div>
+                         <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                       </div>
+                       <h3 className="font-bold text-slate-900 mb-1">{step.label}</h3>
+                       <p className="text-xs text-slate-500 leading-relaxed">{step.subtitle}</p>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+
             </div>
          </main>
 
-         {/* Bottom User Journey Flow (Horizontal) - as requested */}
-         <div className="h-16 bg-white border-t border-slate-200 flex items-center px-8 shrink-0 overflow-x-auto hide-scrollbar">
-            <div className="flex items-center gap-2 min-w-max mx-auto">
-               {journeySteps.map((step, i) => (
-                  <React.Fragment key={step.id}>
-                     <div className={cn(
-                        "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                        step.status === 'complete' ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
-                        step.status === 'current' ? "bg-indigo-600 text-white shadow-md shadow-indigo-200" :
-                        "bg-white text-slate-500 border border-slate-200"
-                     )}>
-                        {step.status === 'complete' && <CheckCircle2 className="w-3 h-3" />}
-                        {step.label}
-                     </div>
-                     {i < journeySteps.length - 1 && (
-                        <div className="w-8 h-px bg-slate-200" />
-                     )}
-                  </React.Fragment>
-               ))}
-            </div>
-         </div>
+         {/* Floating Back Button */}
+         <Button 
+            className="fixed bottom-6 right-6 z-40 bg-slate-900 text-white hover:bg-slate-800 shadow-xl rounded-full px-6"
+            onClick={() => {
+               // Scroll to bottom builder journey section
+               const element = document.querySelector('main');
+               if (element) element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
+            }}
+         >
+            <Grid className="w-4 h-4 mr-2" /> Back to Journey
+         </Button>
 
          {/* Toast Notification */}
          <AnimatePresence>
@@ -512,74 +630,16 @@ export const LeanCanvasBuilder = ({ onNavigate }: { onNavigate?: (view: string) 
          </AnimatePresence>
       </div>
 
-      {/* 3. AI Assistant Panel (Right) */}
-      <aside className={cn(
-         "w-80 bg-white border-l border-slate-200 flex flex-col z-30 shadow-xl lg:shadow-none absolute right-0 top-0 bottom-0 lg:static transform transition-transform duration-300",
-         isMobileMenuOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
-      )}>
-         <div className="h-16 flex items-center px-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
-            <div className="flex items-center gap-3">
-               <div className="relative">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full absolute -right-0.5 -bottom-0.5 border-2 border-white" />
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-sm">
-                     <Bot className="w-4 h-4" />
-                  </div>
-               </div>
-               <div>
-                  <div className="text-sm font-bold text-slate-900">Canvas AI</div>
-                  <div className="text-[10px] text-slate-500">Always active</div>
-               </div>
-            </div>
-            <Button variant="ghost" size="icon" className="ml-auto h-8 w-8 lg:hidden" onClick={() => setIsMobileMenuOpen(false)}>
-               <X className="w-4 h-4" />
-            </Button>
-         </div>
-
-         <div className="flex-grow p-4 overflow-y-auto bg-slate-50/30">
-            {chatMessages.map((msg, i) => (
-               <ChatMessage key={i} msg={msg} />
-            ))}
-            {isAiThinking && (
-               <div className="flex gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shrink-0">
-                     <Bot className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="bg-white border border-slate-100 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
-                     <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
-                     <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100" />
-                     <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200" />
-                  </div>
-               </div>
-            )}
-         </div>
-
-         <div className="p-4 border-t border-slate-200 bg-white">
-            <div className="flex gap-2 items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
-               <input 
-                  className="flex-grow bg-transparent text-sm outline-none placeholder:text-slate-400"
-                  placeholder="Ask Canvas AI..."
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-               />
-               <Button 
-                  size="icon" 
-                  className={cn(
-                     "h-7 w-7 rounded-lg transition-all", 
-                     inputMessage ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-400"
-                  )}
-                  onClick={handleSendMessage}
-               >
-                  <ArrowRight className="w-3.5 h-3.5" />
-               </Button>
-            </div>
-            <div className="mt-3 flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-               <Badge variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-slate-50 text-[10px] py-1">Refine UVP</Badge>
-               <Badge variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-slate-50 text-[10px] py-1">Competitors?</Badge>
-               <Badge variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-slate-50 text-[10px] py-1">Monetization</Badge>
-            </div>
-         </div>
-      </aside>
+      {/* 3. AI Assistant Panel (Desktop Sidebar / Mobile Bottom Sheet) */}
+      <AiAssistantPanel 
+         isMobileMenuOpen={isMobileMenuOpen}
+         setIsMobileMenuOpen={setIsMobileMenuOpen}
+         chatMessages={chatMessages}
+         isAiThinking={isAiThinking}
+         inputMessage={inputMessage}
+         setInputMessage={setInputMessage}
+         handleSendMessage={handleSendMessage}
+      />
 
     </div>
   );

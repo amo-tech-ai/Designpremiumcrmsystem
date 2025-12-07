@@ -39,4 +39,23 @@ app.post("/make-server-6522a742/image-ai", imageAIHandler);
 
 app.post("/make-server-6522a742/research-ai", researchAIHandler);
 
+app.get("/make-server-6522a742/company-profile", async (c) => {
+  try {
+    const data = await kv.get("company_profile_data");
+    return c.json(data || {});
+  } catch (error) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+app.post("/make-server-6522a742/company-profile", async (c) => {
+  try {
+    const data = await c.req.json();
+    await kv.set("company_profile_data", data);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
 Deno.serve(app.fetch);

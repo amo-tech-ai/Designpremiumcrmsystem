@@ -12,7 +12,9 @@ import {
   Globe,
   Trello,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  User,
+  Building2
 } from 'lucide-react';
 import { cn } from "../ui/utils";
 import { Badge } from "../ui/badge";
@@ -32,7 +34,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, class
   const navItems = [
     { id: 'landing-v2', label: 'Home', icon: Home },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'startup-profile', label: 'Startup Profile', icon: Sparkles },
+    { id: 'startup-profile', label: 'Startup Profile Wizard', icon: Sparkles },
+    { id: 'company-profile', label: 'Edit Company', icon: Building2 },
+    { id: 'profile', label: 'User Profile', icon: User },
     { id: 'wizard', label: 'Pitch Decks', icon: Presentation },
     { id: 'pipeline', label: 'Deals', icon: Trello },
     { id: 'contacts', label: 'Contacts', icon: Users },

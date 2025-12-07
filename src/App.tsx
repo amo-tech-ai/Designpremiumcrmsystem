@@ -25,13 +25,14 @@ import { steps, investorSteps } from './components/crm/data';
 import { cn } from "./components/ui/utils";
 import { Toaster } from "sonner@2.0.3";
 
-import { ProfileSettings } from './components/settings/ProfileSettings';
+import { UserProfile } from './components/user-profile/UserProfile';
+import { CompanyProfileEditor } from './components/company-profile/CompanyProfileEditor';
 import { AccountSettings } from './components/settings/AccountSettings';
 import { BillingSettings } from './components/settings/BillingSettings';
 import { WorkspaceSettings } from './components/settings/WorkspaceSettings';
 import { HelpCenter } from './components/support/HelpCenter';
 
-type View = 'dashboard' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'startup-profile' | 'editor' | 'landing' | 'landing-v2' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile' | 'settings-account' | 'settings-billing' | 'settings-workspaces' | 'support';
+type View = 'dashboard' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'startup-profile' | 'company-profile' | 'editor' | 'landing' | 'landing-v2' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile' | 'settings-account' | 'settings-billing' | 'settings-workspaces' | 'support';
 type PipelineMode = 'sales' | 'investor';
 
 export default function App() {
@@ -50,8 +51,6 @@ export default function App() {
     if (path.startsWith('/pitch-deck/generating/')) {
        const id = path.split('/pitch-deck/generating/')[1];
        if (id) {
-          setGeneratedDeckId(id);
-          setIsGenerating(true);
           setCurrentView('wizard'); // Force wizard view to show the generation screen
        }
     } else if (path.startsWith('/pitch-deck/editor/')) {
@@ -160,7 +159,8 @@ export default function App() {
           {currentView === 'wizard' && <PitchDeckWizard onNavigate={(view) => setCurrentView(view as View)} />}
           {currentView === 'startup-profile' && <StartupProfileWizard onNavigate={(view) => setCurrentView(view as View)} />}
 
-          {currentView === 'profile' && <ProfileSettings />}
+          {currentView === 'profile' && <UserProfile onNavigate={(view) => setCurrentView(view as View)} />}
+          {currentView === 'company-profile' && <CompanyProfileEditor onNavigate={(view) => setCurrentView(view as View)} />}
           {currentView === 'settings-account' && <AccountSettings />}
           {currentView === 'settings-billing' && <BillingSettings />}
           {currentView === 'settings-workspaces' && <WorkspaceSettings />}

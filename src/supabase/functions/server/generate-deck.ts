@@ -161,18 +161,38 @@ export const generateDeckHandler = async (c: any) => {
 
     if (dbError) {
       console.error("Database Insert Error:", dbError);
-      // Fallback: If table doesn't exist, we return the slides to the frontend
-      // so the frontend can handle it (e.g. using local state or KV)
+      // Update status to error
+      await supabase
+        .from('decks')
+        .update({ status: 'error' })
+        .eq('id', deckId);
+        
       return c.json({ 
         warning: "Could not save to database (table might be missing), returning generated slides.",
-        slides: slidesToInsert 
+        slides: slidesToInsert,
+        error: dbError.message
       });
     }
+
+    // Success! Update deck status to complete
+    await supabase
+      .from('decks')
+      .update({ status: 'complete' })
+      .eq('id', deckId);
 
     return c.json({ success: true, count: slidesToInsert.length });
 
   } catch (error: any) {
     console.error("Generate Deck Error:", error);
+    
+    // Attempt to update status to error if possible
+    if (payload?.deckId) {
+       await supabase
+        .from('decks')
+        .update({ status: 'error' })
+        .eq('id', payload.deckId);
+    }
+
     return c.json({ error: error.message }, 500);
   }
 };

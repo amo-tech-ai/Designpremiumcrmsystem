@@ -4,29 +4,34 @@ import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../../ui/avatar';
 import { AddFounderModal } from './AddFounderModal';
+import { useStartupProfile } from '../StartupProfileContext';
 
 export const StepTeam = () => {
+  const { data, updateData } = useStartupProfile();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [founders, setFounders] = useState([
-    {
-      id: 1,
-      name: "Alex D.",
-      role: "CEO & Co-Founder",
-      bio: "Serial entrepreneur with 10 years of experience in SaaS. Previously founded TechStart.",
-      linkedin: "linkedin.com/in/alex",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
-    }
-  ]);
+  
+  // Use data from context, default to empty array if undefined
+  const founders = data.founders || [];
 
   const handleAddFounder = (founder: any) => {
-    setFounders([...founders, {
+    const newFounder = {
+      ...founder,
       id: founders.length + 1,
-      name: "New Member",
-      role: "CTO",
-      bio: "Engineering leader...",
-      linkedin: "",
-      image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${founders.length + 1}`
-    }]);
+      // Ensure properties match interface if needed
+      name: founder.name || "New Member",
+      role: founder.role || "Role",
+      bio: founder.bio || "",
+      linkedin: founder.linkedin || "",
+      image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`
+    };
+    
+    updateData({ founders: [...founders, newFounder] });
+  };
+
+  const handleRemoveFounder = (index: number) => {
+     const newFounders = [...founders];
+     newFounders.splice(index, 1);
+     updateData({ founders: newFounders });
   };
 
   return (
@@ -42,14 +47,14 @@ export const StepTeam = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {founders.map((founder) => (
-          <Card key={founder.id} className="group hover:border-indigo-200 transition-all">
+        {founders.map((founder, index) => (
+          <Card key={index} className="group hover:border-indigo-200 transition-all">
             <CardContent className="p-5">
                <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
                      <Avatar className="w-16 h-16 border-2 border-white shadow-sm">
-                        <AvatarImage src={founder.image} />
-                        <AvatarFallback>{founder.name[0]}</AvatarFallback>
+                        <AvatarImage src={founder.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${founder.name}`} />
+                        <AvatarFallback>{founder.name?.[0] || "T"}</AvatarFallback>
                      </Avatar>
                      <div>
                         <h3 className="font-bold text-slate-900">{founder.name}</h3>
@@ -65,13 +70,18 @@ export const StepTeam = () => {
                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600">
                         <Edit2 className="w-4 h-4" />
                      </Button>
-                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600">
+                     <Button 
+                       variant="ghost" 
+                       size="icon" 
+                       className="h-8 w-8 text-slate-400 hover:text-red-600"
+                       onClick={() => handleRemoveFounder(index)}
+                     >
                         <Trash2 className="w-4 h-4" />
                      </Button>
                   </div>
                </div>
                <div className="mt-4 text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-                  {founder.bio}
+                  {founder.bio || "No bio provided."}
                </div>
             </CardContent>
           </Card>

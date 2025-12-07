@@ -37,41 +37,70 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { cn } from "../ui/utils";
-import { toast } from "sonner@2.0.3";
+import { supabase } from '../../utils/supabase/client';
+import { projectId } from '../../utils/supabase/info';
 
-// --- Mock Data ---
-
-const MOCK_DATA = {
-  name: "SkyOffice",
-  tagline: "Virtual HQ for async & remote-first teams",
-  description: "SkyOffice is a virtual headquarters that unifies communication, standups, and task workflows for distributed teams. We help companies maintain culture and velocity without the meeting fatigue.",
-  industry: "SaaS",
-  stage: "Seed",
-  founded: "2023",
-  hq: "San Francisco, CA",
-  website: "https://skyoffice.com",
-  mission: "To make remote work feel as connected and spontaneous as working in person.",
-  valueProp: "Regain 20% of your week lost to meetings.",
-  differentiator: "Async-first architecture vs Real-time fatigue.",
-  founders: [
-    { name: "Alex Johnson", role: "CEO", bio: "ex-Stripe PM, 2x Founder", linkedin: "linkedin.com/in/alex" },
-    { name: "Maria Chen", role: "CTO", bio: "ex-Notion Eng Lead", linkedin: "linkedin.com/in/maria" }
-  ],
-  metrics: { mrr: "$35,000", users: "850", growth: "15%", waitlist: "2,400" },
-  isRaising: true,
-  raiseAmount: "1,500,000",
-  useOfFunds: ["Engineering", "Sales"],
-  socials: { twitter: "@skyoffice", linkedin: "company/skyoffice", github: "skyoffice-os", deck: "docsend.com/..." },
-  logo: "https://api.dicebear.com/7.x/shapes/svg?seed=SkyOffice&backgroundColor=6366f1"
-};
+const SERVER_URL = `https://${projectId}.supabase.co/functions/v1/make-server-6522a742`;
 
 interface EditProfilePanelProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: any;
 }
 
-export const EditProfilePanel: React.FC<EditProfilePanelProps> = ({ isOpen, onClose }) => {
-  const [data, setData] = useState(MOCK_DATA);
+export const EditProfilePanel: React.FC<EditProfilePanelProps> = ({ isOpen, onClose, initialData }) => {
+  // Initialize state with MOCK_DATA but override with initialData if present
+  const [data, setData] = useState(() => {
+     if (initialData) {
+         return {
+             name: initialData.name || "",
+             tagline: initialData.tagline || "",
+             description: initialData.longDescription || initialData.description || "",
+             industry: initialData.industry || "",
+             stage: initialData.stage || "",
+             founded: initialData.foundedYear || "",
+             hq: initialData.location || "",
+             website: initialData.website || "",
+             mission: "", // Not in current backend response
+             valueProp: "", // Not in current backend response
+             differentiator: initialData.competitors?.differentiator || initialData.differentiator || "",
+             founders: initialData.founders || [],
+             metrics: initialData.metrics || { mrr: "", users: "", growth: "", waitlist: "" },
+             isRaising: parseFloat(initialData.fundraising?.amount || "0") > 0,
+             raiseAmount: initialData.fundraising?.amount || "",
+             useOfFunds: initialData.fundraising?.use_of_funds || [],
+             socials: { 
+                 twitter: initialData.links?.find((l: any) => l.type === 'twitter')?.url || "", 
+                 linkedin: initialData.links?.find((l: any) => l.type === 'linkedin')?.url || "", 
+                 github: initialData.links?.find((l: any) => l.type === 'github')?.url || "", 
+                 deck: initialData.links?.find((l: any) => l.type === 'pitch_deck')?.url || "" 
+             },
+             logo: initialData.logo_url || ""
+         };
+     }
+     return MOCK_DATA;
+  });
+
+  // Update local state when initialData changes (e.g. after fetch)
+  React.useEffect(() => {
+      if (initialData && isOpen) {
+         setData(prev => ({
+             ...prev,
+             name: initialData.name || prev.name,
+             tagline: initialData.tagline || prev.tagline,
+             description: initialData.longDescription || initialData.description || prev.description,
+             industry: initialData.industry || prev.industry,
+             stage: initialData.stage || prev.stage,
+             founded: initialData.foundedYear || prev.founded,
+             logo: initialData.logo_url || prev.logo,
+             metrics: initialData.metrics || prev.metrics,
+             founders: initialData.founders || prev.founders,
+             raiseAmount: initialData.fundraising?.amount || prev.raiseAmount,
+             useOfFunds: initialData.fundraising?.use_of_funds || prev.useOfFunds
+         }));
+      }
+  }, [initialData, isOpen]);
+
   const [isSaving, setIsSaving] = useState(false);
   const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
 
@@ -84,13 +113,63 @@ export const EditProfilePanel: React.FC<EditProfilePanelProps> = ({ isOpen, onCl
     }, 1500);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      // Construct payload matching the POST /startup-profile expectation
+      // Note: The backend endpoint maps 'description' -> 'tagline', and 'longDescription' -> 'description'
+      // We should probably fix the backend, but for now we follow its logic or send a merged payload.
+      // Let's send what the backend expects:
+      
+      const payload = {
+          website: data.website,
+          description: data.tagline, // Short description/tagline
+          longDescription: data.description, // Long description
+          industry: data.industry,
+          foundedYear: data.founded,
+          founders: data.founders,
+          // businessModel: ???,
+          // targetAudience: ???,
+          // pricing: ???,
+          mrr: data.metrics.mrr,
+          users: data.metrics.users,
+          growth: data.metrics.growth,
+          stage: data.stage,
+          raiseAmount: data.raiseAmount,
+          useOfFunds: data.useOfFunds,
+          differentiator: data.differentiator,
+          companyName: data.name // Backend might ignore this or we need to update backend to use it
+      };
+
+      const response = await fetch(`${SERVER_URL}/startup-profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error("Failed to save profile");
+
       toast.success("Profile updated successfully");
-      onClose();
-    }, 1000);
+      
+      // Trigger a reload or callback
+      // Ideally we should call a parent refresh function, but we can rely on page reload or optimistic UI
+      setTimeout(() => {
+         onClose();
+         window.location.reload(); // Simple refresh to show new data
+      }, 500);
+      
+    } catch (error) {
+       console.error("Error saving profile:", error);
+       toast.error("Failed to save profile");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // --- Components ---

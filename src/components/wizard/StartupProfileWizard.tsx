@@ -8,6 +8,7 @@ import { StepTraction } from './steps/StepTraction';
 import { StepFunding } from './steps/StepFunding';
 import { StepSummary } from './steps/StepSummary';
 import { motion, AnimatePresence } from 'motion/react';
+import { StartupProfileProvider, useStartupProfile } from './StartupProfileContext';
 
 interface StartupProfileWizardProps {
   onNavigate: (view: string) => void;
@@ -15,23 +16,20 @@ interface StartupProfileWizardProps {
 
 const STEPS = ["Context", "Founders", "Business", "Traction", "Funding", "Summary"];
 
-export const StartupProfileWizard: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
+const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isSaving, setIsSaving] = useState(false);
+  const { saveData, isSaving } = useStartupProfile();
 
-  const handleNext = () => {
-    setIsSaving(true);
-    // Simulate save delay
-    setTimeout(() => {
-      setIsSaving(false);
-      if (currentStep < STEPS.length - 1) {
-        setCurrentStep(prev => prev + 1);
-        window.scrollTo(0, 0);
-      } else {
-        // Finish action
-        onNavigate('dashboard');
-      }
-    }, 600);
+  const handleNext = async () => {
+    await saveData();
+    
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep(prev => prev + 1);
+      window.scrollTo(0, 0);
+    } else {
+      // Finish action
+      onNavigate('dashboard');
+    }
   };
 
   const handleBack = () => {
@@ -96,5 +94,13 @@ export const StartupProfileWizard: React.FC<StartupProfileWizardProps> = ({ onNa
         isSaving={isSaving}
       />
     </div>
+  );
+};
+
+export const StartupProfileWizard: React.FC<StartupProfileWizardProps> = (props) => {
+  return (
+    <StartupProfileProvider>
+      <WizardContent {...props} />
+    </StartupProfileProvider>
   );
 };

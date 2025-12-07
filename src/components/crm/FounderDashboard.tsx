@@ -48,66 +48,52 @@ import { Progress } from "../ui/progress";
 import { toast } from "sonner@2.0.3";
 import { Separator } from "../ui/separator";
 import { EditProfilePanel } from "./EditProfilePanel";
+import { useStartupProfile } from "./hooks";
 
-// --- Mock Data: SkyOffice ---
-const STARTUP_PROFILE = {
-  name: "SkyOffice",
-  tagline: "Virtual HQ for async & remote-first teams",
-  logo_url: "https://api.dicebear.com/7.x/shapes/svg?seed=SkyOffice&backgroundColor=6366f1",
+// --- Default / Fallback Data ---
+const DEFAULT_PROFILE = {
+  name: "My Startup",
+  tagline: "Your tagline goes here",
+  logo_url: "https://api.dicebear.com/7.x/shapes/svg?seed=Startup&backgroundColor=6366f1",
   cover_image_url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200",
-  stage: "Seed",
-  business_model: "B2B SaaS",
-  industry: "Productivity",
-  year_founded: "2023",
-  location: "San Francisco, CA",
-  employees: "12",
-  profile_strength: 85,
-  problem: "Remote teams struggle with fragmented workflows and async burnout.",
-  solution: "A virtual HQ that unifies communication, standups, and task workflows.",
-  icp: "SMB + Mid-market tech companies (20–500 employees)",
-  target_regions: ["North America", "Europe"],
-  features: [
-    "Virtual HQ Rooms",
-    "Async Standups",
-    "Unified Activity Feed",
-    "Meeting Playback",
-    "Jira Integration"
-  ],
-  pricing_model: "Per User Subscription",
-  revenue_example: "$49/mo per user",
-  founders: [
-    { name: "Alex Johnson", title: "CEO", bio: "ex-Slack PM", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex", linkedin: "#" },
-    { name: "Maria Chen", title: "CTO", bio: "ex-Notion Eng", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria", linkedin: "#" }
-  ],
+  stage: "Idea",
+  business_model: "SaaS",
+  industry: "Tech",
+  year_founded: "2024",
+  location: "Remote",
+  employees: "1",
+  profile_strength: 20,
+  problem: "Describe the problem you are solving.",
+  solution: "Describe your solution.",
+  icp: "Target Customer",
+  target_regions: ["Global"],
+  features: ["Feature 1", "Feature 2"],
+  pricing_model: "Subscription",
+  revenue_example: "$0/mo",
+  founders: [],
   metrics: {
-    mrr: "$12,400",
-    growth: "14%",
-    users: "1,250",
-    waitlist: "3,100",
-    history: [35, 45, 60, 75, 80, 90, 100]
+    mrr: "$0",
+    growth: "0%",
+    users: "0",
+    waitlist: "0",
+    history: [0, 0, 0, 0, 0]
   },
   fundraising: {
-    is_raising: true,
-    amount: "$500,000",
-    use_of_funds: ["Engineering", "Marketing", "Infrastructure"]
+    is_raising: false,
+    amount: "0",
+    use_of_funds: []
   },
-  links: [
-    { type: 'website', url: 'https://skyoffice.com', label: 'Website', icon: Globe },
-    { type: 'linkedin', url: '#', label: 'LinkedIn', icon: Linkedin },
-    { type: 'pitch_deck', url: '#', label: 'Pitch Deck', icon: FileText },
-    { type: 'demo', url: '#', label: 'Demo Video', icon: Video },
-    { type: 'github', url: '#', label: 'GitHub', icon: Github }
-  ],
+  links: [],
   competitors: {
-    list: ["Slack", "Zoom", "Gather", "Microsoft Teams"],
-    differentiator: "More async-first and task-integrated than Slack or Zoom."
+    list: [],
+    differentiator: "What makes you unique?"
   },
   ai_insights: {
-    summary: "SkyOffice shows strong product-market fit signals in the remote work sector but needs more robust traction data for Series A readiness.",
-    match_score: 85,
-    risks: ["Low pricing clarity", "Competitor differentiation weak", "Churn metrics missing"],
-    steps: ["Add detailed competitor comparison", "Upload latest cohort retention data", "Refine GTM channel strategy"],
-    last_updated: "2 hours ago"
+    summary: "Complete your profile to get AI insights.",
+    match_score: 0,
+    risks: [],
+    steps: [],
+    last_updated: "Never"
   }
 };
 
@@ -149,15 +135,49 @@ interface FounderDashboardProps {
 export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }) => {
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false); // Mobile toggle
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false); // New state for Edit Panel
+  
+  const { profile, loading } = useStartupProfile();
+
+  // Merge fetched profile with default to ensure no crashes
+  const STARTUP_PROFILE = profile ? {
+      ...DEFAULT_PROFILE,
+      ...profile,
+      // Ensure nested objects are merged correctly if backend returns partials
+      metrics: { ...DEFAULT_PROFILE.metrics, ...profile.metrics, ...profile }, // Flattened in backend resp? Backend returns root fields like mrr, users.
+      // Wait, backend returns mrr, users, growth at root of profileData object.
+      // So we need to map them to metrics object expected by dashboard.
+      metrics: {
+          mrr: profile.mrr || "$0",
+          growth: profile.growth || "0%",
+          users: profile.users || "0",
+          waitlist: profile.waitlist || "0",
+          history: profile.history || [0,0,0,0,0]
+      },
+      fundraising: {
+          amount: profile.raiseAmount || "0",
+          use_of_funds: profile.useOfFunds || []
+      }
+  } : DEFAULT_PROFILE;
 
   // --- Components ---
+  
+  if (loading) {
+      return (
+          <div className="flex items-center justify-center h-screen bg-[#F8FAFC]">
+              <div className="flex flex-col items-center gap-4">
+                  <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-slate-500 font-medium">Loading Dashboard...</p>
+              </div>
+          </div>
+      );
+  }
 
   const HeroSection = () => (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
       {/* Cover Image */}
       <div 
         className="h-32 md:h-48 w-full bg-cover bg-center relative"
-        style={{ backgroundImage: `url(${STARTUP_PROFILE.cover_image_url})` }}
+        style={{ backgroundImage: `url(${STARTUP_PROFILE.cover_image_url || DEFAULT_PROFILE.cover_image_url})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
       </div>
@@ -166,7 +186,13 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
         <div className="flex flex-col md:flex-row items-start md:items-end -mt-10 md:-mt-12 gap-4 md:gap-6">
           {/* Logo */}
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl border-4 border-white bg-white shadow-md flex items-center justify-center overflow-hidden z-10">
-            <img src={STARTUP_PROFILE.logo_url} alt="Logo" className="w-full h-full object-cover" />
+            {STARTUP_PROFILE.logo_url ? (
+                <img src={STARTUP_PROFILE.logo_url} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
+                <div className="w-full h-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl">
+                    {STARTUP_PROFILE.name.charAt(0)}
+                </div>
+            )}
           </div>
 
           {/* Main Info */}
@@ -639,7 +665,11 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
       </AnimatePresence>
 
       {/* Edit Profile Panel */}
-      <EditProfilePanel isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} />
+      <EditProfilePanel 
+        isOpen={isEditProfileOpen} 
+        onClose={() => setIsEditProfileOpen(false)} 
+        initialData={STARTUP_PROFILE}
+      />
       
     </div>
   );

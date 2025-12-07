@@ -1,7 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
-import * as kv from "./kv_store.tsx";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 export const researchAIHandler = async (c: any) => {
   try {
@@ -11,6 +12,9 @@ export const researchAIHandler = async (c: any) => {
     if (!GEMINI_API_KEY) {
       return c.json({ error: "Server configuration error: Missing AI Key" }, 500);
     }
+
+    // 1. Setup Supabase Client
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // 1. Construct Prompt
     const prompt = `
@@ -81,10 +85,22 @@ export const researchAIHandler = async (c: any) => {
       }
     }
 
-    // 5. Save Citations (Simulating public.citations using KV store)
-    if (deckId && slideId && result.sources && result.sources.length > 0) {
-      const citationKey = `citations:${deckId}:${slideId}`;
-      await kv.set(citationKey, result.sources);
+    // 5. Save Citations (Postgres public.citations)
+    if (slideId && result.sources && result.sources.length > 0) {
+      const citationsToInsert = result.sources.map((s: any) => ({
+        slide_id: slideId,
+        source_url: s.url || "unknown",
+        quote: s.snippet || "",
+        created_at: new Date().toISOString()
+      }));
+
+      const { error } = await supabase
+        .from('citations')
+        .insert(citationsToInsert);
+        
+      if (error) {
+        console.error("Failed to save citations:", error);
+      }
     }
 
     return c.json({

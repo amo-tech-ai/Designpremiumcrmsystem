@@ -1,154 +1,186 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
 
 export const seedCRM = async (c: any) => {
   try {
+    const authHeader = c.req.header('Authorization');
+    if (!authHeader) return c.json({ error: "Unauthorized" }, 401);
+    
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    
+    if (error || !user) return c.json({ error: "Unauthorized" }, 401);
 
-    // Check if data exists
-    const { count, error: countError } = await supabase
+    // Get Startup ID
+    const { data: startup } = await supabase
+      .from('startups')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!startup) {
+      return c.json({ error: "No startup profile found. Please complete onboarding first." }, 400);
+    }
+    const startupId = startup.id;
+
+    // Check if data exists (check contacts count)
+    const { count } = await supabase
       .from('crm_contacts')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('startup_id', startupId);
 
-    if (countError) throw countError;
-    if (count !== null && count > 0) {
+    if (count && count > 0) {
         return c.json({ message: 'Already seeded', success: true });
     }
 
-    // 1. Create Accounts
-    const accounts = [
-      { name: 'TechFlow AI', domain: 'techflow.ai' },
-      { name: 'Nexus Corp', domain: 'nexus.com' },
-      { name: 'GreenEnergy Systems', domain: 'greenenergy.io' },
-      { name: 'Quantum Leap', domain: 'quantum.tech' },
-    ];
+    // 1. Create Contacts & Accounts
+    // We'll insert accounts first to get IDs, or just insert contacts with account names if we don't care about normalization yet.
+    // The schema has crm_accounts. Let's do it properly-ish.
+    
+    // Define sample accounts
+    const accountNames = ['TechFlow AI', 'Nexus Corp', 'GreenEnergy Systems', 'Quantum Leap', 'Stark Industries', 'Wayne Enterprises', 'Sequoia Capital', 'Y Combinator'];
+    const accountMap: Record<string, string> = {};
 
-    const { data: createdAccounts, error: accountsError } = await supabase
-      .from('crm_accounts')
-      .insert(accounts)
-      .select();
+    for (const name of accountNames) {
+        const { data: acc } = await supabase.from('crm_accounts').insert({
+            startup_id: startupId,
+            name: name,
+            status: 'Active',
+            segment: 'Enterprise'
+        }).select('id').single();
+        if (acc) accountMap[name] = acc.id;
+    }
 
-    if (accountsError) throw accountsError;
-
-    // 2. Create Contacts
     const contacts = [
       {
         first_name: 'Sarah',
         last_name: 'Chen',
         email: 'sarah@techflow.ai',
         title: 'CTO',
-        account_id: createdAccounts[0].id,
-        tags: ['Decision Maker', 'Technical'],
-        linkedin_url: 'linkedin.com/in/sarahchen',
-        created_at: new Date(Date.now() - 2 * 86400000).toISOString()
+        account_name: 'TechFlow AI',
+        role: 'Decision Maker',
+        linkedin_url: 'linkedin.com/in/sarahchen'
       },
       {
         first_name: 'Michael',
         last_name: 'Ross',
         email: 'mike@nexus.com',
         title: 'VP of Engineering',
-        account_id: createdAccounts[1].id,
-        tags: ['Influencer'],
-        linkedin_url: 'linkedin.com/in/mross',
-        created_at: new Date(Date.now() - 5 * 86400000).toISOString()
+        account_name: 'Nexus Corp',
+        role: 'Influencer',
+        linkedin_url: 'linkedin.com/in/mross'
       },
       {
         first_name: 'Jessica',
         last_name: 'Alba',
         email: 'jessica@greenenergy.io',
         title: 'Head of Product',
-        account_id: createdAccounts[2].id,
-        tags: ['Champion', 'Green Tech'],
-        linkedin_url: 'linkedin.com/in/jalba',
-        created_at: new Date(Date.now() - 1 * 86400000).toISOString()
+        account_name: 'GreenEnergy Systems',
+        role: 'Champion',
+        linkedin_url: 'linkedin.com/in/jalba'
       },
       {
         first_name: 'David',
         last_name: 'Kim',
         email: 'david@quantum.tech',
         title: 'Research Director',
-        account_id: createdAccounts[3].id,
-        tags: ['Researcher'],
-        linkedin_url: 'linkedin.com/in/dkim',
-        created_at: new Date(Date.now() - 10 * 86400000).toISOString()
+        account_name: 'Quantum Leap',
+        role: 'Researcher',
+        linkedin_url: 'linkedin.com/in/dkim'
       },
       {
         first_name: 'Emily',
         last_name: 'Weiss',
         email: 'emily@techflow.ai',
         title: 'Product Manager',
-        account_id: createdAccounts[0].id,
-        tags: ['User'],
-        linkedin_url: 'linkedin.com/in/eweiss',
-        created_at: new Date(Date.now() - 3 * 86400000).toISOString()
+        account_name: 'TechFlow AI',
+        role: 'User',
+        linkedin_url: 'linkedin.com/in/eweiss'
       }
     ];
 
-    const { data: createdContacts, error: contactsError } = await supabase
-      .from('crm_contacts')
-      .insert(contacts)
-      .select();
-
-    if (contactsError) throw contactsError;
-
-    // 3. Create Scores & Enrichment
-    const scores = [];
-    const enrichments = [];
-    const interactions = [];
-
-    for (const contact of createdContacts) {
-      // Score
-      scores.push({
-        lead_id: contact.id,
-        overall_score: Math.floor(Math.random() * 40) + 60, // 60-100
-        industry_fit: Math.floor(Math.random() * 20) + 80,
-        company_size_fit: Math.floor(Math.random() * 20) + 80,
-        budget_fit: Math.floor(Math.random() * 20) + 80,
-        risk_score: Math.floor(Math.random() * 20),
-        match_reason: 'Strong alignment with ICP based on role and industry.',
-        recommended_next_actions: ['Schedule Intro Call', 'Send Case Study']
-      });
-
-      // Enrichment
-      enrichments.push({
-        lead_id: contact.id,
-        recent_news: [
-          { title: 'Series B Funding Announced', url: '#', date: '2023-10-15' },
-          { title: 'New Product Launch', url: '#', date: '2023-11-01' }
-        ],
-        funding_history: [
-          { round: 'Series A', amount: '$10M', date: '2022-05-01' },
-          { round: 'Seed', amount: '$2M', date: '2021-01-15' }
-        ],
-        hiring_trends: { engineering: '+15%', sales: '+5%' },
-        gemini_summary: `Key decision maker at ${contact.account_id}. Recently active on LinkedIn regarding AI infrastructure.`
-      });
-
-      // Interactions
-      interactions.push({
-        account_id: contact.account_id,
-        contact_id: contact.id,
-        type: 'email',
-        content: `Sent introductory email to ${contact.first_name}`,
-        occurred_at: new Date(Date.now() - Math.random() * 100000000).toISOString()
-      });
-      
-      interactions.push({
-         account_id: contact.account_id,
-         contact_id: contact.id,
-         type: 'linkedin',
-         content: `Connected on LinkedIn`,
-         occurred_at: new Date(Date.now() - Math.random() * 200000000).toISOString()
+    for (const cData of contacts) {
+       const accountId = accountMap[cData.account_name];
+       await supabase.from('crm_contacts').insert({
+         startup_id: startupId,
+         account_id: accountId,
+         first_name: cData.first_name,
+         last_name: cData.last_name,
+         email: cData.email,
+         title: cData.title,
+         role: cData.role,
+         linkedin_url: cData.linkedin_url
        });
     }
 
-    await supabase.from('crm_lead_scores').insert(scores);
-    await supabase.from('crm_lead_enrichment').insert(enrichments);
-    await supabase.from('crm_interactions').insert(interactions);
+    // 2. Create Deals
+    const deals = [
+      {
+        name: 'Skynet Systems Enterprise License',
+        amount: 120000,
+        stage: 'Qualified',
+        probability: 20,
+        expected_close: new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0],
+        account_name: 'Skynet Systems', // We missed creating this account above, let's just skip account linking for demo or mapped if exists
+        sector: 'Sales'
+      },
+      {
+        name: 'Wayne Enterprises Security Suite',
+        amount: 450000,
+        stage: 'Proposal',
+        probability: 40,
+        expected_close: new Date(Date.now() + 60 * 86400000).toISOString().split('T')[0],
+        account_name: 'Wayne Enterprises',
+        sector: 'Sales'
+      },
+      {
+        name: 'Stark Industries Arc Reactor Control',
+        amount: 1000000,
+        stage: 'Negotiation',
+        probability: 70,
+        expected_close: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        account_name: 'Stark Industries',
+        sector: 'Sales'
+      },
+      {
+        name: 'Sequoia Capital Series A',
+        amount: 2000000,
+        stage: 'Lead',
+        probability: 50,
+        expected_close: new Date(Date.now() + 45 * 86400000).toISOString().split('T')[0],
+        account_name: 'Sequoia Capital',
+        sector: 'Fundraising'
+      },
+      {
+        name: 'Y Combinator W24',
+        amount: 500000,
+        stage: 'Closed Won',
+        probability: 90,
+        expected_close: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0],
+        account_name: 'Y Combinator',
+        sector: 'Fundraising'
+      }
+    ];
 
-    return c.json({ success: true, message: 'Sample CRM data seeded!' });
+    for (const dData of deals) {
+       const accountId = accountMap[dData.account_name];
+       await supabase.from('crm_deals').insert({
+         startup_id: startupId,
+         account_id: accountId,
+         name: dData.name,
+         amount: dData.amount,
+         stage: dData.stage,
+         probability: dData.probability,
+         expected_close: dData.expected_close,
+         sector: dData.sector,
+         owner_id: user.id
+       });
+    }
+
+    return c.json({ success: true, message: 'Sample CRM data (Contacts & Deals) seeded (Postgres)!' });
   } catch (err: any) {
     console.error('Seeding error:', err);
     return c.json({ success: false, error: err.message }, 500);

@@ -18,13 +18,17 @@ import { cn } from "../ui/utils";
 import { ContactPanel } from './ContactPanel';
 import { ContactCard } from './ContactCard';
 import { AnimatePresence, motion } from 'motion/react';
-import { useContacts } from './hooks';
+import { useContacts, useRealtimeCRM } from './hooks';
 import { Contact } from './types';
 
 import { AddContactSidebar } from './AddContactSidebar';
 
 export const ContactsDashboard: React.FC = () => {
   const { contacts, loading, getContacts } = useContacts();
+  
+  // Enable Realtime Updates
+  useRealtimeCRM(getContacts);
+
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [isAddSidebarOpen, setIsAddSidebarOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | 'sales' | 'investor' | 'linkedin'>('all');

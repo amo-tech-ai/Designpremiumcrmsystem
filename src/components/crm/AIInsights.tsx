@@ -1,5 +1,5 @@
 import React from 'react';
-import { aiInsights } from './data';
+import { useDeals } from './hooks';
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { motion } from 'motion/react';
@@ -10,12 +10,13 @@ import {
   ArrowRight, 
   Sparkles, 
   Clock,
-  BarChart3
+  BarChart3,
+  Loader2
 } from 'lucide-react';
 import { cn } from "../ui/utils";
 
 interface InsightCardProps {
-  insight: typeof aiInsights[0];
+  insight: any;
 }
 
 const InsightCard: React.FC<InsightCardProps> = ({ insight }) => {
@@ -50,7 +51,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight }) => {
               <Icon className="w-6 h-6" />
             </div>
             <div className="flex gap-2">
-               {insight.tags.map((tag, i) => (
+               {insight.tags.map((tag: any, i: number) => (
                  <span key={i} className={cn("px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider", tag.color)}>
                    {tag.label}
                  </span>
@@ -100,6 +101,21 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight }) => {
 };
 
 export const AIInsights: React.FC = () => {
+  const { deals, loading } = useDeals('sales'); // default to sales for insights
+
+  // Generate insights from deals data
+  const generatedInsights = deals
+    .filter(d => d.ai_risk || d.ai_next_step)
+    .map(d => ({
+       id: d.id,
+       type: d.ai_risk ? 'risk' : 'suggestion',
+       title: d.name,
+       description: d.ai_risk || `Opportunity to advance: ${d.ai_next_step}`,
+       tags: d.ai_risk ? [{ label: 'Risk', color: 'bg-red-100 text-red-700' }] : [{ label: 'Opportunity', color: 'bg-blue-100 text-blue-700' }],
+       action: d.ai_next_step || 'Review Deal',
+       relatedId: d.id
+    }));
+
   return (
     <div className="p-6 h-full overflow-y-auto bg-slate-50/50">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -120,34 +136,44 @@ export const AIInsights: React.FC = () => {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {aiInsights.map((insight, index) => (
-            <motion.div
-              key={insight.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <InsightCard insight={insight} />
-            </motion.div>
-          ))}
-          
-          {/* Placeholder for empty state or more */}
-           <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 text-slate-400 min-h-[300px] hover:bg-slate-50/50 transition-colors cursor-pointer"
-            >
-              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                <Sparkles className="w-6 h-6 text-slate-300" />
+        {loading ? (
+           <div className="flex justify-center py-20">
+             <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+           </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {generatedInsights.length > 0 ? generatedInsights.map((insight, index) => (
+              <motion.div
+                key={insight.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <InsightCard insight={insight} />
+              </motion.div>
+            )) : (
+              <div className="col-span-full text-center py-10 text-slate-400">
+                No AI insights available yet. Run analysis on your deals.
               </div>
-              <h3 className="font-medium mb-1">Waiting for more data...</h3>
-              <p className="text-sm text-center max-w-[200px]">
-                AI needs more interactions to generate accurate insights.
-              </p>
-            </motion.div>
-        </div>
+            )}
+            
+            {/* Placeholder for empty state or more */}
+             <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 text-slate-400 min-h-[300px] hover:bg-slate-50/50 transition-colors cursor-pointer"
+              >
+                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <Sparkles className="w-6 h-6 text-slate-300" />
+                </div>
+                <h3 className="font-medium mb-1">Waiting for more data...</h3>
+                <p className="text-sm text-center max-w-[200px]">
+                  AI needs more interactions to generate accurate insights.
+                </p>
+              </motion.div>
+          </div>
+        )}
 
       </div>
     </div>

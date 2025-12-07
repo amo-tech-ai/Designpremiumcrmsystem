@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { steps, leads, investorSteps, investorLeads } from './data';
+import { steps, investorSteps } from './data';
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
@@ -10,33 +10,27 @@ import {
   Plus, 
   Sparkles,
   LayoutGrid,
-  List
+  List,
+  Loader2
 } from 'lucide-react';
 import { cn } from "../ui/utils";
 import { DealCard } from './DealCard';
+import { DealPanel } from './DealPanel';
 import { ContactPanel } from './ContactPanel';
+import { useDeals, useCRMStats, useRealtimeCRM } from './hooks';
 
-// Mock AI Data Augmentation
-const augmentLeadWithAI = (lead: any) => {
-  const probability = Math.floor(Math.random() * 60) + 40; // 40-100%
-  const risks = ["Stalled decision maker", "Budget concerns", "Competitor involved", null, null];
-  const nextSteps = [
-    "Send updated case study",
-    "Schedule technical deep dive",
-    "Follow up on proposal",
-    "Connect on LinkedIn",
-    "Intro to CTO"
-  ];
+// Simple relative time helper to avoid date-fns dependency
+const formatRelativeTime = (dateString: string) => {
+  if (!dateString) return 'Recently';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
   
-  return {
-    ...lead,
-    amount: lead.value || "$120,000",
-    healthScore: Math.floor(Math.random() * 100),
-    probability,
-    aiRisk: risks[Math.floor(Math.random() * risks.length)],
-    aiNextStep: nextSteps[Math.floor(Math.random() * nextSteps.length)],
-    tags: lead.tags || ["Enterprise", "Q3 Close"]
-  };
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  return date.toLocaleDateString();
 };
 
 interface PipelineDashboardProps {
@@ -60,35 +54,64 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
+  // 1. Fetch Deals
+  const { deals, loading, refresh, createDeal } = useDeals(pipelineMode);
+  const { stats, refresh: refreshStats } = useCRMStats();
+
+  // 2. Realtime Subscriptions
+  useRealtimeCRM(() => {
+    refresh();
+    refreshStats();
+  });
+
   // Data selection based on mode
   const currentSteps = pipelineMode === 'investor' ? investorSteps : steps;
-  const rawLeads = pipelineMode === 'investor' ? investorLeads : leads;
-  
-  // Memoize and augment data
-  const currentLeads = useMemo(() => {
-    return rawLeads.map(augmentLeadWithAI);
-  }, [rawLeads]);
+
+  // 3. Map Backend Data to UI Format
+  const mappedDeals = useMemo(() => {
+    return deals.map(d => ({
+       ...d,
+       company: d.account?.name || d.account_name, // Handle joined account name or fallback
+       stepId: d.stage || d.stage_id, // Support 'stage' (from SQL) or 'stage_id' (legacy KV)
+       healthScore: d.ai_score || d.health_score || 50, // Use SQL 'ai_score' or KV 'health_score'
+       aiRisk: d.enrichment?.risk_analysis || d.ai_risk, // Join result vs KV
+       aiNextStep: d.enrichment?.next_action || d.ai_next_step,
+       lastActivity: d.updated_at ? formatRelativeTime(d.updated_at) : 'Recently',
+       amount: d.amount ? `$${d.amount.toLocaleString()}` : 'N/A'
+    }));
+  }, [deals]);
 
   // Filtering logic
-  const filteredLeads = useMemo(() => {
+  const filteredDeals = useMemo(() => {
     return activeStepId 
-      ? currentLeads.filter(l => l.stepId === activeStepId) 
-      : currentLeads;
-  }, [activeStepId, currentLeads]);
+      ? mappedDeals.filter(d => d.stepId === activeStepId) 
+      : mappedDeals;
+  }, [activeStepId, mappedDeals]);
 
   const activeStep = currentSteps.find(s => s.id === activeStepId);
 
-  // AI Summary Content
+  // AI Summary Content (Using Server Aggregations)
   const aiSummary = useMemo(() => {
-    const totalValue = filteredLeads.length * 120000; // Mock calc
-    const avgProb = filteredLeads.reduce((acc, l) => acc + l.probability, 0) / (filteredLeads.length || 1);
-    
+    if (!stats) return { text: "Loading AI insights..." };
+
+    // Use server stats if available, otherwise fallback to client calc for immediate feedback
+    const count = filteredDeals.length;
+    const value = filteredDeals.reduce((sum, d) => sum + (Number(d.amount?.replace(/[^0-9.-]+/g,"")) || 0), 0);
+    const avgProb = filteredDeals.reduce((acc, d) => acc + (d.probability || 0), 0) / (count || 1);
+
     return {
-      text: filteredLeads.length > 0 
-        ? `${filteredLeads.length} deals in ${activeStep?.title} worth ~$${(totalValue/1000).toFixed(0)}k. Win probability is ${avgProb.toFixed(0)}%. Focus on the 2 at-risk accounts.`
-        : `No deals in ${activeStep?.title}. AI suggests adding new prospects from LinkedIn.`
+      text: count > 0 
+        ? `${count} deals in ${activeStep?.title} worth ~$${(value/1000).toFixed(0)}k. Win probability is ${avgProb.toFixed(0)}%. ${stats.sales_win_rate ? `Overall win rate: ${stats.sales_win_rate}%.` : ''}`
+        : `No deals in ${activeStep?.title}. Pipeline looks healthy otherwise with $${(stats.total_pipeline_value/1000).toFixed(0)}k total volume.`
     };
-  }, [filteredLeads, activeStep]);
+  }, [filteredDeals, activeStep, stats]);
+
+  // Handle Create Seed Data if empty
+  useEffect(() => {
+    if (!loading && deals.length === 0) {
+      // Optional: Auto-seed or prompt
+    }
+  }, [loading, deals]);
 
   return (
     <div className="flex h-full overflow-hidden bg-slate-50/50">
@@ -161,12 +184,12 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
                           )}>
                             {step.title}
                           </span>
-                          {/* Count Badge (Mock) */}
+                          {/* Count Badge */}
                           <span className={cn(
                             "text-[10px] px-1.5 rounded-full font-medium",
                             activeStepId === step.id ? "bg-indigo-200 text-indigo-700" : "bg-slate-100 text-slate-500"
                           )}>
-                            {currentLeads.filter(l => l.stepId === step.id).length}
+                            {mappedDeals.filter(l => l.stepId === step.id).length}
                           </span>
                        </div>
                        <p className={cn(
@@ -200,7 +223,19 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
               <Button variant="outline" className="gap-2">
                 <Filter className="w-4 h-4" /> Filter
               </Button>
-              <Button className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200">
+              <Button 
+                onClick={() => {
+                   // Mock create for now - typically opens modal
+                   createDeal({
+                     name: 'New Opportunity',
+                     amount: 50000,
+                     stage_id: activeStepId,
+                     pipeline_type: pipelineMode,
+                     account_name: 'Prospect Inc'
+                   });
+                }}
+                className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
+              >
                 <Plus className="w-4 h-4" /> Add Deal
               </Button>
            </div>
@@ -227,9 +262,13 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
           </motion.div>
 
           {/* Deals Grid */}
-          {filteredLeads.length > 0 ? (
+          {loading ? (
+             <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+             </div>
+          ) : filteredDeals.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
-              {filteredLeads.map((lead: any) => (
+              {filteredDeals.map((lead: any) => (
                 <DealCard 
                   key={lead.id} 
                   deal={lead} 
@@ -242,7 +281,12 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
             <div className="flex flex-col items-center justify-center h-64 text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
                <LayoutGrid className="w-10 h-10 mb-3 opacity-20" />
                <p>No deals in this stage</p>
-               <Button variant="link" className="text-blue-600">Add your first deal</Button>
+               <Button variant="link" className="text-blue-600" onClick={() => createDeal({
+                  name: 'New Deal',
+                  stage_id: activeStepId,
+                  pipeline_type: pipelineMode,
+                  account_name: 'New Account'
+               })}>Add your first deal</Button>
             </div>
           )}
         </div>
@@ -258,9 +302,10 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
              className="w-[450px] bg-white border-l border-slate-200 shadow-2xl z-30 flex-shrink-0 h-full"
           >
-             <ContactPanel 
-               lead={selectedLead} 
-               onClose={onCloseLead} 
+             <DealPanel 
+               deal={selectedLead} 
+               onClose={onCloseLead}
+               pipelineMode={pipelineMode}
              />
           </motion.div>
         )}

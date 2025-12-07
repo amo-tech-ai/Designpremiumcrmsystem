@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useForm, FormProvider, useFormContext, useFieldArray } from 'react-hook-form@7.55.0';
 import { motion, AnimatePresence } from 'motion/react';
 import { projectId, publicAnonKey } from '../../utils/supabase/info';
+import { supabase } from '../../utils/supabase/client';
 import { 
-  Building2, 
+  Building2,  
   Globe, 
   Linkedin, 
   Twitter, 
@@ -37,6 +38,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
+import { useCompanyAI } from "../crm/hooks";
 
 // --- Types ---
 
@@ -124,10 +126,16 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setIsLoading(false);
+          return;
+        }
+
         const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6522a742/company-profile`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
+            'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json'
           }
         });
@@ -152,10 +160,13 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
 
   const onSubmit = async (data: CompanyProfileFormValues) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session found");
+
       const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6522a742/company-profile`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${publicAnonKey}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
@@ -691,6 +702,19 @@ const CompFundingCard = () => {
 // --- AI Panel (Right Column) ---
 
 const CompAIPanel = () => {
+  const { watch } = useFormContext<CompanyProfileFormValues>();
+  const profile = watch();
+  const { analyzeProfile, processing } = useCompanyAI();
+  const [aiResult, setAiResult] = useState<{ strengths: string; risks: string; actions: string[] } | null>(null);
+
+  const handleAnalyze = async () => {
+    const res = await analyzeProfile(profile);
+    if (res) {
+       setAiResult(res);
+       toast.success("Profile analyzed");
+    }
+  };
+
   return (
     <Card className="border-none shadow-lg shadow-indigo-100 bg-white rounded-[20px] overflow-hidden ring-1 ring-indigo-50">
       <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 text-white">
@@ -710,7 +734,7 @@ const CompAIPanel = () => {
             Strengths
           </h4>
           <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-            Strong clear value proposition in the "Differentiator" field. Good traction signals with waitlist numbers.
+            {aiResult ? aiResult.strengths : "Click Auto-Improve to analyze your profile."}
           </p>
         </div>
 
@@ -721,7 +745,7 @@ const CompAIPanel = () => {
             Risks Identified
           </h4>
           <p className="text-sm text-slate-600 leading-relaxed bg-amber-50 p-3 rounded-lg border border-amber-100">
-            "Business Model" is generic. Consider specifying pricing tiers or contract types to attract investors.
+             {aiResult ? aiResult.risks : "..."}
           </p>
         </div>
 
@@ -732,23 +756,28 @@ const CompAIPanel = () => {
             Recommended Actions
           </h4>
           <div className="space-y-2">
-             <Button variant="outline" className="w-full justify-start text-xs h-9 bg-white hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border-slate-200">
-               <Plus className="w-3 h-3 mr-2" /> Add 2 more team members
-             </Button>
-             <Button variant="outline" className="w-full justify-start text-xs h-9 bg-white hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border-slate-200">
-               <Plus className="w-3 h-3 mr-2" /> Elaborate on "AI/ML" tech stack
-             </Button>
+             {aiResult?.actions?.map((action, i) => (
+                <div key={i} className="text-xs p-2 bg-indigo-50 text-indigo-800 rounded border border-indigo-100 flex items-center gap-2">
+                  <Plus className="w-3 h-3 flex-shrink-0" /> {action}
+                </div>
+             ))}
+             {!aiResult && (
+               <div className="text-xs text-slate-400 italic">No actions generated yet.</div>
+             )}
           </div>
         </div>
 
         <Separator />
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button size="sm" variant="secondary" className="w-full text-xs">
-            Refresh
-          </Button>
-          <Button size="sm" className="w-full text-xs bg-indigo-600 hover:bg-indigo-700 text-white">
-            Auto-Improve
+        <div className="grid grid-cols-1 gap-3">
+          <Button 
+             size="sm" 
+             onClick={handleAnalyze}
+             disabled={processing}
+             className="w-full text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            {processing ? <Sparkles className="w-3 h-3 animate-spin mr-2" /> : <Sparkles className="w-3 h-3 mr-2" />}
+            {processing ? "Analyzing..." : "Auto-Improve Profile"}
           </Button>
         </div>
 

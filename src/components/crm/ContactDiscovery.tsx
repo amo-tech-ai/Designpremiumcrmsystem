@@ -17,7 +17,8 @@ import {
   RefreshCw,
   CheckCircle2,
   X,
-  MessageCircle
+  MessageCircle,
+  TrendingUp
 } from 'lucide-react';
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -26,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { cn } from "../ui/utils";
 import { ContactPanel } from './ContactPanel';
 import { toast } from 'sonner@2.0.3';
+import { addContact } from './actions';
 
 // --- Types & Mock Data ---
 
@@ -141,8 +143,6 @@ const KPICard = ({ title, value, change, icon: Icon, colorClass }: any) => (
   </div>
 );
 
-import { TrendingUp } from 'lucide-react';
-
 export const ContactDiscovery: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContact, setSelectedContact] = useState<DiscoveryContact | null>(null);
@@ -152,6 +152,34 @@ export const ContactDiscovery: React.FC = () => {
     region: 'All'
   });
   const [isEnriching, setIsEnriching] = useState(false);
+
+  const handleAddToCRM = async (e: React.MouseEvent, contact: DiscoveryContact) => {
+    e.stopPropagation();
+    try {
+       await addContact({
+          first_name: contact.name.split(' ')[0],
+          last_name: contact.name.split(' ').slice(1).join(' '),
+          title: contact.role,
+          tags: contact.tags,
+          overall_score: contact.matchScore,
+          // map other fields
+       }, {
+          name: contact.company,
+          // infer domain or leave empty
+          segment: contact.type
+       }, {
+          gemini_summary: contact.matchReason
+       }, {
+          overall_score: contact.matchScore,
+          match_reason: contact.matchReason,
+          recommended_next_actions: [contact.aiNextStep]
+       });
+       
+       toast.success(`Added ${contact.name} to CRM`);
+    } catch (err) {
+       toast.error("Failed to add contact");
+    }
+  };
 
   // Filter Logic
   const filteredContacts = useMemo(() => {
@@ -405,10 +433,7 @@ export const ContactDiscovery: React.FC = () => {
                                 <Button 
                                    size="xs" 
                                    className="h-8 text-xs bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm opacity-0 group-hover:opacity-100 transition-all mr-2"
-                                   onClick={(e) => {
-                                      e.stopPropagation();
-                                      toast.success(`Added ${contact.name} to CRM`);
-                                   }}
+                                   onClick={(e) => handleAddToCRM(e, contact)}
                                 >
                                    <UserPlus className="w-3 h-3 mr-1" /> Add to CRM
                                 </Button>

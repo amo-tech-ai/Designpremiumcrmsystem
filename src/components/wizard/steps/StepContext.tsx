@@ -8,17 +8,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Card, CardContent } from '../../ui/card';
 import { UploadCard } from '../common/UploadCard';
 import { Badge } from '../../ui/badge';
+import { useStartupProfile } from '../StartupProfileContext';
 
 export const StepContext = () => {
-  const [description, setDescription] = useState('');
+  const { data, updateData, generateAI } = useStartupProfile();
   const [isAiLoading, setIsAiLoading] = useState(false);
 
-  const handleAutofill = () => {
+  const handleAutofill = async () => {
+    if (!data.website) return;
     setIsAiLoading(true);
-    setTimeout(() => {
+    
+    try {
+      // Simulate/Real AI Call via backend
+      const result = await generateAI("extract", `Extract company details from website: ${data.website}`);
+      
+      // In a real scenario, we'd parse the result. For now, we put it in description.
+      // Or we can assume the AI returns a JSON string if we instructed it to.
+      // Let's just set the description for now.
+      if (result) {
+        updateData({ description: result });
+      } else {
+        updateData({ description: "Acme is a visual collaboration platform..." });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
       setIsAiLoading(false);
-      setDescription("Acme is a visual collaboration platform for marketing teams to design, review, and approve creative assets 10x faster.");
-    }, 1500);
+    }
   };
 
   return (
@@ -35,12 +51,17 @@ export const StepContext = () => {
                <div className="flex gap-3">
                  <div className="relative flex-grow">
                     <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input className="pl-10" placeholder="https://www.yourstartup.com" />
+                    <Input 
+                      className="pl-10" 
+                      placeholder="https://www.yourstartup.com" 
+                      value={data.website}
+                      onChange={(e) => updateData({ website: e.target.value })}
+                    />
                  </div>
                  <Button 
                    variant="outline" 
                    onClick={handleAutofill}
-                   disabled={isAiLoading}
+                   disabled={isAiLoading || !data.website}
                    className="bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 min-w-[140px]"
                  >
                    {isAiLoading ? (
@@ -61,13 +82,13 @@ export const StepContext = () => {
                <div className="space-y-2">
                    <div className="flex justify-between">
                       <Label className="text-base">One-Liner Description</Label>
-                      <span className="text-xs text-slate-400">{description.length}/140</span>
+                      <span className="text-xs text-slate-400">{data.description?.length || 0}/140</span>
                    </div>
                    <Textarea 
                      className="min-h-[80px] resize-none text-base"
                      placeholder="e.g. Acme is a visual collaboration platform..."
-                     value={description}
-                     onChange={(e) => setDescription(e.target.value)}
+                     value={data.description}
+                     onChange={(e) => updateData({ description: e.target.value })}
                      maxLength={140}
                    />
                </div>
@@ -77,6 +98,8 @@ export const StepContext = () => {
                    <Textarea 
                      className="min-h-[140px] resize-none text-base"
                      placeholder="Detailed description of your product, mission, and vision..."
+                     value={data.longDescription}
+                     onChange={(e) => updateData({ longDescription: e.target.value })}
                    />
                </div>
             </div>
@@ -85,7 +108,10 @@ export const StepContext = () => {
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-2">
                   <Label>Industry</Label>
-                  <Select>
+                  <Select 
+                    value={data.industry} 
+                    onValueChange={(val) => updateData({ industry: val })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
@@ -102,7 +128,13 @@ export const StepContext = () => {
                   <Label>Year Founded</Label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input className="pl-10" placeholder="YYYY" type="number" />
+                    <Input 
+                      className="pl-10" 
+                      placeholder="YYYY" 
+                      type="number"
+                      value={data.foundedYear}
+                      onChange={(e) => updateData({ foundedYear: e.target.value })}
+                    />
                   </div>
                </div>
             </div>

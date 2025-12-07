@@ -84,7 +84,12 @@ export const ContactPanel: React.FC<ContactPanelProps> = ({ lead: initialLead, o
   const handleAIAction = async (action: 'summarize' | 'enrich' | 'suggest') => {
     try {
       if (action === 'summarize') await summarizeContact();
-      if (action === 'enrich') await enrichContact(localLead.linkedin_url || '');
+      if (action === 'enrich') {
+        const enriched = await enrichContact(localLead.linkedin_url || '');
+        if (enriched && !enriched.error) {
+           await updateContact(enriched);
+        }
+      }
       if (action === 'suggest') await suggestNextSteps();
       
       toast.success(`AI ${action} completed`);

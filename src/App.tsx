@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Session } from '@supabase/supabase-js';
+import { supabase } from './utils/supabase/client';
+import { AuthPage } from './components/auth/AuthPage';
 import { PipelineDashboard } from './components/crm/PipelineDashboard';
 import { TasksDashboard } from './components/crm/TasksDashboard';
 import { ActivityFeed } from './components/crm/ActivityFeed';
@@ -36,6 +39,8 @@ type View = 'dashboard' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'c
 type PipelineMode = 'sales' | 'investor';
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState<View>('landing-v2');
   const [pipelineMode, setPipelineMode] = useState<PipelineMode>('investor');
   
@@ -44,6 +49,21 @@ export default function App() {
 
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [deckId, setDeckId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     // Check for URL-based "generating" state on mount
@@ -94,6 +114,14 @@ export default function App() {
     };
     return <StandardPage title={pageTitles[currentView]} onNavigate={(view) => setCurrentView(view as View)} />;
   }
+
+  // Auth Protection for App Shell
+  /*
+  if (!session) {
+    if (loading) return null; // Or a loading spinner
+    return <AuthPage onAuthSuccess={() => setCurrentView('dashboard')} />;
+  }
+  */
 
   // APPLICATION SHELL (Dashboard, Tools, CRM)
   return (

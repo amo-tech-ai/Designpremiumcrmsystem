@@ -1,0 +1,134 @@
+import React from 'react';
+import { 
+  Home, 
+  LayoutDashboard, 
+  Presentation, 
+  Users, 
+  Rocket, 
+  LayoutGrid, 
+  Settings, 
+  LogOut, 
+  Sparkles,
+  Search,
+  ChevronRight,
+  Globe,
+  Trello
+} from 'lucide-react';
+import { cn } from "../ui/utils";
+import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { motion } from "motion/react";
+
+interface SidebarProps {
+  currentView: string;
+  onNavigate: (view: string) => void;
+  className?: string;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, className }) => {
+  
+  const navItems = [
+    { id: 'landing-v2', label: 'Home', icon: Home },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'profile', label: 'Startup Profile', icon: Sparkles },
+    { id: 'wizard', label: 'Pitch Decks', icon: Presentation },
+    { id: 'pipeline', label: 'Deals', icon: Trello },
+    { id: 'contacts', label: 'Contacts', icon: Users },
+    { id: 'discovery', label: 'Discovery', icon: Globe },
+    { id: 'gtm', label: 'GTM Strategy', icon: Rocket },
+    { id: 'lean-canvas', label: 'Lean Canvas', icon: LayoutGrid, badge: 'AI' },
+  ];
+
+  return (
+    <div className={cn("w-64 bg-white border-r border-slate-200 flex flex-col h-full z-30 flex-shrink-0", className)}>
+      
+      {/* Logo Section */}
+      <div className="h-16 flex items-center px-6 border-b border-slate-100">
+        <div 
+          className="flex items-center gap-2 cursor-pointer" 
+          onClick={() => onNavigate('landing-v2')}
+        >
+          <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-lg flex items-center justify-center text-white shadow-indigo-200 shadow-lg">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-lg tracking-tight text-slate-900">
+            StartupAI
+          </span>
+        </div>
+      </div>
+
+      {/* Main Navigation */}
+      <div className="flex-grow overflow-y-auto py-6 px-4 space-y-1">
+        
+        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 px-2">
+          Platform
+        </div>
+
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onNavigate(item.id)}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative",
+              currentView === item.id 
+                ? "bg-indigo-50 text-indigo-700" 
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            )}
+          >
+            <item.icon className={cn(
+              "w-5 h-5 transition-colors",
+              currentView === item.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"
+            )} />
+            
+            <span className="flex-grow text-left">{item.label}</span>
+            
+            {item.badge && (
+              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-indigo-100 text-indigo-700 border-0">
+                {item.badge}
+              </Badge>
+            )}
+
+            {currentView === item.id && (
+              <motion.div
+                layoutId="sidebar-active"
+                className="absolute left-0 top-2 bottom-2 w-1 bg-indigo-600 rounded-r-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+            )}
+          </button>
+        ))}
+
+        <div className="pt-6 pb-2">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">
+            Workspace
+          </div>
+          <button
+            onClick={() => onNavigate('settings')}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+          >
+            <Settings className="w-5 h-5 text-slate-400" />
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
+
+      {/* User Profile (Bottom) */}
+      <div className="p-4 border-t border-slate-200 bg-slate-50/50">
+        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
+          <Avatar className="h-9 w-9 border border-slate-200">
+            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" />
+            <AvatarFallback>AD</AvatarFallback>
+          </Avatar>
+          <div className="flex-grow min-w-0">
+            <div className="text-sm font-bold text-slate-900 truncate">Alex Founder</div>
+            <div className="text-xs text-slate-500 truncate">Pro Plan</div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600" />
+        </div>
+      </div>
+    </div>
+  );
+};

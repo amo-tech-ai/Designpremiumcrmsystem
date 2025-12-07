@@ -17,12 +17,29 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { EditableInput } from './EditableFields';
+import { useAIActions } from './hooks';
+import { toast } from 'sonner@2.0.3';
 
 interface EnrichmentTabProps {
   lead: any;
 }
 
 export const EnrichmentTab: React.FC<EnrichmentTabProps> = ({ lead }) => {
+  const { enrichContact, processing } = useAIActions(lead?.id || '');
+
+  // Use real enrichment data if available, otherwise mock or empty
+  const enrichmentData = lead?.enrichment || {};
+  const accountData = lead?.account || {};
+
+  const handleRunEnrichment = async () => {
+    try {
+      await enrichContact(lead.linkedin_url || '');
+      toast.success('Enrichment started');
+    } catch (e) {
+      toast.error('Enrichment failed');
+    }
+  };
+
   return (
     <div className="space-y-6 h-full overflow-y-auto pr-2">
       
@@ -30,19 +47,25 @@ export const EnrichmentTab: React.FC<EnrichmentTabProps> = ({ lead }) => {
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
-            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${lead?.avatarSeed || lead?.name}`} />
-            <AvatarFallback>{lead?.name?.substring(0,2)}</AvatarFallback>
+            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${lead?.email || lead?.name}`} />
+            <AvatarFallback>{(lead?.first_name?.[0] || lead?.name?.[0])}</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="text-lg font-bold text-slate-800">{lead?.name}</h3>
-            <div className="text-slate-500 text-sm">{lead?.role} at {lead?.company}</div>
-            <Badge variant="secondary" className="mt-1 bg-purple-50 text-purple-600 border-purple-100">
-               {lead?.type || 'Lead'}
-            </Badge>
+            <h3 className="text-lg font-bold text-slate-800">{lead?.first_name} {lead?.last_name}</h3>
+            <div className="text-slate-500 text-sm">{lead?.title || lead?.role} at {accountData.name || lead?.company}</div>
+            <div className="flex gap-2 mt-1">
+              <Badge variant="secondary" className="bg-purple-50 text-purple-600 border-purple-100">
+                 {accountData.industry || 'SaaS'}
+              </Badge>
+            </div>
           </div>
         </div>
-        <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-md gap-2">
-          <Sparkles className="w-4 h-4" /> Run AI Enrichment
+        <Button 
+          onClick={handleRunEnrichment} 
+          disabled={processing}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-md gap-2"
+        >
+          <Sparkles className="w-4 h-4" /> {processing ? 'Enriching...' : 'Run AI Enrichment'}
         </Button>
       </div>
 
@@ -55,25 +78,27 @@ export const EnrichmentTab: React.FC<EnrichmentTabProps> = ({ lead }) => {
         <div className="grid grid-cols-1 gap-4">
            <EditableInput 
              label="LinkedIn Profile" 
-             value="linkedin.com/in/sarahconnor" 
+             value={lead?.linkedin_url || ""} 
              onSave={() => {}} 
              icon={<Linkedin className="w-3 h-3" />}
+             placeholder="Add LinkedIn URL"
            />
            <EditableInput 
              label="Website" 
-             value={lead?.company ? `www.${lead.company.toLowerCase().replace(/\s/g,'')}.com` : "www.skynet.ai"} 
+             value={accountData.domain || ""} 
              onSave={() => {}} 
              icon={<Globe className="w-3 h-3" />}
+             placeholder="company.com"
            />
            <EditableInput 
              label="Email" 
-             value={lead?.email || "sarah@skynet.ai"} 
+             value={lead?.email || ""} 
              onSave={() => {}} 
              icon={<Mail className="w-3 h-3" />}
            />
            <EditableInput 
              label="Location" 
-             value="Los Angeles, CA" 
+             value="Unknown" 
              onSave={() => {}} 
              icon={<MapPin className="w-3 h-3" />}
            />
@@ -81,28 +106,32 @@ export const EnrichmentTab: React.FC<EnrichmentTabProps> = ({ lead }) => {
            <div className="grid grid-cols-2 gap-4">
              <EditableInput 
                label="Company Size" 
-               value="50–100" 
+               value="Unknown" 
                onSave={() => {}} 
                icon={<Users className="w-3 h-3" />}
              />
              <EditableInput 
                label="Funding Stage" 
-               value="Seed" 
+               value={enrichmentData.funding_history?.[0]?.round || "Unknown"} 
                onSave={() => {}} 
                icon={<Briefcase className="w-3 h-3" />}
              />
            </div>
 
            <div>
-             <label className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2 block">Skills / Keywords</label>
-             <div className="flex flex-wrap gap-2">
-               {['AI', 'Ops', 'Automation', 'SaaS'].map(tag => (
-                 <Badge key={tag} variant="outline" className="bg-slate-50 border-slate-200 text-slate-600">
-                   {tag}
-                 </Badge>
-               ))}
-               <Badge variant="outline" className="border-dashed border-slate-300 text-slate-400">+ Add</Badge>
-             </div>
+             <label className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2 block">Latest News</label>
+             {enrichmentData.recent_news && enrichmentData.recent_news.length > 0 ? (
+               <div className="flex flex-col gap-2">
+                 {enrichmentData.recent_news.map((news: any, i: number) => (
+                   <a key={i} href={news.url} target="_blank" rel="noreferrer" className="block bg-slate-50 border border-slate-200 p-2 rounded-md hover:border-blue-300 transition-colors">
+                     <p className="text-xs font-medium text-slate-700 line-clamp-1">{news.title}</p>
+                     <p className="text-[10px] text-slate-400">{news.date}</p>
+                   </a>
+                 ))}
+               </div>
+             ) : (
+                <div className="text-xs text-slate-400 italic">No recent news found</div>
+             )}
            </div>
         </div>
       </div>
@@ -111,23 +140,29 @@ export const EnrichmentTab: React.FC<EnrichmentTabProps> = ({ lead }) => {
       <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-5 rounded-xl border border-purple-100 space-y-3">
          <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-purple-600" />
-            <h4 className="font-bold text-purple-800">Gemini Insights</h4>
+            <h4 className="font-bold text-purple-800">Gemini Summary</h4>
          </div>
-         <div className="space-y-2">
-           {[
-             { text: "High engagement in last 7 days", icon: Zap },
-             { text: "Matches ICP: AI-based B2B SaaS HQ in US", icon: CheckCircle },
-             { text: "Likely evaluator: Head of Ops", icon: Users },
-             { text: "Suggested: Send demo link or short Loom walkthrough", icon: ArrowRight, bold: true }
-           ].map((insight, i) => (
-             <div key={i} className="flex items-start gap-3 bg-white/60 p-2 rounded-lg">
-               <insight.icon className={cn("w-4 h-4 mt-0.5 flex-shrink-0", insight.bold ? "text-blue-600" : "text-slate-400")} />
-               <span className={cn("text-sm text-slate-700", insight.bold && "font-bold text-blue-700")}>
-                 {insight.text}
-               </span>
-             </div>
-           ))}
-         </div>
+         {enrichmentData.gemini_summary ? (
+            <p className="text-sm text-slate-700 leading-relaxed">
+              {enrichmentData.gemini_summary}
+            </p>
+         ) : (
+            <div className="space-y-2">
+              {[
+                { text: "High engagement in last 7 days", icon: Zap },
+                { text: "Matches ICP: AI-based B2B SaaS HQ in US", icon: CheckCircle },
+                { text: "Likely evaluator: Head of Ops", icon: Users },
+                { text: "Suggested: Send demo link or short Loom walkthrough", icon: ArrowRight, bold: true }
+              ].map((insight, i) => (
+                <div key={i} className="flex items-start gap-3 bg-white/60 p-2 rounded-lg">
+                  <insight.icon className={cn("w-4 h-4 mt-0.5 flex-shrink-0", insight.bold ? "text-blue-600" : "text-slate-400")} />
+                  <span className={cn("text-sm text-slate-700", insight.bold && "font-bold text-blue-700")}>
+                    {insight.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+         )}
       </div>
 
       {/* 4. Workflow Logic (Visual) */}

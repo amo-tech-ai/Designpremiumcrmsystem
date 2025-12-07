@@ -22,6 +22,9 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { cn } from "../ui/utils";
 
+import { Footer } from './Footer';
+import { TopNavbar } from '../layout/TopNavbar';
+
 interface LandingPageV2Props {
   onNavigate?: (view: string) => void;
 }
@@ -46,6 +49,8 @@ export const LandingPageV2: React.FC<LandingPageV2Props> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen bg-slate-50/50 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
       
+      <TopNavbar currentView="landing-v2" onNavigate={onNavigate || (() => {})} />
+
       {/* 1. HERO SECTION (Cinematic, Illustrated) */}
       <section className="relative min-h-[90vh] flex items-center pt-20 pb-20 overflow-hidden">
         {/* Background Layers */}
@@ -446,63 +451,7 @@ export const LandingPageV2: React.FC<LandingPageV2Props> = ({ onNavigate }) => {
       </section>
 
       {/* 8. FOOTER */}
-      <footer className="bg-slate-900 text-slate-300 py-20 border-t border-slate-800">
-         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
-            <div className="col-span-1 md:col-span-1">
-               <div className="flex items-center gap-2 text-white font-bold text-2xl mb-6">
-                  <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                     <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  StartupAI
-               </div>
-               <p className="text-slate-400 mb-6">
-                  The intelligent operating system for high-growth founders. Build, analyze, and scale with AI.
-               </p>
-               <div className="flex gap-4">
-                  {[1,2,3].map(i => (
-                     <div key={i} className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-indigo-600 transition-colors cursor-pointer">
-                        <div className="w-4 h-4 bg-slate-400 rounded-sm" />
-                     </div>
-                  ))}
-               </div>
-            </div>
-            
-            <div>
-               <h4 className="text-white font-bold mb-6">Platform</h4>
-               <ul className="space-y-4">
-                  <li><button onClick={() => onNavigate && onNavigate('dashboard')} className="hover:text-indigo-400 transition-colors text-left">Dashboard</button></li>
-                  <li><button onClick={() => onNavigate && onNavigate('wizard')} className="hover:text-indigo-400 transition-colors text-left">Pitch Deck Wizard</button></li>
-                  <li><button onClick={() => onNavigate && onNavigate('gtm')} className="hover:text-indigo-400 transition-colors text-left">Startup Wizard</button></li>
-                  <li><button onClick={() => onNavigate && onNavigate('insights')} className="hover:text-indigo-400 transition-colors text-left">AI Insights</button></li>
-               </ul>
-            </div>
-
-            <div>
-               <h4 className="text-white font-bold mb-6">Company</h4>
-               <ul className="space-y-4">
-                  <li><a href="#" className="hover:text-indigo-400 transition-colors">About Us</a></li>
-                  <li><a href="#" className="hover:text-indigo-400 transition-colors">Careers</a></li>
-                  <li><a href="#" className="hover:text-indigo-400 transition-colors">Blog</a></li>
-                  <li><a href="#" className="hover:text-indigo-400 transition-colors">Press</a></li>
-               </ul>
-            </div>
-
-            <div>
-               <h4 className="text-white font-bold mb-6">Legal</h4>
-               <ul className="space-y-4">
-                  <li><a href="#" className="hover:text-indigo-400 transition-colors">Privacy Policy</a></li>
-                  <li><a href="#" className="hover:text-indigo-400 transition-colors">Terms of Service</a></li>
-                  <li><a href="#" className="hover:text-indigo-400 transition-colors">Security</a></li>
-               </ul>
-            </div>
-         </div>
-         <div className="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-            <div>© 2025 StartupAI Inc. All rights reserved.</div>
-            <div className="flex gap-8">
-               <span>Designed for Founders</span>
-            </div>
-         </div>
-      </footer>
+      <Footer onNavigate={onNavigate} />
       
     </div>
   );

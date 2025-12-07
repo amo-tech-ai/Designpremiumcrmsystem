@@ -1,316 +1,410 @@
-import React, { useState } from 'react';
-import { 
-  Layout, 
-  Image as ImageIcon, 
-  Type, 
-  Columns, 
-  MoreVertical, 
-  Plus, 
-  Sparkles, 
-  Check, 
-  ChevronRight, 
-  AlertCircle, 
-  Lightbulb, 
-  Wand2,
-  RefreshCw,
-  Maximize2,
-  Download,
-  Share2,
-  Play
-} from 'lucide-react';
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { Badge } from "../ui/badge";
-import { cn } from "../ui/utils";
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { EditorSidebarLeft } from '../editor/EditorSidebarLeft';
+import { EditorCanvas } from '../editor/EditorCanvas';
+import { EditorSidebarRight } from '../editor/EditorSidebarRight';
+import { MOCK_SLIDES, Slide } from '../editor/types';
+import { Toaster } from 'sonner@2.0.3';
+import { toast } from 'sonner@2.0.3';
+import { ImageGenerationModal } from '../modals/ImageGenerationModal';
+import { supabase } from '../../utils/supabase/client';
+import * as deckService from '../../services/deckService';
+import { Loader2, AlertTriangle } from 'lucide-react';
+import { Button } from '../ui/button';
 
-// Types
-type SlideStatus = 'draft' | 'edited' | 'ai-suggested';
-type SlideLayout = 'text' | 'text-image' | 'two-column' | 'visual';
-
-interface Slide {
-  id: string;
-  title: string;
-  content: string;
-  layout: SlideLayout;
-  status: SlideStatus;
-  thumbnail?: string;
+interface PitchDeckEditorProps {
+  deckId?: string;
 }
 
-const INITIAL_SLIDES: Slide[] = [
-  { id: '1', title: 'Title Slide', content: 'EventOS: The Future of Fashion Events', layout: 'visual', status: 'edited' },
-  { id: '2', title: 'Problem', content: 'Organizing fashion weeks is chaotic and disconnected.', layout: 'text', status: 'draft' },
-  { id: '3', title: 'Solution', content: 'An all-in-one platform for digital and physical runway management.', layout: 'text-image', status: 'ai-suggested' },
-  { id: '4', title: 'Market Size', content: '$2.5T Global Fashion Industry', layout: 'two-column', status: 'draft' },
-  { id: '5', title: 'Product', content: 'Seamless ticketing, seating, and showrooms.', layout: 'text-image', status: 'draft' },
-  { id: '6', title: 'Business Model', content: 'SaaS Subscription + Transaction Fees', layout: 'text', status: 'draft' },
-  { id: '7', title: 'Go-to-Market', content: 'Direct sales to Fashion Councils & PR Agencies', layout: 'text', status: 'draft' },
-  { id: '8', title: 'Traction', content: '3 Major Fashion Weeks signed LOIs', layout: 'visual', status: 'draft' },
-  { id: '9', title: 'Team', content: 'Ex-Vogue, Ex-Shopify Founders', layout: 'two-column', status: 'draft' },
-  { id: '10', title: 'The Ask', content: 'Raising $2M Seed to scale engineering', layout: 'text', status: 'draft' },
-];
+export const PitchDeckEditor: React.FC<PitchDeckEditorProps> = ({ deckId }) => {
+  const [slides, setSlides] = useState<Slide[]>([]);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('saved');
+  const [isLoading, setIsLoading] = useState(!!deckId);
+  const [hasError, setHasError] = useState(false);
+  const [templateId, setTemplateId] = useState<string>('startup'); // Default to startup
+  
+  const saveTimeoutRef = useRef<any>(null);
 
-export const PitchDeckEditor: React.FC = () => {
-  const [slides, setSlides] = useState<Slide[]>(INITIAL_SLIDES);
-  const [currentSlideId, setCurrentSlideId] = useState<string>('2');
-  const [isAiPanelOpen, setIsAiPanelOpen] = useState(true);
+  const loadDeck = useCallback(async (id: string) => {
+    setIsLoading(true);
+    setHasError(false);
+    try {
+      const { data: deck, error } = await deckService.getDeckById(id);
+      
+      if (error || !deck) {
+        throw new Error("Deck not found");
+      }
 
-  const currentSlide = slides.find(s => s.id === currentSlideId) || slides[0];
+      if (deck.template) {
+        setTemplateId(deck.template);
+      }
 
-  const updateSlide = (key: keyof Slide, value: any) => {
-    setSlides(slides.map(s => s.id === currentSlideId ? { ...s, [key]: value } : s));
+      // Map DB slides to Frontend slides
+      const mappedSlides: Slide[] = deck.slides.map(s => ({
+        id: s.id,
+        deck_id: s.deck_id,
+        type: (s.type.charAt(0).toUpperCase() + s.type.slice(1)) as any, // Capitalize for frontend enum match if needed
+        title: s.title,
+        content: s.bullets || [],
+        notes: s.speaker_notes,
+        imageUrl: s.image_url,
+        layout: s.layout || 'default'
+      }));
+
+      if (mappedSlides.length > 0) {
+        setSlides(mappedSlides);
+      } else {
+        setSlides([]);
+      }
+    } catch (err) {
+      console.error("Failed to load deck:", err);
+      setHasError(true);
+      toast.error("Failed to load pitch deck");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (deckId) {
+      loadDeck(deckId);
+    } else {
+      setSlides(MOCK_SLIDES);
+    }
+  }, [deckId, loadDeck]);
+
+  const currentSlide = slides[currentSlideIndex];
+
+  // --- Auto-Save Logic ---
+  const triggerAutoSave = useCallback((slide: Slide) => {
+    setSaveStatus('idle'); // Waiting for debounce
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      setSaveStatus('saving');
+      try {
+        // Map Frontend slide to DB updates
+        const updates = {
+           title: slide.title,
+           bullets: slide.content, // Map content -> bullets
+           speaker_notes: slide.notes,
+           image_url: slide.imageUrl,
+           layout: slide.layout
+        };
+
+        const { error } = await deckService.updateSlide(slide.id, updates);
+
+        if (error) throw error;
+
+        // Also touch the deck updated_at
+        if (slide.deck_id) {
+           await deckService.updateDeck(slide.deck_id, {});
+        }
+
+        setSaveStatus('saved');
+      } catch (err) {
+        console.error("Auto-save error:", err);
+        setSaveStatus('error');
+        toast.error("Failed to save changes");
+      }
+    }, 500); // Debounce 500ms
+  }, []);
+
+  // --- Handlers ---
+  
+  const handleOpenImageModal = () => {
+    setIsImageModalOpen(true);
+  };
+  
+  const handleSelectImage = (imageUrl: string) => {
+    handleUpdateSlide({ imageUrl });
+    setIsImageModalOpen(false);
   };
 
-  return (
-    <div className="flex h-full bg-[#F7F7FB] overflow-hidden font-sans text-slate-800">
-      
-      {/* 1. LEFT SIDEBAR: SLIDE LIST */}
-      <div className="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0">
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-           <h2 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Slides ({slides.length})</h2>
-           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600">
-              <MoreVertical className="w-4 h-4" />
-           </Button>
-        </div>
-        
-        <div className="flex-grow overflow-y-auto custom-scrollbar p-3 space-y-2">
-           {slides.map((slide, index) => (
-             <div 
-               key={slide.id}
-               onClick={() => setCurrentSlideId(slide.id)}
-               className={cn(
-                 "flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all group border",
-                 currentSlideId === slide.id 
-                   ? "bg-indigo-50 border-indigo-200 shadow-sm" 
-                   : "bg-white border-transparent hover:bg-slate-50 hover:border-slate-100"
-               )}
-             >
-                <div className="text-xs font-bold text-slate-300 w-4 text-center">{index + 1}</div>
-                {/* Mini Thumbnail */}
-                <div className={cn(
-                   "w-12 h-8 rounded border flex items-center justify-center bg-slate-50",
-                   currentSlideId === slide.id ? "border-indigo-200" : "border-slate-100"
-                )}>
-                   {slide.layout === 'visual' && <ImageIcon className="w-3 h-3 text-slate-300" />}
-                   {slide.layout === 'text' && <Type className="w-3 h-3 text-slate-300" />}
-                   {slide.layout === 'text-image' && <Layout className="w-3 h-3 text-slate-300" />}
-                   {slide.layout === 'two-column' && <Columns className="w-3 h-3 text-slate-300" />}
-                </div>
-                
-                <div className="flex-grow min-w-0">
-                   <div className={cn("text-xs font-bold truncate mb-0.5", currentSlideId === slide.id ? "text-indigo-900" : "text-slate-700")}>
-                      {slide.title}
-                   </div>
-                   <div className="flex items-center gap-1.5">
-                      <div className={cn("w-1.5 h-1.5 rounded-full", 
-                         slide.status === 'ai-suggested' ? "bg-purple-500" :
-                         slide.status === 'edited' ? "bg-indigo-500" : "bg-slate-300"
-                      )} />
-                      <span className="text-[10px] text-slate-400 capitalize">{slide.status}</span>
-                   </div>
-                </div>
-             </div>
-           ))}
+  const handleSelectSlide = (id: string) => {
+    const index = slides.findIndex(s => s.id === id);
+    if (index !== -1) setCurrentSlideIndex(index);
+  };
 
-           <Button variant="outline" className="w-full mt-4 border-dashed border-slate-300 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 gap-2 h-10">
-              <Plus className="w-4 h-4" /> Add Slide
-           </Button>
-        </div>
+  const handleAddSlide = async (newSlideData?: Partial<Slide>) => {
+    const newId = crypto.randomUUID();
+    // Calculate new position
+    const maxPosition = slides.length > 0 ? slides.length : 0;
+    
+    const newSlide: Slide = {
+      id: newId,
+      deck_id: deckId,
+      type: 'Title',
+      title: 'New Slide',
+      content: [''],
+      notes: '',
+      ...newSlideData
+    };
+    
+    // Optimistic Update
+    const updatedSlides = [...slides, newSlide];
+    setSlides(updatedSlides);
+    setCurrentSlideIndex(updatedSlides.length - 1); 
+    
+    if (deckId) {
+      try {
+        // Direct insert since service doesn't have createSlide yet
+        const { error } = await supabase.from('slides').insert({
+          id: newId,
+          deck_id: deckId,
+          type: newSlide.type.toLowerCase(),
+          title: newSlide.title,
+          bullets: newSlide.content,
+          speaker_notes: newSlide.notes,
+          position: maxPosition, // Use position
+          updated_at: new Date().toISOString()
+        });
+        if (error) throw error;
+      } catch (e) {
+        console.error("Failed to create slide", e);
+        toast.error("Failed to save new slide");
+      }
+    }
+    
+    toast.success("New slide added");
+  };
+
+  const handleUpdateSlide = (updates: Partial<Slide>) => {
+    const newSlides = [...slides];
+    const updatedSlide = { ...newSlides[currentSlideIndex], ...updates };
+    newSlides[currentSlideIndex] = updatedSlide;
+    setSlides(newSlides);
+    
+    // Trigger auto-save
+    if (deckId) {
+      triggerAutoSave(updatedSlide);
+    }
+  };
+
+  const handleDeleteSlide = async (id: string) => {
+    if (slides.length <= 1) {
+      toast.error("Cannot delete the last slide");
+      return;
+    }
+    const index = slides.findIndex(s => s.id === id);
+    const newSlides = slides.filter(s => s.id !== id);
+    setSlides(newSlides);
+    
+    // Adjust index if necessary
+    if (index === currentSlideIndex) {
+      setCurrentSlideIndex(Math.max(0, index - 1));
+    } else if (index < currentSlideIndex) {
+      setCurrentSlideIndex(currentSlideIndex - 1);
+    }
+    
+    if (deckId) {
+       try {
+         // DELETE from slides
+         await supabase.from('slides').delete().eq('id', id);
+         
+         // Reorder remaining slides
+         const slideIds = newSlides.map(s => s.id);
+         await deckService.reorderSlides(deckId, slideIds);
+       } catch (e) {
+         console.error("Failed to delete slide", e);
+       }
+    }
+    
+    toast.success("Slide deleted");
+  };
+
+  const handleDuplicateSlide = async (id: string) => {
+    const index = slides.findIndex(s => s.id === id);
+    if (index === -1) return;
+    
+    const slideToCopy = slides[index];
+    const newId = crypto.randomUUID();
+    
+    const newSlide: Slide = {
+      ...slideToCopy,
+      id: newId,
+      title: `${slideToCopy.title} (Copy)`,
+      deck_id: deckId
+    };
+    
+    const newSlides = [...slides];
+    newSlides.splice(index + 1, 0, newSlide);
+    setSlides(newSlides);
+    setCurrentSlideIndex(index + 1);
+    
+    if (deckId) {
+       try {
+         await supabase.from('slides').insert({
+           id: newId,
+           deck_id: deckId,
+           type: newSlide.type.toLowerCase(),
+           title: newSlide.title,
+           bullets: newSlide.content,
+           speaker_notes: newSlide.notes,
+           image_url: newSlide.imageUrl,
+           position: index + 1,
+           updated_at: new Date().toISOString()
+         });
+         
+         // Reorder all slides to ensure positions are correct
+         const slideIds = newSlides.map(s => s.id);
+         await deckService.reorderSlides(deckId, slideIds);
+         
+       } catch (e) {
+         console.error("Failed to duplicate slide", e);
+         toast.error("Failed to save duplicated slide");
+       }
+    }
+    
+    toast.success("Slide duplicated");
+  };
+
+  const handleMoveSlide = async (id: string, direction: 'up' | 'down') => {
+    const index = slides.findIndex(s => s.id === id);
+    if (index === -1) return;
+    
+    // Snapshot for rollback
+    const previousSlides = [...slides];
+    const previousIndex = currentSlideIndex;
+
+    const newSlides = [...slides];
+    let newIndex = currentSlideIndex;
+
+    if (direction === 'up' && index > 0) {
+      // Swap with previous
+      [newSlides[index - 1], newSlides[index]] = [newSlides[index], newSlides[index - 1]];
+      if (currentSlideIndex === index) newIndex = index - 1;
+      else if (currentSlideIndex === index - 1) newIndex = index;
+    } else if (direction === 'down' && index < slides.length - 1) {
+      // Swap with next
+      [newSlides[index], newSlides[index + 1]] = [newSlides[index + 1], newSlides[index]];
+      if (currentSlideIndex === index) newIndex = index + 1;
+      else if (currentSlideIndex === index + 1) newIndex = index;
+    } else {
+      return;
+    }
+
+    // 1. Update local state immediately
+    setSlides(newSlides);
+    setCurrentSlideIndex(newIndex);
+    
+    // 2. Call service to reorder
+    if (deckId) {
+       try {
+         const slideIds = newSlides.map(s => s.id);
+         const { error } = await deckService.reorderSlides(deckId, slideIds);
+         if (error) throw error;
+
+         toast.success("Order saved");
+       } catch (err) {
+         console.error("Failed to reorder slides:", err);
+         // 4. Handle errors with restore
+         setSlides(previousSlides);
+         setCurrentSlideIndex(previousIndex);
+         toast.error("Failed to save order");
+       }
+    }
+  };
+
+  const handleNextSlide = () => {
+    if (currentSlideIndex < slides.length - 1) {
+      setCurrentSlideIndex(currentSlideIndex + 1);
+    }
+  };
+
+  const handlePrevSlide = () => {
+    if (currentSlideIndex > 0) {
+      setCurrentSlideIndex(currentSlideIndex - 1);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+         <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <p className="text-sm font-medium text-slate-500">Loading your deck...</p>
+         </div>
       </div>
+    );
+  }
 
-      {/* 2. MAIN EDITOR AREA */}
-      <div className="flex-grow flex flex-col min-w-0 relative">
-         {/* Editor Toolbar */}
-         <div className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0">
-            <div className="flex items-center gap-4">
-               <div className="flex bg-slate-100 rounded-lg p-1">
-                  {[
-                    { id: 'text', icon: Type, label: 'Text' },
-                    { id: 'text-image', icon: Layout, label: 'Image + Text' },
-                    { id: 'two-column', icon: Columns, label: '2 Cols' },
-                    { id: 'visual', icon: ImageIcon, label: 'Visual' },
-                  ].map((layout) => (
-                    <button 
-                      key={layout.id}
-                      onClick={() => updateSlide('layout', layout.id)}
-                      title={layout.label}
-                      className={cn(
-                        "p-1.5 rounded-md transition-all",
-                        currentSlide.layout === layout.id ? "bg-white shadow-sm text-indigo-600" : "text-slate-400 hover:text-slate-600"
-                      )}
-                    >
-                       <layout.icon className="w-4 h-4" />
-                    </button>
-                  ))}
-               </div>
-               <div className="h-4 w-px bg-slate-200" />
-               <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Last saved 2m ago</span>
+  if (hasError) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+         <div className="max-w-md text-center space-y-4">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-500">
+               <AlertTriangle className="w-6 h-6" />
             </div>
-            
-            <div className="flex items-center gap-3">
-               <Button variant="ghost" className="text-slate-500 gap-2 h-9">
-                  <Play className="w-4 h-4" /> Preview
-               </Button>
-               <Button className="bg-slate-900 text-white gap-2 h-9 hover:bg-slate-800">
-                  <Download className="w-4 h-4" /> Export
-               </Button>
-            </div>
-         </div>
-
-         {/* Canvas Area */}
-         <div className="flex-grow overflow-y-auto p-8 flex justify-center bg-[#F7F7FB]">
-            <div className="w-full max-w-4xl bg-white rounded-xl shadow-sm border border-slate-200 min-h-[600px] flex flex-col overflow-hidden relative group">
-               {/* Slide Number Watermark */}
-               <div className="absolute top-4 left-4 text-xs font-bold text-slate-200 select-none">
-                  SLIDE {currentSlideId}
-               </div>
-
-               <div className="p-12 flex-grow flex flex-col">
-                  {/* Title Input */}
-                  <input 
-                    className="text-4xl font-bold text-slate-900 placeholder:text-slate-300 border-none focus:ring-0 px-0 py-2 mb-6 bg-transparent w-full"
-                    value={currentSlide.title}
-                    onChange={(e) => updateSlide('title', e.target.value)}
-                    placeholder="Slide Title..."
-                  />
-                  
-                  {/* Content Area */}
-                  <div className="flex-grow flex gap-8">
-                     {/* Text Column */}
-                     <div className={cn(
-                        "flex-grow flex flex-col",
-                        (currentSlide.layout === 'text-image' || currentSlide.layout === 'two-column') ? "w-1/2" : "w-full"
-                     )}>
-                        <Textarea 
-                           className="flex-grow text-lg text-slate-600 leading-relaxed border-none focus:ring-0 p-0 resize-none bg-transparent placeholder:text-slate-300"
-                           value={currentSlide.content}
-                           onChange={(e) => updateSlide('content', e.target.value)}
-                           placeholder="Start typing your bullet points..."
-                        />
-                     </div>
-
-                     {/* Image/Secondary Column */}
-                     {(currentSlide.layout !== 'text') && (
-                        <div className={cn(
-                           "flex-col gap-4",
-                           (currentSlide.layout === 'text-image' || currentSlide.layout === 'two-column') ? "w-1/2 flex" : "hidden"
-                        )}>
-                           <div className="flex-grow bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all cursor-pointer group/upload">
-                              <ImageIcon className="w-8 h-8 mb-2 text-slate-300 group-hover/upload:text-indigo-400" />
-                              <span className="text-sm font-medium">Click to upload image</span>
-                              <span className="text-xs opacity-70">or drag and drop</span>
-                           </div>
-                           
-                           {/* AI Visual Idea Generator */}
-                           <div className="p-3 bg-indigo-50/50 rounded-lg border border-indigo-100 flex items-center justify-between">
-                              <span className="text-xs font-bold text-indigo-700">Need a visual?</span>
-                              <Button size="sm" variant="ghost" className="h-7 text-indigo-600 hover:bg-indigo-100 text-xs gap-1">
-                                 <Sparkles className="w-3 h-3" /> Generate Idea
-                              </Button>
-                           </div>
-                        </div>
-                     )}
-                  </div>
-               </div>
-
-               {/* AI Action Bar */}
-               <div className="bg-slate-50 border-t border-slate-100 p-3 flex gap-2 justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="outline" size="sm" className="bg-white border-slate-200 text-slate-600 gap-2 h-8 text-xs hover:text-indigo-600 hover:border-indigo-200">
-                     <Wand2 className="w-3 h-3" /> Improve Wording
-                  </Button>
-                  <Button variant="outline" size="sm" className="bg-white border-slate-200 text-slate-600 gap-2 h-8 text-xs hover:text-indigo-600 hover:border-indigo-200">
-                     <RefreshCw className="w-3 h-3" /> Rewrite for Investors
-                  </Button>
-                  <Button variant="outline" size="sm" className="bg-white border-slate-200 text-slate-600 gap-2 h-8 text-xs hover:text-indigo-600 hover:border-indigo-200">
-                     <Maximize2 className="w-3 h-3" /> Expand Points
-                  </Button>
-               </div>
-            </div>
-         </div>
-      </div>
-
-      {/* 3. RIGHT PANEL: AI ASSISTANT */}
-      <div className={cn(
-         "w-80 bg-white border-l border-slate-200 flex flex-col flex-shrink-0 transition-all duration-300",
-         !isAiPanelOpen && "w-0 opacity-0 overflow-hidden"
-      )}>
-         <div className="p-6 border-b border-slate-100 bg-slate-50/30">
-            <div className="flex items-center gap-2 mb-1">
-               <div className="w-6 h-6 rounded bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white">
-                  <Sparkles className="w-3 h-3" />
-               </div>
-               <h3 className="font-bold text-slate-900">Deck Copilot</h3>
-            </div>
-            <p className="text-xs text-slate-500"> analyzing '{currentSlide.title}'...</p>
-         </div>
-
-         <div className="flex-grow overflow-y-auto p-6 space-y-6">
-            
-            {/* Helpful Insights */}
-            <div className="space-y-3">
-               <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                  <Lightbulb className="w-3 h-3" /> Helpful Insights
-               </h4>
-               <div className="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
-                  <p className="text-xs text-blue-900 leading-relaxed font-medium">
-                     Your problem statement is clear, but lacks quantification. Try adding a statistic about "disconnected fashion weeks".
-                  </p>
-               </div>
-            </div>
-
-            {/* Things to Improve */}
-            <div className="space-y-3">
-               <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                  <AlertCircle className="w-3 h-3" /> Improvements
-               </h4>
-               <div className="bg-amber-50/50 rounded-lg p-3 border border-amber-100">
-                  <p className="text-xs text-amber-900 leading-relaxed font-medium mb-2">
-                     The title "Problem" is generic.
-                  </p>
-                  <Button size="sm" variant="outline" className="w-full bg-white border-amber-200 text-amber-700 h-7 text-xs hover:bg-amber-50">
-                     Rename to "The Disconnect"
-                  </Button>
-               </div>
-            </div>
-
-            {/* AI Suggestions */}
-            <div className="space-y-3">
-               <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                  <Wand2 className="w-3 h-3" /> AI Suggestions
-               </h4>
-               
-               <div className="space-y-2">
-                  <div className="p-3 rounded-lg border border-purple-100 bg-purple-50/30 hover:bg-purple-50 transition-colors cursor-pointer group">
-                     <div className="flex justify-between items-start mb-1">
-                        <span className="text-xs font-bold text-purple-700">Strengthen Narrative</span>
-                        <Sparkles className="w-3 h-3 text-purple-400 group-hover:text-purple-600" />
-                     </div>
-                     <p className="text-xs text-slate-600 line-clamp-2">
-                        Connect the "Problem" directly to the "Solution" using a bridge statement.
-                     </p>
-                  </div>
-                  
-                  <div className="p-3 rounded-lg border border-purple-100 bg-purple-50/30 hover:bg-purple-50 transition-colors cursor-pointer group">
-                     <div className="flex justify-between items-start mb-1">
-                        <span className="text-xs font-bold text-purple-700">Fix Formatting</span>
-                        <Sparkles className="w-3 h-3 text-purple-400 group-hover:text-purple-600" />
-                     </div>
-                     <p className="text-xs text-slate-600 line-clamp-2">
-                        Convert long paragraphs into punchy bullet points for better readability.
-                     </p>
-                  </div>
-               </div>
-            </div>
-
-         </div>
-
-         <div className="p-4 border-t border-slate-100 bg-slate-50/30">
-            <Button className="w-full bg-indigo-600 text-white shadow-md shadow-indigo-900/10 hover:bg-indigo-700">
-               Auto-Fix Slide
+            <h2 className="text-xl font-bold text-slate-900">Deck Not Found</h2>
+            <p className="text-slate-500">We couldn't find the pitch deck you are looking for. It may have been deleted or you may not have permission to view it.</p>
+            <Button onClick={() => window.location.href = '/'} variant="outline">
+               Go Back Home
             </Button>
          </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full overflow-hidden bg-[#F3F4F6] font-sans">
+      <Toaster />
       
+      {/* Left Sidebar */}
+      <EditorSidebarLeft 
+        slides={slides}
+        currentSlideId={currentSlide?.id}
+        onSelectSlide={handleSelectSlide}
+        onAddSlide={() => handleAddSlide()}
+        onDeleteSlide={handleDeleteSlide}
+        onDuplicateSlide={handleDuplicateSlide}
+        onMoveSlide={handleMoveSlide}
+      />
+
+      {/* Main Canvas */}
+      {currentSlide ? (
+        <EditorCanvas 
+          currentSlide={currentSlide}
+          totalSlides={slides.length}
+          currentIndex={currentSlideIndex}
+          onUpdateSlide={handleUpdateSlide}
+          onNextSlide={handleNextSlide}
+          onPrevSlide={handlePrevSlide}
+          onTriggerImageModal={handleOpenImageModal}
+          saveStatus={saveStatus}
+          templateId={templateId}
+        />
+      ) : (
+        <div className="flex-grow flex items-center justify-center text-slate-400">
+           No slides found
+        </div>
+      )}
+
+      {/* Right Sidebar */}
+      {currentSlide && (
+        <EditorSidebarRight 
+          currentSlide={currentSlide}
+          onUpdateSlide={handleUpdateSlide}
+          onAddSlide={handleAddSlide}
+          isOpen={rightSidebarOpen}
+          onToggle={() => setRightSidebarOpen(!rightSidebarOpen)}
+        />
+      )}
+      
+      <ImageGenerationModal 
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onSelectImage={handleSelectImage}
+        initialPrompt={currentSlide?.title ? `Visual for: ${currentSlide.title}` : undefined}
+        slideType={currentSlide?.type || 'General'}
+        slideId={currentSlide?.id}
+      />
+
     </div>
   );
 };

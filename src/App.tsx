@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PipelineDashboard } from './components/crm/PipelineDashboard';
 import { TasksDashboard } from './components/crm/TasksDashboard';
 import { ActivityFeed } from './components/crm/ActivityFeed';
@@ -13,6 +13,7 @@ import { StartupProfileWizard } from './components/wizard/StartupProfileWizard';
 import { PitchDeckEditor } from './components/crm/PitchDeckEditor';
 import { LeanCanvasBuilder } from './components/crm/LeanCanvasBuilder';
 import { DocumentWorkspace } from './components/crm/DocumentWorkspace';
+import { DeckTemplateSystem } from './components/crm/DeckTemplateSystem';
 import { HowItWorksPage } from './components/landing/HowItWorksPage';
 import { BusinessModelPage } from './components/landing/BusinessModelPage';
 import { LandingPage } from './components/landing/LandingPage';
@@ -41,6 +42,26 @@ export default function App() {
   const [activeInvestorStepId, setActiveInvestorStepId] = useState<string>(investorSteps[0].id);
 
   const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [deckId, setDeckId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    // Check for URL-based "generating" state on mount
+    const path = window.location.pathname;
+    if (path.startsWith('/pitch-deck/generating/')) {
+       const id = path.split('/pitch-deck/generating/')[1];
+       if (id) {
+          setGeneratedDeckId(id);
+          setIsGenerating(true);
+          setCurrentView('wizard'); // Force wizard view to show the generation screen
+       }
+    } else if (path.startsWith('/pitch-deck/editor/')) {
+      const id = path.split('/pitch-deck/editor/')[1];
+      if (id) {
+        setDeckId(id);
+        setCurrentView('editor');
+      }
+    }
+  }, []);
 
   const handleLeadClick = (lead: any) => {
     setSelectedLead(lead);
@@ -61,7 +82,7 @@ export default function App() {
   }
   
   // Standard Pages (About, Legal etc)
-  if (['about', 'careers', 'legal', 'contact', 'blog', 'community', 'help', 'templates', 'pricing'].includes(currentView)) {
+  if (['about', 'careers', 'legal', 'contact', 'blog', 'community', 'help', 'pricing'].includes(currentView)) {
     const pageTitles: Record<string, string> = {
       about: 'About Us',
       careers: 'Join Our Team',
@@ -70,7 +91,6 @@ export default function App() {
       blog: 'Latest Insights',
       community: 'Community Forum',
       help: 'Help Center',
-      templates: 'Template Library',
       pricing: 'Pricing Plans'
     };
     return <StandardPage title={pageTitles[currentView]} onNavigate={(view) => setCurrentView(view as View)} />;
@@ -146,9 +166,11 @@ export default function App() {
           {currentView === 'settings-workspaces' && <WorkspaceSettings />}
           {currentView === 'support' && <HelpCenter />}
 
-          {currentView === 'editor' && <PitchDeckEditor />}
+          {currentView === 'editor' && <PitchDeckEditor deckId={deckId} />}
           
           {currentView === 'lean-canvas' && <LeanCanvasBuilder onNavigate={(view) => setCurrentView(view as View)} />}
+
+          {currentView === 'templates' && <DeckTemplateSystem />}
 
         </main>
       </div>

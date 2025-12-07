@@ -43,7 +43,7 @@ export const LandingPageV2: React.FC<LandingPageV2Props> = ({ onNavigate }) => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } }
   };
 
   return (
@@ -116,7 +116,7 @@ export const LandingPageV2: React.FC<LandingPageV2Props> = ({ onNavigate }) => {
             <motion.div 
               initial={{ opacity: 0, rotateX: 10, rotateY: -10, y: 50 }}
               animate={{ opacity: 1, rotateX: 5, rotateY: -5, y: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 1, ease: "easeOut" as const }}
               className="absolute top-10 left-10 right-10 bottom-10 bg-white rounded-2xl shadow-2xl border border-slate-100/80 z-10 overflow-hidden flex flex-col"
             >
                {/* Window Header */}
@@ -153,7 +153,7 @@ export const LandingPageV2: React.FC<LandingPageV2Props> = ({ onNavigate }) => {
             {/* Top Right: AI Node */}
             <motion.div 
                animate={{ y: [0, -15, 0] }}
-               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" as const }}
                className="absolute -right-4 top-20 bg-white p-4 rounded-xl shadow-xl border border-slate-100 z-20 w-48"
             >
                <div className="flex items-center gap-3 mb-2">
@@ -174,7 +174,7 @@ export const LandingPageV2: React.FC<LandingPageV2Props> = ({ onNavigate }) => {
             {/* Bottom Left: Chart */}
             <motion.div 
                animate={{ y: [0, 15, 0] }}
-               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" as const, delay: 1 }}
                className="absolute -left-8 bottom-32 bg-white p-4 rounded-xl shadow-xl border border-slate-100 z-20 w-56"
             >
                <div className="flex items-center justify-between mb-3">

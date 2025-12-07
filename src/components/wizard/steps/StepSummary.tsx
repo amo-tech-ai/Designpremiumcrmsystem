@@ -32,7 +32,7 @@ export const StepSummary = () => {
                      <span className="text-emerald-400">Excellent</span>
                      <span>85%</span>
                   </div>
-                  <Progress value={85} className="h-2 bg-slate-700" indicatorClassName="bg-emerald-500" />
+                  <Progress value={85} className="h-2 bg-slate-700" />
                </div>
             </div>
             

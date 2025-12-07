@@ -513,7 +513,7 @@ const EditorView = () => {
 
 const DocCategoryCard = ({ title, desc, icon: Icon, color, onClick }: any) => (
   <motion.button 
-    whileHover={{ y: -4, shadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
+    whileHover={{ y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
     onClick={onClick}
     className="bg-white rounded-xl p-6 text-left border border-slate-100 shadow-sm relative overflow-hidden group w-full"
   >

@@ -4,13 +4,12 @@ import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { generateSlideImage } from "../../src/services/edgeFunctionService";
-import { uploadSlideImage } from "../../services/deckService";
-import { toast } from "sonner@2.0.3";
-import { Loader2, Image as ImageIcon, Sparkles, RefreshCw, Check, Upload, CloudUpload } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Sparkles, Loader2, CloudUpload, RefreshCw, Check, Image as ImageIcon } from "lucide-react";
 import { cn } from "../ui/utils";
+import { generateSlideImage } from "../../services/edgeFunctions";
+import { uploadSlideImage } from "../../services/deckService";
 
 interface ImageGenerationModalProps {
   isOpen: boolean;
@@ -66,13 +65,11 @@ export const ImageGenerationModal: React.FC<ImageGenerationModalProps> = ({
 
       if (result && result.imageUrl) {
         setGeneratedImage(result.imageUrl);
-        toast.success("Image generated successfully!");
       } else {
         throw new Error("Failed to generate image");
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create image. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -83,7 +80,6 @@ export const ImageGenerationModal: React.FC<ImageGenerationModalProps> = ({
     if (!file) return;
 
     if (!slideId) {
-       toast.error("Cannot upload: Slide ID missing");
        return;
     }
 
@@ -96,11 +92,9 @@ export const ImageGenerationModal: React.FC<ImageGenerationModalProps> = ({
       if (result.error) throw result.error;
       if (result.url) {
         setUploadedImage(result.url);
-        toast.success("Image uploaded successfully!");
       }
     } catch (error) {
       console.error("Upload failed:", error);
-      toast.error("Failed to upload image");
     } finally {
       setUploading(false);
     }

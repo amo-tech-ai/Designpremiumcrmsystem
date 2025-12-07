@@ -7,9 +7,12 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export const generateDeckHandler = async (c: any) => {
+  let deckId: string | null = null; // Declare outside try for catch block access
+  
   try {
     const payload = await c.req.json();
-    const { deckId, businessContext, deckType, wizardData, templateId, format } = payload;
+    const { deckId: payloadDeckId, businessContext, deckType, wizardData, templateId, format } = payload;
+    deckId = payloadDeckId; // Store for error handling
 
     if (!deckId) {
       return c.json({ error: "deckId is required" }, 400);
@@ -186,11 +189,11 @@ export const generateDeckHandler = async (c: any) => {
     console.error("Generate Deck Error:", error);
     
     // Attempt to update status to error if possible
-    if (payload?.deckId) {
+    if (deckId) {
        await supabase
         .from('decks')
         .update({ status: 'error' })
-        .eq('id', payload.deckId);
+        .eq('id', deckId);
     }
 
     return c.json({ error: error.message }, 500);

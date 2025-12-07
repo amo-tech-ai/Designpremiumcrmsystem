@@ -1,27 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  LayoutGrid, 
-  List, 
-  Sparkles,
-  SlidersHorizontal,
-  ChevronDown,
-  Loader2,
-  MoreHorizontal
-} from 'lucide-react';
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { cn } from "../ui/utils";
+import { useContacts } from './hooks';
+import { useRealtimeCRM } from './realtimeHooks';
 import { ContactPanel } from './ContactPanel';
-import { ContactCard } from './ContactCard';
-import { AnimatePresence, motion } from 'motion/react';
-import { useContacts, useRealtimeCRM } from './hooks';
-import { Contact } from './types';
-
 import { AddContactSidebar } from './AddContactSidebar';
+import { SkeletonContactCard } from '../ui/skeleton';
+import { AnimatePresence, motion } from 'motion/react';
+import { LayoutGrid, List, MoreHorizontal } from 'lucide-react';
 
 export const ContactsDashboard: React.FC = () => {
   const { contacts, loading, getContacts } = useContacts();
@@ -159,9 +142,10 @@ export const ContactsDashboard: React.FC = () => {
         <div className="flex-grow overflow-y-auto p-8 custom-scrollbar">
           
           {loading ? (
-             <div className="h-full flex flex-col items-center justify-center text-slate-400">
-                <Loader2 className="w-8 h-8 animate-spin mb-4 text-indigo-500" />
-                <p>Loading contacts...</p>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+               {Array.from({ length: 8 }).map((_, i) => (
+                 <SkeletonContactCard key={i} />
+               ))}
              </div>
           ) : filteredContacts.length === 0 ? (
              <div className="h-full flex flex-col items-center justify-center text-slate-400">

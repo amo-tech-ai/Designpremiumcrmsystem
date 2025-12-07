@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { EditorSidebarLeft } from '../editor/EditorSidebarLeft';
-import { EditorCanvas } from '../editor/EditorCanvas';
-import { EditorSidebarRight } from '../editor/EditorSidebarRight';
-import { MOCK_SLIDES, Slide } from '../editor/types';
-import { Toaster } from 'sonner@2.0.3';
-import { toast } from 'sonner@2.0.3';
-import { ImageGenerationModal } from '../modals/ImageGenerationModal';
-import { supabase } from '../../utils/supabase/client';
-import * as deckService from '../../services/deckService';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Loader2, ChevronLeft, Save, Eye, Share2, Download, Plus, Trash2, Copy, Image as ImageIcon } from 'lucide-react';
 import { Button } from '../ui/button';
+import { toast } from 'sonner@2.0.3';
+import { supabase } from '../../utils/supabase/client';
+import { SlideEditor } from '../editor/SlideEditor';
+import { SlideOutline } from '../editor/SlideOutline';
+import { EditorSidebarRight } from '../editor/EditorSidebarRight';
+import { logger } from '../../utils/logger';
 
 interface PitchDeckEditorProps {
   deckId?: string;
@@ -59,7 +56,7 @@ export const PitchDeckEditor: React.FC<PitchDeckEditorProps> = ({ deckId }) => {
         setSlides([]);
       }
     } catch (err) {
-      console.error("Failed to load deck:", err);
+      logger.error("Failed to load deck:", err);
       setHasError(true);
       toast.error("Failed to load pitch deck");
     } finally {
@@ -108,7 +105,7 @@ export const PitchDeckEditor: React.FC<PitchDeckEditorProps> = ({ deckId }) => {
 
         setSaveStatus('saved');
       } catch (err) {
-        console.error("Auto-save error:", err);
+        logger.error("Auto-save error:", err);
         setSaveStatus('error');
         toast.error("Failed to save changes");
       }
@@ -356,7 +353,7 @@ export const PitchDeckEditor: React.FC<PitchDeckEditorProps> = ({ deckId }) => {
       <Toaster />
       
       {/* Left Sidebar */}
-      <EditorSidebarLeft 
+      <SlideOutline 
         slides={slides}
         currentSlideId={currentSlide?.id}
         onSelectSlide={handleSelectSlide}
@@ -368,7 +365,7 @@ export const PitchDeckEditor: React.FC<PitchDeckEditorProps> = ({ deckId }) => {
 
       {/* Main Canvas */}
       {currentSlide ? (
-        <EditorCanvas 
+        <SlideEditor 
           currentSlide={currentSlide}
           totalSlides={slides.length}
           currentIndex={currentSlideIndex}

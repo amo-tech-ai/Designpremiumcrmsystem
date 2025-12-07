@@ -73,6 +73,18 @@ export const slideAI = async (payload: any) => {
   return callEdgeFunction('slide-ai', payload);
 };
 
+export const analyzeSlideAI = async (payload: { slideId: string; slideContent: any; action: 'analyze' }) => {
+  return callEdgeFunction<{ score: number; suggestions: string[] }>('slide-ai', payload);
+};
+
+export const rewriteSlide = async (payload: { slideId: string; action: 'rewrite'; prompt: string; currentContent?: any }) => {
+  return callEdgeFunction<{ title: string; content: string; bullets: string[] }>('slide-ai', payload);
+};
+
+export const chatWithSlide = async (payload: { action: string; message?: string; slideTitle?: string; slideContent?: any; slideType?: string }) => {
+  return callEdgeFunction('slide-ai', payload);
+};
+
 export const imageAI = async (payload: {
   prompt: string;
   style: "photo" | "illustration" | "abstract" | "chart";
@@ -98,4 +110,12 @@ export const researchAI = async (payload: {
       sources: Array<{ url: string; snippet: string }>;
     }
   }>('research-ai', payload);
+};
+
+export const researchTopic = async (payload: { query: string; slideType?: string }) => {
+  return callEdgeFunction<{ content: string; citations: Array<{ url: string; title: string }> }>('research-ai', payload);
+};
+
+export const generateSlideImage = async (payload: { slideId: string; prompt: string; style?: string }) => {
+  return callEdgeFunction<{ imageUrl: string }>('image-ai', payload);
 };

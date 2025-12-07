@@ -21,7 +21,7 @@ import {
 import { Switch } from '../ui/switch';
 import { ScrollArea } from '../ui/scroll-area';
 import { AIChatPanel } from './AIChatPanel';
-import { analyzeSlideAI } from '../../src/services/edgeFunctionService';
+import * as edgeFunctions from '../../services/edgeFunctions';
 
 interface EditorSidebarRightProps {
   currentSlide: Slide;
@@ -53,7 +53,7 @@ export const EditorSidebarRight: React.FC<EditorSidebarRightProps> = ({
   useEffect(() => {
     if (activeTab === 'analysis' && !analysisResult && !isAnalyzing) {
        setIsAnalyzing(true);
-       analyzeSlideAI({ 
+       edgeFunctions.analyzeSlideAI({ 
          slideId: currentSlide.id, 
          slideContent: currentSlide.content, 
          action: 'analyze' 

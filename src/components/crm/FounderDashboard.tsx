@@ -1,54 +1,14 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-  TrendingUp, 
-  Users, 
-  Briefcase, 
-  Plus, 
-  MoreHorizontal,
-  Zap,
-  Target,
-  Globe,
-  ShieldCheck,
-  Sparkles,
-  ChevronDown,
-  ChevronUp,
-  Lightbulb,
-  FileText,
-  Rocket,
-  BarChart3,
-  Mail,
-  FolderOpen,
-  ArrowRight,
-  MessageSquare,
-  Edit2,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  Linkedin,
-  Github,
-  Twitter,
-  Video,
-  Link as LinkIcon,
-  DollarSign,
-  Calendar,
-  MapPin,
-  RefreshCw,
-  ExternalLink,
-  PieChart,
-  Layers,
-  X
-} from 'lucide-react';
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { cn } from "../ui/utils";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
-import { Progress } from "../ui/progress";
-import { toast } from "sonner@2.0.3";
-import { Separator } from "../ui/separator";
-import { EditProfilePanel } from "./EditProfilePanel";
-import { useStartupProfile } from "./hooks";
+import { motion } from 'motion/react';
+import { Sparkles, TrendingUp, Users, DollarSign, Target, Calendar, ChevronRight, Edit, Plus, BarChart3, FileText, MessageSquare, Zap, Rocket, Settings, Bell } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { Progress } from '../ui/progress';
+import { cn } from '../ui/utils';
+import { useStartupProfile } from './hooks';
+import { EditProfilePanel } from './EditProfilePanel';
+import { SkeletonMetric } from '../ui/skeleton';
 
 // --- Default / Fallback Data ---
 const DEFAULT_PROFILE = {
@@ -121,10 +81,10 @@ const WORKFLOWS = [
 const QUICK_ACTIONS = [
   { label: "Pitch Deck", icon: Sparkles, color: "text-indigo-600 bg-indigo-50" },
   { label: "One-Pager", icon: FileText, color: "text-blue-600 bg-blue-50" },
-  { label: "Market Sizing", icon: PieChart, color: "text-emerald-600 bg-emerald-50" },
+  { label: "Market Sizing", icon: BarChart3, color: "text-emerald-600 bg-emerald-50" },
   { label: "GTM Strategy", icon: Rocket, color: "text-purple-600 bg-purple-50" },
-  { label: "Data Room", icon: FolderOpen, color: "text-amber-600 bg-amber-50" },
-  { label: "Outreach", icon: Mail, color: "text-pink-600 bg-pink-50" },
+  { label: "Data Room", icon: FileText, color: "text-amber-600 bg-amber-50" },
+  { label: "Outreach", icon: MessageSquare, color: "text-pink-600 bg-pink-50" },
 ];
 
 interface FounderDashboardProps {
@@ -207,7 +167,7 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
                 
                 <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-sm text-slate-500">
                   <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" /> {STARTUP_PROFILE.industry}</span>
-                  <span className="flex items-center gap-1"><Layers className="w-3 h-3" /> {STARTUP_PROFILE.business_model}</span>
+                  <span className="flex items-center gap-1"><Settings className="w-3 h-3" /> {STARTUP_PROFILE.business_model}</span>
                   <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Est. {STARTUP_PROFILE.year_founded}</span>
                   <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {STARTUP_PROFILE.location}</span>
                   <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {STARTUP_PROFILE.employees} Employees</span>

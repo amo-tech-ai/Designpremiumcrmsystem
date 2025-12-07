@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Check, Sparkles, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from "../ui/button";
-import { cn } from "../ui/utils";
 import { toast } from "sonner@2.0.3";
-import { supabase } from '../../utils/supabase/client';
+import { generateDeck } from '../../services/edgeFunctions';
+import { logger } from '../../utils/logger';
 
 // Import new wizard components
 import { PitchWizardData, INITIAL_DATA, STEPS, WizardStepId } from '../pitch-wizard/types';
@@ -12,8 +13,6 @@ import { DeckTemplateSystem } from './DeckTemplateSystem';
 import { StepDetails } from '../pitch-wizard/steps/StepDetails';
 import { StepFinancials } from '../pitch-wizard/steps/StepFinancials';
 import { PitchDeckGenerationScreen } from '../pitch-wizard/PitchDeckGenerationScreen';
-
-import * as edgeFunctionService from '../../src/services/edgeFunctionService';
 
 interface PitchDeckWizardProps {
   onNavigate?: (view: string) => void;
@@ -98,19 +97,18 @@ export const PitchDeckWizard: React.FC<PitchDeckWizardProps> = ({ onNavigate }) 
       setGeneratedDeckId(deckId);
 
       // 3. Call generate-deck Edge Function via Service
-      await edgeFunctionService.generateDeck({
+      await generateDeck({
         deckId,
         businessContext: data.description,
-        templateId: data.theme,
-        format: data.format,
-        wizardData: data,
-        urls: [] // Optional
+        deckType: 'investor_pitch',
+        template: data.theme,
+        wizardData: data
       });
 
       // The generation screen will now take over polling via the deckId
       
     } catch (err) {
-      console.error("Failed to start generation:", err);
+      logger.error("Failed to start deck generation:", err);
       toast.error("Failed to start deck generation");
       setIsGenerating(false);
       setGeneratedDeckId(null);

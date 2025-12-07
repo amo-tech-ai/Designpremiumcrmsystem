@@ -1,39 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './utils/supabase/client';
 import { AuthPage } from './components/auth/AuthPage';
-import { PipelineDashboard } from './components/crm/PipelineDashboard';
-import { TasksDashboard } from './components/crm/TasksDashboard';
-import { ActivityFeed } from './components/crm/ActivityFeed';
-import { ContactPanel } from './components/crm/ContactPanel';
-import { AIInsights } from './components/crm/AIInsights';
-import { FounderDashboard } from './components/crm/FounderDashboard';
-import { ContactsDashboard } from './components/crm/ContactsDashboard';
-import { ContactDiscovery } from './components/crm/ContactDiscovery';
-import { GTMStrategy } from './components/crm/GTMStrategy';
-import { PitchDeckWizard } from './components/crm/PitchDeckWizard';
-import { StartupProfileWizard } from './components/wizard/StartupProfileWizard';
-import { PitchDeckEditor } from './components/crm/PitchDeckEditor';
-import { LeanCanvasBuilder } from './components/crm/LeanCanvasBuilder';
-import { DocumentWorkspace } from './components/crm/DocumentWorkspace';
-import { DeckTemplateSystem } from './components/crm/DeckTemplateSystem';
-import { HowItWorksPage } from './components/landing/HowItWorksPage';
-import { BusinessModelPage } from './components/landing/BusinessModelPage';
-import { LandingPage } from './components/landing/LandingPage';
-import { LandingPageV2 } from './components/landing/LandingPageV2';
-import { StandardPage } from './components/landing/StandardPage';
 import { TopNavbar } from './components/layout/TopNavbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { steps, investorSteps } from './components/crm/data';
 import { cn } from "./components/ui/utils";
 import { Toaster } from "sonner@2.0.3";
+import { AppErrorBoundary, EditorErrorBoundary, CRMErrorBoundary } from './components/ErrorBoundary';
+import { Loader2 } from 'lucide-react';
 
-import { UserProfile } from './components/user-profile/UserProfile';
-import { CompanyProfileEditor } from './components/company-profile/CompanyProfileEditor';
-import { AccountSettings } from './components/settings/AccountSettings';
-import { BillingSettings } from './components/settings/BillingSettings';
-import { WorkspaceSettings } from './components/settings/WorkspaceSettings';
-import { HelpCenter } from './components/support/HelpCenter';
+// Lazy load heavy components for better performance
+const PipelineDashboard = lazy(() => import('./components/crm/PipelineDashboard').then(m => ({ default: m.PipelineDashboard })));
+const TasksDashboard = lazy(() => import('./components/crm/TasksDashboard').then(m => ({ default: m.TasksDashboard })));
+const ActivityFeed = lazy(() => import('./components/crm/ActivityFeed').then(m => ({ default: m.ActivityFeed })));
+const AIInsights = lazy(() => import('./components/crm/AIInsights').then(m => ({ default: m.AIInsights })));
+const FounderDashboard = lazy(() => import('./components/crm/FounderDashboard').then(m => ({ default: m.FounderDashboard })));
+const ContactsDashboard = lazy(() => import('./components/crm/ContactsDashboard').then(m => ({ default: m.ContactsDashboard })));
+const ContactDiscovery = lazy(() => import('./components/crm/ContactDiscovery').then(m => ({ default: m.ContactDiscovery })));
+const GTMStrategy = lazy(() => import('./components/crm/GTMStrategy').then(m => ({ default: m.GTMStrategy })));
+const PitchDeckWizard = lazy(() => import('./components/crm/PitchDeckWizard').then(m => ({ default: m.PitchDeckWizard })));
+const StartupProfileWizard = lazy(() => import('./components/wizard/StartupProfileWizard').then(m => ({ default: m.StartupProfileWizard })));
+const PitchDeckEditor = lazy(() => import('./components/crm/PitchDeckEditor').then(m => ({ default: m.PitchDeckEditor })));
+const LeanCanvasBuilder = lazy(() => import('./components/crm/LeanCanvasBuilder').then(m => ({ default: m.LeanCanvasBuilder })));
+const DocumentWorkspace = lazy(() => import('./components/crm/DocumentWorkspace').then(m => ({ default: m.DocumentWorkspace })));
+const DeckTemplateSystem = lazy(() => import('./components/crm/DeckTemplateSystem').then(m => ({ default: m.DeckTemplateSystem })));
+const HowItWorksPage = lazy(() => import('./components/landing/HowItWorksPage').then(m => ({ default: m.HowItWorksPage })));
+const BusinessModelPage = lazy(() => import('./components/landing/BusinessModelPage').then(m => ({ default: m.BusinessModelPage })));
+const LandingPage = lazy(() => import('./components/landing/LandingPage').then(m => ({ default: m.LandingPage })));
+const LandingPageV2 = lazy(() => import('./components/landing/LandingPageV2').then(m => ({ default: m.LandingPageV2 })));
+const StandardPage = lazy(() => import('./components/landing/StandardPage').then(m => ({ default: m.StandardPage })));
+const UserProfile = lazy(() => import('./components/user-profile/UserProfile').then(m => ({ default: m.UserProfile })));
+const CompanyProfileEditor = lazy(() => import('./components/company-profile/CompanyProfileEditor').then(m => ({ default: m.CompanyProfileEditor })));
+const AccountSettings = lazy(() => import('./components/settings/AccountSettings').then(m => ({ default: m.AccountSettings })));
+const BillingSettings = lazy(() => import('./components/settings/BillingSettings').then(m => ({ default: m.BillingSettings })));
+const WorkspaceSettings = lazy(() => import('./components/settings/WorkspaceSettings').then(m => ({ default: m.WorkspaceSettings })));
+const HelpCenter = lazy(() => import('./components/support/HelpCenter').then(m => ({ default: m.HelpCenter })));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-screen bg-slate-50">
+    <div className="flex flex-col items-center gap-4">
+      <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      <p className="text-slate-500 font-medium">Loading...</p>
+    </div>
+  </div>
+);
 
 type View = 'dashboard' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'startup-profile' | 'company-profile' | 'editor' | 'landing' | 'landing-v2' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile' | 'settings-account' | 'settings-billing' | 'settings-workspaces' | 'support';
 type PipelineMode = 'sales' | 'investor';
@@ -88,16 +100,32 @@ export default function App() {
 
   // Full screen landing page views that DON'T need the app shell
   if (['landing', 'business-model'].includes(currentView)) {
-     if (currentView === 'landing') return <LandingPage onNavigate={(view) => setCurrentView(view as View)} />;
-     if (currentView === 'business-model') return <BusinessModelPage onNavigate={(view) => setCurrentView(view as View)} />;
+     if (currentView === 'landing') return (
+       <Suspense fallback={<LoadingFallback />}>
+         <LandingPage onNavigate={(view) => setCurrentView(view as View)} />
+       </Suspense>
+     );
+     if (currentView === 'business-model') return (
+       <Suspense fallback={<LoadingFallback />}>
+         <BusinessModelPage onNavigate={(view) => setCurrentView(view as View)} />
+       </Suspense>
+     );
   }
 
   if (currentView === 'landing-v2') {
-    return <LandingPageV2 onNavigate={(view) => setCurrentView(view as View)} />;
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <LandingPageV2 onNavigate={(view) => setCurrentView(view as View)} />
+      </Suspense>
+    );
   }
   
   if (currentView === 'how-it-works') {
-    return <HowItWorksPage onNavigate={(view) => setCurrentView(view as View)} />;
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <HowItWorksPage onNavigate={(view) => setCurrentView(view as View)} />
+      </Suspense>
+    );
   }
   
   // Standard Pages (About, Legal etc)
@@ -112,7 +140,11 @@ export default function App() {
       help: 'Help Center',
       pricing: 'Pricing Plans'
     };
-    return <StandardPage title={pageTitles[currentView]} onNavigate={(view) => setCurrentView(view as View)} />;
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <StandardPage title={pageTitles[currentView]} onNavigate={(view) => setCurrentView(view as View)} />
+      </Suspense>
+    );
   }
 
   // Auth Protection for App Shell
@@ -125,83 +157,120 @@ export default function App() {
 
   // APPLICATION SHELL (Dashboard, Tools, CRM)
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
-      <Toaster />
-      
-      {/* SIDEBAR NAVIGATION (Desktop) */}
-      <div className="hidden md:block h-full shadow-xl z-30">
-        <Sidebar currentView={currentView} onNavigate={(view) => setCurrentView(view as View)} />
-      </div>
-      
-      {/* MAIN CONTENT AREA */}
-      <div className="flex-grow flex flex-col h-full overflow-hidden relative bg-slate-50/50">
+    <AppErrorBoundary>
+      <div className="flex h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
+        <Toaster />
         
-        {/* TOP HEADER (Mobile Nav + Search + Profile) */}
-        <TopNavbar 
-          currentView={currentView} 
-          onNavigate={(view) => setCurrentView(view as View)} 
-          showNavLinks={false}
-        />
+        {/* SIDEBAR NAVIGATION (Desktop) */}
+        <div className="hidden md:block h-full shadow-xl z-30">
+          <Sidebar currentView={currentView} onNavigate={(view) => setCurrentView(view as View)} />
+        </div>
         
-        <main className="flex-grow overflow-hidden relative">
+        {/* MAIN CONTENT AREA */}
+        <div className="flex-grow flex flex-col h-full overflow-hidden relative bg-slate-50/50">
           
-          {currentView === 'dashboard' && (
-             <FounderDashboard 
-               onNavigate={(view) => setCurrentView(view as View)} 
-               onLeadClick={handleLeadClick}
-             />
-          )}
-
-          {currentView === 'documents' && <DocumentWorkspace />}
-
-          {currentView === 'pipeline' && (
-            <div className="h-full overflow-hidden">
-              <PipelineDashboard 
-                 pipelineMode={pipelineMode}
-                 setPipelineMode={setPipelineMode}
-                 activeStepId={pipelineMode === 'investor' ? activeInvestorStepId : activeSalesStepId}
-                 setActiveStepId={pipelineMode === 'investor' ? setActiveInvestorStepId : setActiveSalesStepId}
-                 selectedLead={selectedLead}
-                 onLeadClick={handleLeadClick}
-                 onCloseLead={() => setSelectedLead(null)}
-              />
-            </div>
-          )}
-
-          {currentView === 'insights' && <AIInsights />}
+          {/* TOP HEADER (Mobile Nav + Search + Profile) */}
+          <TopNavbar 
+            currentView={currentView} 
+            onNavigate={(view) => setCurrentView(view as View)} 
+            showNavLinks={false}
+          />
           
-          {currentView === 'tasks' && <TasksDashboard />}
-          
-          {currentView === 'activities' && (
-             <div className="p-6 max-w-4xl mx-auto h-full overflow-hidden flex flex-col">
-                <ActivityFeed />
-             </div>
-          )}
-          
-          {currentView === 'contacts' && <ContactsDashboard />}
-          
-          {currentView === 'discovery' && <ContactDiscovery />}
+          <main className="flex-grow overflow-hidden relative">
+            <Suspense fallback={<LoadingFallback />}>
+              {currentView === 'dashboard' && (
+                <CRMErrorBoundary>
+                  <FounderDashboard 
+                    onNavigate={(view) => setCurrentView(view as View)} 
+                    onLeadClick={handleLeadClick}
+                  />
+                </CRMErrorBoundary>
+              )}
 
-          {currentView === 'gtm' && <GTMStrategy />}
+              {currentView === 'documents' && <DocumentWorkspace />}
 
-          {currentView === 'wizard' && <PitchDeckWizard onNavigate={(view) => setCurrentView(view as View)} />}
-          {currentView === 'startup-profile' && <StartupProfileWizard onNavigate={(view) => setCurrentView(view as View)} />}
+              {currentView === 'pipeline' && (
+                <CRMErrorBoundary>
+                  <div className="h-full overflow-hidden">
+                    <PipelineDashboard 
+                       pipelineMode={pipelineMode}
+                       setPipelineMode={setPipelineMode}
+                       activeStepId={pipelineMode === 'investor' ? activeInvestorStepId : activeSalesStepId}
+                       setActiveStepId={pipelineMode === 'investor' ? setActiveInvestorStepId : setActiveSalesStepId}
+                       selectedLead={selectedLead}
+                       onLeadClick={handleLeadClick}
+                       onCloseLead={() => setSelectedLead(null)}
+                    />
+                  </div>
+                </CRMErrorBoundary>
+              )}
 
-          {currentView === 'profile' && <UserProfile onNavigate={(view) => setCurrentView(view as View)} />}
-          {currentView === 'company-profile' && <CompanyProfileEditor onNavigate={(view) => setCurrentView(view as View)} />}
-          {currentView === 'settings-account' && <AccountSettings />}
-          {currentView === 'settings-billing' && <BillingSettings />}
-          {currentView === 'settings-workspaces' && <WorkspaceSettings />}
-          {currentView === 'support' && <HelpCenter />}
+              {currentView === 'insights' && (
+                <CRMErrorBoundary>
+                  <AIInsights />
+                </CRMErrorBoundary>
+              )}
+              
+              {currentView === 'tasks' && (
+                <CRMErrorBoundary>
+                  <TasksDashboard />
+                </CRMErrorBoundary>
+              )}
+              
+              {currentView === 'activities' && (
+                <CRMErrorBoundary>
+                  <div className="p-6 max-w-4xl mx-auto h-full overflow-hidden flex flex-col">
+                     <ActivityFeed />
+                  </div>
+                </CRMErrorBoundary>
+              )}
+              
+              {currentView === 'contacts' && (
+                <CRMErrorBoundary>
+                  <ContactsDashboard />
+                </CRMErrorBoundary>
+              )}
+              
+              {currentView === 'discovery' && (
+                <CRMErrorBoundary>
+                  <ContactDiscovery />
+                </CRMErrorBoundary>
+              )}
 
-          {currentView === 'editor' && <PitchDeckEditor deckId={deckId} />}
-          
-          {currentView === 'lean-canvas' && <LeanCanvasBuilder onNavigate={(view) => setCurrentView(view as View)} />}
+              {currentView === 'gtm' && (
+                <CRMErrorBoundary>
+                  <GTMStrategy />
+                </CRMErrorBoundary>
+              )}
 
-          {currentView === 'templates' && <DeckTemplateSystem />}
+              {currentView === 'wizard' && (
+                <EditorErrorBoundary>
+                  <PitchDeckWizard onNavigate={(view) => setCurrentView(view as View)} />
+                </EditorErrorBoundary>
+              )}
+              
+              {currentView === 'startup-profile' && <StartupProfileWizard onNavigate={(view) => setCurrentView(view as View)} />}
 
-        </main>
+              {currentView === 'profile' && <UserProfile onNavigate={(view) => setCurrentView(view as View)} />}
+              {currentView === 'company-profile' && <CompanyProfileEditor onNavigate={(view) => setCurrentView(view as View)} />}
+              {currentView === 'settings-account' && <AccountSettings />}
+              {currentView === 'settings-billing' && <BillingSettings />}
+              {currentView === 'settings-workspaces' && <WorkspaceSettings />}
+              {currentView === 'support' && <HelpCenter />}
+
+              {currentView === 'editor' && (
+                <EditorErrorBoundary>
+                  <PitchDeckEditor deckId={deckId} />
+                </EditorErrorBoundary>
+              )}
+              
+              {currentView === 'lean-canvas' && <LeanCanvasBuilder onNavigate={(view) => setCurrentView(view as View)} />}
+
+              {currentView === 'templates' && <DeckTemplateSystem />}
+            </Suspense>
+          </main>
+        </div>
       </div>
-    </div>
+    </AppErrorBoundary>
   );
 }

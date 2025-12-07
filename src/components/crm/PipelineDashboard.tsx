@@ -1,23 +1,14 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { steps, investorSteps } from './data';
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { Input } from "../ui/input";
-import { 
-  Search,
-  Filter, 
-  Plus, 
-  Sparkles,
-  LayoutGrid,
-  List,
-  Loader2
-} from 'lucide-react';
-import { cn } from "../ui/utils";
-import { DealCard } from './DealCard';
-import { DealPanel } from './DealPanel';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { Plus, Filter, ChevronDown, Sparkles, TrendingUp, Loader2, X, BarChart3, Zap } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { cn } from '../ui/utils';
 import { ContactPanel } from './ContactPanel';
-import { useDeals, useCRMStats, useRealtimeCRM } from './hooks';
+import { useDeals, useCRMStats } from './hooks';
+import { useRealtimeCRM } from './realtimeHooks';
+import { DealCard } from './DealCard';
+import { SkeletonDealCard } from '../ui/skeleton';
 
 // Simple relative time helper to avoid date-fns dependency
 const formatRelativeTime = (dateString: string) => {
@@ -263,8 +254,10 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
 
           {/* Deals Grid */}
           {loading ? (
-             <div className="flex items-center justify-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
+               {Array.from({ length: 6 }).map((_, i) => (
+                 <SkeletonDealCard key={i} />
+               ))}
              </div>
           ) : filteredDeals.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
@@ -314,4 +307,3 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
     </div>
   );
 };
-

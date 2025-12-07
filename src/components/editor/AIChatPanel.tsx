@@ -32,7 +32,7 @@ import {
   analyzeSlideAI, 
   researchTopic, 
   chatWithSlide 
-} from '../../src/services/edgeFunctionService';
+} from '../../services/edgeFunctions';
 
 interface AIChatPanelProps {
   currentSlide: Slide;

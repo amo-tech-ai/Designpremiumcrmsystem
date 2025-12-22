@@ -5,11 +5,17 @@ import { toast } from "sonner@2.0.3";
 
 interface StartupProfileData {
   // Context
+  startupName: string;
   website: string;
+  linkedin: string;
   description: string;
   longDescription: string;
+  targetMarket: string;
+  additionalUrls: string[];
+  searchTerms: string;
   industry: string;
   foundedYear: string;
+  coverImage: string;
   
   // Team
   founders: Array<{ name: string; role: string; linkedin: string; bio: string }>;
@@ -40,11 +46,17 @@ interface StartupProfileContextType {
 }
 
 const defaultData: StartupProfileData = {
+  startupName: '',
   website: '',
+  linkedin: '',
   description: '',
   longDescription: '',
+  targetMarket: '',
+  additionalUrls: [],
+  searchTerms: '',
   industry: '',
   foundedYear: '',
+  coverImage: '',
   founders: [],
   businessModel: '',
   targetAudience: [],
@@ -105,7 +117,13 @@ export const StartupProfileProvider: React.FC<{ children: React.ReactNode }> = (
     setIsSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("No active session");
+      
+      // If no session, warn user but don't fail completely
+      if (!session) {
+        toast.error("Please sign in to save your profile");
+        setIsSaving(false);
+        return;
+      }
 
       const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6522a742/startup-profile`, {
         method: 'POST',

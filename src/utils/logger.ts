@@ -6,8 +6,19 @@
  * In development, all log levels are enabled.
  */
 
-const isDevelopment = import.meta.env.DEV;
-const isProduction = import.meta.env.PROD;
+// Safely access environment variables with fallbacks
+// In some environments import.meta.env might be undefined
+const getEnv = () => {
+  try {
+    return import.meta.env || {};
+  } catch {
+    return {};
+  }
+};
+
+const env = getEnv();
+const isDevelopment = env.DEV ?? true; // Default to true if unknown, to see logs
+const isProduction = env.PROD ?? false;
 
 interface LogMetadata {
   timestamp?: Date;

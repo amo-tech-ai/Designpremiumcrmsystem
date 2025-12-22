@@ -1,458 +1,658 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   ArrowRight, 
-  Play, 
-  Zap, 
-  BarChart2, 
-  Layers, 
-  Cpu, 
-  TrendingUp, 
-  Users, 
   Sparkles, 
-  Search, 
+  LayoutTemplate, 
+  FileText, 
+  Users, 
+  Zap, 
   CheckCircle2, 
-  ArrowUpRight,
-  FileText,
-  MessageSquare,
-  PieChart,
-  ShieldCheck
+  BarChart3, 
+  Layers, 
+  Wand2, 
+  Search, 
+  Code2, 
+  Menu,
+  X,
+  ChevronRight,
+  Globe,
+  Shield,
+  Bot,
+  Map as MapIcon,
+  Github
 } from 'lucide-react';
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { cn } from "../ui/utils";
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
+import { cn } from '../ui/utils';
+import { WorkflowDiagram } from '../workflow/WorkflowDiagram';
 
-import { Footer } from './Footer';
-import { TopNavbar } from '../layout/TopNavbar';
+// --- Types ---
 
-interface LandingPageV2Props {
-  onNavigate?: (view: string) => void;
+interface LandingPageProps {
+  onNavigate: (view: string) => void;
 }
 
-export const LandingPageV2: React.FC<LandingPageV2Props> = ({ onNavigate }) => {
-  
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
+// --- Components ---
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } }
-  };
+const Navbar = ({ onNavigate }: { onNavigate: (view: string) => void }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navLinks = [
+    { label: 'Products', href: '#product' },
+    { label: 'Playground', href: '#playground' },
+    { label: 'Docs', href: '#docs' },
+    { label: 'Pricing', href: '#pricing' },
+    { label: 'Blog', href: '#blog' },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-50/50 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
-      
-      <TopNavbar currentView="landing-v2" onNavigate={onNavigate || (() => {})} />
-
-      {/* 1. HERO SECTION (Cinematic, Illustrated) */}
-      <section className="relative min-h-[90vh] flex items-center pt-20 pb-20 overflow-hidden">
-        {/* Background Layers */}
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/80 via-white to-slate-50 -z-20" />
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-200/20 rounded-full blur-3xl -translate-y-1/4 translate-x-1/4 -z-10" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-200/20 rounded-full blur-3xl translate-y-1/4 -translate-x-1/4 -z-10" />
-
-        <div className="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Left: Messaging */}
-          <motion.div 
-            initial="hidden"
-            animate="show"
-            variants={containerVariants}
-            className="space-y-8 relative z-10"
-          >
-            <motion.div variants={itemVariants}>
-              <Badge className="bg-white/80 backdrop-blur-sm text-indigo-700 border-indigo-100 shadow-sm px-4 py-1.5 text-sm font-medium rounded-full transition-all hover:bg-white hover:shadow-md cursor-default">
-                <Sparkles className="w-3.5 h-3.5 mr-2 inline-block text-indigo-500" />
-                New: StartupAI Founder Edition
-              </Badge>
-            </motion.div>
-            
-            <motion.h1 variants={itemVariants} className="text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-              Scale your vision <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600">
-                with intelligent design.
-              </span>
-            </motion.h1>
-            
-            <motion.p variants={itemVariants} className="text-xl text-slate-600 max-w-lg leading-relaxed font-light">
-              The premium operating system for modern founders. Generate decks, analyze markets, and execute strategies with an AI partner that understands your business.
-            </motion.p>
-            
-            <motion.div variants={itemVariants} className="flex flex-wrap gap-4 pt-2">
-              <Button 
-                size="lg" 
-                onClick={() => onNavigate && onNavigate('dashboard')}
-                className="h-14 px-8 rounded-full bg-slate-900 text-white hover:bg-slate-800 text-base font-semibold shadow-xl shadow-slate-900/10 transition-all hover:-translate-y-1 hover:shadow-2xl"
-              >
-                Start Free <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="h-14 px-8 rounded-full border-slate-200 bg-white/50 backdrop-blur-sm text-slate-700 hover:bg-white text-base font-medium transition-all">
-                <Play className="mr-2 w-5 h-5 fill-slate-700" /> Watch Demo (2m)
-              </Button>
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="pt-8 border-t border-slate-200/60 flex items-center gap-6 text-sm text-slate-500">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>No credit card required</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>14-day free trial</span>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Right: Premium Illustration (Layered Parallax) */}
-          <div className="relative h-[600px] w-full hidden lg:block perspective-1000">
-            {/* Main Dashboard Card - Center */}
-            <motion.div 
-              initial={{ opacity: 0, rotateX: 10, rotateY: -10, y: 50 }}
-              animate={{ opacity: 1, rotateX: 5, rotateY: -5, y: 0 }}
-              transition={{ duration: 1, ease: "easeOut" as const }}
-              className="absolute top-10 left-10 right-10 bottom-10 bg-white rounded-2xl shadow-2xl border border-slate-100/80 z-10 overflow-hidden flex flex-col"
-            >
-               {/* Window Header */}
-               <div className="h-10 bg-slate-50/50 border-b border-slate-100 flex items-center px-4 gap-2">
-                 <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                 <div className="w-3 h-3 rounded-full bg-amber-400/80" />
-                 <div className="w-3 h-3 rounded-full bg-green-400/80" />
-               </div>
-               {/* Content Mockup */}
-               <div className="p-6 flex-grow bg-gradient-to-br from-slate-50/50 to-white grid grid-cols-3 gap-4">
-                  <div className="col-span-2 space-y-4">
-                     <div className="h-32 bg-indigo-50/30 rounded-xl border border-indigo-100/50 p-4 flex flex-col justify-between">
-                        <div className="flex justify-between">
-                           <div className="h-2 w-20 bg-indigo-200/50 rounded-full" />
-                           <Sparkles className="w-4 h-4 text-indigo-400" />
-                        </div>
-                        <div className="space-y-2">
-                           <div className="h-2 w-full bg-indigo-100/50 rounded-full" />
-                           <div className="h-2 w-3/4 bg-indigo-100/50 rounded-full" />
-                           <div className="h-2 w-1/2 bg-indigo-100/50 rounded-full" />
-                        </div>
-                     </div>
-                     <div className="grid grid-cols-2 gap-4">
-                        <div className="h-24 bg-white rounded-xl border border-slate-100 shadow-sm" />
-                        <div className="h-24 bg-white rounded-xl border border-slate-100 shadow-sm" />
-                     </div>
-                  </div>
-                  <div className="col-span-1 bg-slate-50 rounded-xl border border-slate-100/50" />
-               </div>
-            </motion.div>
-
-            {/* Floating Elements - Parallax/Motion */}
-            
-            {/* Top Right: AI Node */}
-            <motion.div 
-               animate={{ y: [0, -15, 0] }}
-               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" as const }}
-               className="absolute -right-4 top-20 bg-white p-4 rounded-xl shadow-xl border border-slate-100 z-20 w-48"
-            >
-               <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><Cpu className="w-4 h-4" /></div>
-                  <span className="text-xs font-bold text-slate-700">AI Analysis</span>
-               </div>
-               <div className="space-y-1.5">
-                  <div className="flex justify-between text-[10px] text-slate-500">
-                     <span>Market Fit</span>
-                     <span className="text-emerald-500 font-bold">94%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                     <div className="h-full w-[94%] bg-emerald-400 rounded-full" />
-                  </div>
-               </div>
-            </motion.div>
-
-            {/* Bottom Left: Chart */}
-            <motion.div 
-               animate={{ y: [0, 15, 0] }}
-               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" as const, delay: 1 }}
-               className="absolute -left-8 bottom-32 bg-white p-4 rounded-xl shadow-xl border border-slate-100 z-20 w-56"
-            >
-               <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold text-slate-700">Growth Projection</span>
-                  <TrendingUp className="w-4 h-4 text-emerald-500" />
-               </div>
-               <div className="flex items-end justify-between gap-1 h-16">
-                  {[40, 65, 45, 80, 95].map((h, i) => (
-                     <motion.div 
-                        key={i}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        transition={{ duration: 1, delay: 1 + (i * 0.1) }}
-                        className="w-full bg-indigo-500/20 rounded-t-sm hover:bg-indigo-500 transition-colors" 
-                     />
-                  ))}
-               </div>
-            </motion.div>
-
-            {/* Decorative Blur Blobs */}
-            <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 -z-10 animate-pulse" />
-          </div>
-        </div>
-      </section>
-
-      {/* 2. FEATURE OVERVIEW (2x2 Premium Grid) */}
-      <section className="py-32 bg-white relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div 
-             initial="hidden"
-             whileInView="show"
-             viewport={{ once: true, margin: "-100px" }}
-             variants={containerVariants}
-             className="grid grid-cols-1 md:grid-cols-2 gap-8"
-          >
-             {[
-               {
-                 icon: Layers,
-                 title: 'Creation Tools',
-                 desc: 'Build pitch decks, one-pagers, and memos with drag-and-drop simplicity.',
-                 color: 'text-blue-600',
-                 bg: 'bg-blue-50'
-               },
-               {
-                 icon: Cpu,
-                 title: 'Intelligence Engine',
-                 desc: 'Deep market research and competitor analysis powered by real-time data.',
-                 color: 'text-purple-600',
-                 bg: 'bg-purple-50'
-               },
-               {
-                 icon: BarChart2,
-                 title: 'Insights & Analytics',
-                 desc: 'Track investor engagement, view times, and identify warm leads instantly.',
-                 color: 'text-emerald-600',
-                 bg: 'bg-emerald-50'
-               },
-               {
-                 icon: Zap,
-                 title: 'Automation & CRM',
-                 desc: 'Automate follow-ups, enrich contact data, and never miss a deal.',
-                 color: 'text-amber-600',
-                 bg: 'bg-amber-50'
-               }
-             ].map((feature, i) => (
-               <motion.div 
-                 key={i}
-                 variants={itemVariants}
-                 className="group p-10 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-               >
-                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors", feature.bg, feature.color)}>
-                     <feature.icon className="w-7 h-7" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">{feature.title}</h3>
-                  <p className="text-lg text-slate-600 leading-relaxed">{feature.desc}</p>
-               </motion.div>
-             ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* 3. WORKFLOW / PROCESS DIAGRAM */}
-      <section className="py-32 bg-slate-50/50 border-y border-slate-200/50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">From idea to execution in seconds</h2>
-             <p className="text-lg text-slate-600">A complete workflow designed for speed and precision.</p>
-          </div>
-
+    <motion.nav
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className={cn(
+        "sticky top-0 left-0 right-0 z-40 transition-all duration-300",
+        isScrolled 
+          ? "bg-white/90 backdrop-blur-md border-b border-gray-200 py-3" 
+          : "bg-transparent py-4"
+      )}
+    >
+      <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between">
+        {/* Logo */}
+        <div 
+          className="flex items-center gap-2 cursor-pointer group" 
+          onClick={() => onNavigate('landing-v2')}
+        >
           <div className="relative">
-             {/* Connecting Line Background */}
-             <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 hidden md:block z-0" />
-             
-             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
-                {[
-                  { title: 'Input Context', icon: MessageSquare, sub: 'Raw ideas, notes, URLs' },
-                  { title: 'AI Processing', icon: Cpu, sub: 'Structuring & Design', active: true },
-                  { title: 'Smart Output', icon: FileText, sub: 'Decks, Docs, Memos' },
-                  { title: 'CRM Tracking', icon: PieChart, sub: 'Analytics & Follow-up' },
-                ].map((step, i) => (
-                   <motion.div 
-                      key={i}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.2 }}
-                      className="flex flex-col items-center text-center"
-                   >
-                      <div className={cn(
-                        "w-24 h-24 rounded-3xl flex items-center justify-center mb-6 shadow-lg relative transition-all duration-500",
-                        step.active ? "bg-indigo-600 text-white scale-110 ring-8 ring-indigo-50" : "bg-white text-slate-500 border border-slate-200"
-                      )}>
-                         <step.icon className={cn("w-10 h-10", step.active && "animate-pulse")} />
-                         
-                         {/* Connector Arrow for Mobile */}
-                         {i < 3 && (
-                            <div className="md:hidden absolute -bottom-10 left-1/2 -translate-x-1/2 text-slate-300">
-                               ↓
-                            </div>
-                         )}
-                      </div>
-                      <h4 className="text-xl font-bold text-slate-900 mb-1">{step.title}</h4>
-                      <p className="text-sm text-slate-500">{step.sub}</p>
-                   </motion.div>
-                ))}
+            <Sparkles className="w-6 h-6 text-[#FF6A3D] fill-current" />
+          </div>
+          <span className="font-sans font-bold text-xl text-[#111827] tracking-tight group-hover:text-[#FF6A3D] transition-colors">
+            StartupAI
+          </span>
+        </div>
+
+        {/* Desktop Menu */}
+        <div className="hidden lg:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <a 
+              key={link.label} 
+              href={link.href}
+              className="text-sm font-medium text-gray-600 hover:text-[#111827] transition-colors flex items-center gap-1"
+            >
+              {link.label}
+              {link.label === 'Products' && <ChevronRight className="w-3 h-3 rotate-90 opacity-50" />}
+            </a>
+          ))}
+        </div>
+
+        {/* Right Actions */}
+        <div className="hidden lg:flex items-center gap-4">
+          <div className="flex items-center gap-2 text-gray-600 hover:text-[#111827] cursor-pointer transition-colors text-sm font-medium">
+            <Github className="w-5 h-5" />
+            <span>12.4k</span>
+          </div>
+          <Button 
+            onClick={() => onNavigate('dashboard')}
+            className="bg-[#111827] hover:bg-[#FF6A3D] text-white rounded-lg px-5 font-medium transition-all shadow-md hover:shadow-lg"
+          >
+            Sign up
+          </Button>
+        </div>
+
+        {/* Mobile Menu Toggle */}
+        <button 
+          className="lg:hidden p-2 text-gray-600"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X /> : <Menu />}
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 p-6 lg:hidden flex flex-col gap-4 shadow-xl">
+          {navLinks.map((link) => (
+            <a 
+              key={link.label} 
+              href={link.href}
+              className="text-base font-medium text-gray-800 py-2 border-b border-gray-100"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {link.label}
+            </a>
+          ))}
+          <Button onClick={() => onNavigate('dashboard')} className="w-full mt-4 bg-[#FF6A3D]">
+            Sign up
+          </Button>
+        </div>
+      )}
+    </motion.nav>
+  );
+};
+
+const HeroSection = ({ onNavigate }: { onNavigate: (view: string) => void }) => {
+  const [url, setUrl] = useState('');
+  const [activeAction, setActiveAction] = useState('Analyze');
+
+  return (
+    <section className="relative pt-20 pb-32 overflow-hidden bg-[#FAFAFA]">
+      {/* Technical Grid Background */}
+      <div className="absolute inset-0 pointer-events-none select-none">
+        {/* Fine Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        {/* Large Grid Markers (+) */}
+        <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(#CBD5E1 1px, transparent 1px)`,
+            backgroundSize: '40px 40px',
+            opacity: 0.3
+        }}></div>
+        {/* Center Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white rounded-full blur-3xl opacity-60"></div>
+      </div>
+      
+      {/* Decorative Plus Signs */}
+      <div className="absolute top-1/4 left-1/4 text-[#FF6A3D]/30 hidden md:block"><Sparkles className="w-8 h-8" /></div>
+      <div className="absolute top-1/4 right-1/4 text-[#FF6A3D]/30 hidden md:block"><Sparkles className="w-8 h-8" /></div>
+
+      <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center flex flex-col items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center"
+        >
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-1.5 shadow-sm text-sm font-medium text-gray-600 mb-8 cursor-pointer hover:border-[#FF6A3D] transition-colors group">
+            <span className="group-hover:text-[#FF6A3D] transition-colors">2 Months Free — Annually</span>
+            <ChevronRight className="w-4 h-4 bg-gray-100 rounded-full p-0.5 group-hover:bg-[#FF6A3D]/10 group-hover:text-[#FF6A3D] transition-colors" />
+          </div>
+          
+          {/* Main Headline */}
+          <h1 className="text-5xl md:text-7xl font-bold text-[#111827] tracking-tight leading-[1.1] mb-6 max-w-4xl font-sans">
+            Turn startup ideas into <br />
+            <span className="text-[#FF6A3D]">investor-ready assets</span>
+          </h1>
+          
+          {/* Subheadline */}
+          <p className="text-lg md:text-xl text-[#6B7280] max-w-2xl mx-auto mb-12 leading-relaxed">
+            Power your AI apps with clean web data from any website. <br className="hidden md:block"/>
+            It's also open source.
+          </p>
+        </motion.div>
+
+        {/* Floating Input Interface */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="w-full max-w-2xl"
+        >
+          <div className="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-gray-200 p-3 relative group">
+             {/* Input Area */}
+             <div className="flex items-center gap-3 px-4 py-3 bg-[#FAFAFA] border border-gray-100 rounded-xl mb-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#FF6A3D]/10 focus-within:border-[#FF6A3D]/20 transition-all">
+                <Globe className="w-5 h-5 text-gray-400" />
+                <Input 
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://example.com" 
+                  className="border-none shadow-none focus-visible:ring-0 px-0 text-base md:text-lg h-auto placeholder:text-gray-400 flex-1 bg-transparent"
+                />
+             </div>
+
+             {/* Actions Row */}
+             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                <div className="flex items-center p-1 bg-[#F5F5F5] rounded-lg w-full sm:w-auto overflow-x-auto no-scrollbar">
+                  {['Analyze', 'Deck', 'Docs', 'CRM'].map((action) => (
+                    <button
+                      key={action}
+                      onClick={() => setActiveAction(action)}
+                      className={cn(
+                        "px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap",
+                        activeAction === action 
+                          ? "bg-white text-[#111827] shadow-sm" 
+                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                      )}
+                    >
+                      {action === 'Analyze' && <Search className="w-3 h-3 inline-block mr-1.5" />}
+                      {action === 'Deck' && <LayoutTemplate className="w-3 h-3 inline-block mr-1.5" />}
+                      {action === 'Docs' && <FileText className="w-3 h-3 inline-block mr-1.5" />}
+                      {action === 'CRM' && <Users className="w-3 h-3 inline-block mr-1.5" />}
+                      {action}
+                    </button>
+                  ))}
+                </div>
+
+                <Button 
+                  onClick={() => onNavigate('dashboard')}
+                  className="w-full sm:w-auto bg-[#FF6A3D] hover:bg-[#E55A2D] text-white rounded-lg h-10 px-6 font-medium shadow-md flex items-center justify-center gap-2"
+                >
+                  Generate <ArrowRight className="w-4 h-4" />
+                </Button>
              </div>
           </div>
+          
+          {/* Subtle Code Hint Background */}
+          <div className="absolute -z-10 top-full left-1/2 -translate-x-1/2 w-[90%] h-32 bg-white/50 border border-gray-100 rounded-b-xl opacity-50 blur-[1px] transform -translate-y-2 pointer-events-none flex flex-col p-4 overflow-hidden">
+             <div className="flex gap-2 mb-2">
+               <div className="w-12 h-2 bg-gray-100 rounded-full" />
+               <div className="w-24 h-2 bg-gray-100 rounded-full" />
+             </div>
+             <div className="space-y-2">
+               <div className="w-full h-2 bg-gray-50 rounded-full" />
+               <div className="w-2/3 h-2 bg-gray-50 rounded-full" />
+             </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+const HowItWorks = () => {
+  const steps = [
+    {
+      icon: <Globe className="w-6 h-6 text-[#FF6A3D]" />,
+      title: "Add Context",
+      desc: "Enter your website URL, upload files, or paste raw text notes."
+    },
+    {
+      icon: <Bot className="w-6 h-6 text-[#FF6A3D]" />,
+      title: "AI Reasoning",
+      desc: "Gemini 3 Pro analyzes your market, competitors, and unique value."
+    },
+    {
+      icon: <FileText className="w-6 h-6 text-[#FF6A3D]" />,
+      title: "Edit & Export",
+      desc: "Get fully editable artifacts (PDF, PPTX, Docs) ready for investors."
+    }
+  ];
+
+  return (
+    <section className="py-24 bg-white border-y border-[#E5E7EB]">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-4">How it works</h2>
+          <p className="text-[#6B7280] max-w-2xl mx-auto">
+            From chaos to clarity in three simple steps.
+          </p>
         </div>
-      </section>
 
-      {/* 4. AI CAPABILITIES SECTION */}
-      <section className="py-32 bg-white">
-         <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-               {[
-                 { title: 'AI Wizard', icon: Sparkles, desc: 'Answer 5 questions, get a 15-slide pitch deck tailored to your industry.' },
-                 { title: 'Intelligent Copilot', icon: Search, desc: 'Ask complex questions about your market, competitors, or financial models.' },
-                 { title: 'Visual Agent', icon: Layers, desc: 'Describe a concept and generate professional diagrams and charts instantly.' },
-               ].map((card, i) => (
-                  <motion.div 
-                     key={i}
-                     whileHover={{ y: -10 }}
-                     className="p-8 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-2xl transition-all duration-300 group"
-                  >
-                     <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                        <card.icon className="w-6 h-6" />
-                     </div>
-                     <h3 className="text-xl font-bold text-slate-900 mb-3">{card.title}</h3>
-                     <p className="text-slate-600 leading-relaxed mb-6">{card.desc}</p>
-                     <div className="flex items-center text-indigo-600 font-medium text-sm cursor-pointer group-hover:gap-2 transition-all">
-                        Learn more <ArrowRight className="w-4 h-4 ml-1" />
-                     </div>
-                  </motion.div>
-               ))}
-            </div>
-         </div>
-      </section>
+        <div className="grid md:grid-cols-3 gap-12 relative">
+          {/* Connecting Line (Desktop) */}
+          <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-[#E5E7EB] via-[#FF6A3D] to-[#E5E7EB] -z-0 opacity-20" />
 
-      {/* 5. KPI / SOCIAL PROOF BAND */}
-      <section className="py-20 bg-[#0F172A] text-white">
-         <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-800">
-               {[
-                 { value: '75%', label: 'Faster Creation Time', color: 'text-emerald-400' },
-                 { value: '50%', label: 'More Investor Meetings', color: 'text-indigo-400' },
-                 { value: '90%', label: 'Founder Satisfaction', color: 'text-purple-400' },
-               ].map((kpi, i) => (
-                  <div key={i} className="py-4 md:py-0 px-4">
-                     <motion.div 
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        whileInView={{ scale: 1, opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ type: "spring", bounce: 0.5, delay: i * 0.2 }}
-                        className={cn("text-6xl font-bold mb-4", kpi.color)}
-                     >
-                        {kpi.value}
-                     </motion.div>
-                     <div className="text-lg text-slate-300 font-medium">{kpi.label}</div>
-                  </div>
-               ))}
+          {steps.map((step, i) => (
+            <div key={i} className="relative z-10 flex flex-col items-center text-center group">
+              <div className="w-24 h-24 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 group-hover:border-[#FF6A3D] transition-all duration-300">
+                <div className="w-12 h-12 bg-[#FFF7ED] rounded-xl flex items-center justify-center">
+                  {step.icon}
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-[#111827] mb-3">{step.title}</h3>
+              <p className="text-[#6B7280] leading-relaxed max-w-xs">{step.desc}</p>
             </div>
-         </div>
-      </section>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
-      {/* 6. TESTIMONIALS SECTION */}
-      <section className="py-32 bg-slate-50">
-         <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-20">
-               <Badge variant="outline" className="mb-4 border-slate-300 text-slate-500">Community Love</Badge>
-               <h2 className="text-3xl md:text-4xl font-bold text-slate-900">Trusted by modern builders</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-               {[
-                 { 
-                   quote: "The intelligence engine surfaced competitors I didn't even know existed. It saved us months of wasted effort.",
-                   author: "Michael Ross",
-                   role: "Founder, FinStack",
-                   initial: "MR"
-                 },
-                 { 
-                   quote: "I used to spend weeks on decks. With the Visual Agent, I built a Series A ready presentation in an afternoon.",
-                   author: "Sarah Jenkins",
-                   role: "CEO, CloudScale",
-                   initial: "SJ"
-                 },
-                 { 
-                   quote: "It's not just a deck builder. It's a strategic partner that helps you refine your entire business model.",
-                   author: "David Kim",
-                   role: "Co-Founder, AI Flow",
-                   initial: "DK"
-                 },
-               ].map((t, i) => (
-                  <motion.div 
-                     key={i}
-                     whileInView={{ opacity: 1, y: 0 }}
-                     initial={{ opacity: 0, y: 20 }}
-                     viewport={{ once: true }}
-                     transition={{ delay: i * 0.2 }}
-                     className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 relative"
-                  >
-                     <div className="absolute top-8 right-8 text-indigo-100">
-                        <MessageSquare className="w-8 h-8" />
-                     </div>
-                     <p className="text-lg text-slate-700 leading-relaxed mb-8 relative z-10">"{t.quote}"</p>
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 font-bold text-sm">
-                           {t.initial}
-                        </div>
-                        <div>
-                           <div className="font-bold text-slate-900">{t.author}</div>
-                           <div className="text-sm text-slate-500">{t.role}</div>
-                        </div>
-                     </div>
-                  </motion.div>
-               ))}
-            </div>
-         </div>
-      </section>
+const ProductModules = () => {
+  const modules = [
+    {
+      icon: <LayoutTemplate className="w-6 h-6" />,
+      title: "Pitch Deck Engine",
+      desc: "Generate 12-slide investor decks with compelling narrative arcs.",
+    },
+    {
+      icon: <FileText className="w-6 h-6" />,
+      title: "Document Factory",
+      desc: "Create one-pagers, memos, and legal docs in seconds.",
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: "Visual CRM",
+      desc: "Track investors and leads with an AI-enriched pipeline.",
+    },
+    {
+      icon: <Wand2 className="w-6 h-6" />,
+      title: "Startup Wizard",
+      desc: "Guided step-by-step builder for your entire business plan.",
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: "Automations",
+      desc: "Connect your workflow to Email, Slack, and Notion.",
+    }
+  ];
 
-      {/* 7. FINAL CTA SECTION */}
-      <section className="py-32 px-6 relative overflow-hidden">
-         <div className="max-w-5xl mx-auto relative z-10 text-center space-y-10">
-            <motion.div
-               initial={{ opacity: 0, scale: 0.9 }}
-               whileInView={{ opacity: 1, scale: 1 }}
-               viewport={{ once: true }}
-               className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-12 md:p-24 relative overflow-hidden"
+  return (
+    <section id="product" className="py-24 bg-[#FAFAFA]">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+           <div>
+             <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-4">Product Modules</h2>
+             <p className="text-[#6B7280] max-w-xl">
+               A complete suite of tools designed to help you raise capital and grow faster.
+             </p>
+           </div>
+           <Button variant="ghost" className="text-[#FF6A3D] hover:text-[#E55A2D] hover:bg-[#FF6A3D]/5">
+             View all features <ArrowRight className="ml-2 w-4 h-4" />
+           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {modules.map((mod, i) => (
+            <motion.div 
+              key={i}
+              whileHover={{ y: -5 }}
+              className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm hover:shadow-md hover:border-[#FF6A3D]/30 transition-all group cursor-pointer"
             >
-               {/* Background Accents */}
-               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
-               <div className="absolute -right-20 -top-20 w-96 h-96 bg-indigo-50 rounded-full blur-3xl -z-10" />
-               <div className="absolute -left-20 -bottom-20 w-96 h-96 bg-purple-50 rounded-full blur-3xl -z-10" />
-
-               <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Ready to build faster?</h2>
-               <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10">
-                  Join the platform that's powering the next generation of unicorns. Start your free trial today.
-               </p>
-               
-               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Button 
-                    size="lg" 
-                    onClick={() => onNavigate && onNavigate('dashboard')}
-                    className="h-14 px-10 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 text-lg font-bold shadow-lg shadow-indigo-200 transition-all hover:-translate-y-1"
-                  >
-                     Create Your Profile
-                  </Button>
-                  <Button size="lg" variant="outline" className="h-14 px-10 rounded-full border-slate-300 text-slate-700 hover:bg-slate-50 text-lg">
-                     Build a Deck
-                  </Button>
-               </div>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 shadow-sm bg-gray-50 group-hover:bg-[#FF6A3D]/10 text-[#111827] group-hover:text-[#FF6A3D] transition-colors">
+                {mod.icon}
+              </div>
+              <h3 className="text-xl font-bold text-[#111827] mb-2">{mod.title}</h3>
+              <p className="text-[#6B7280] mb-6 min-h-[48px]">{mod.desc}</p>
+              <div className="flex items-center text-sm font-medium text-[#111827] group-hover:text-[#FF6A3D] transition-colors">
+                Open module <ChevronRight className="ml-1 w-4 h-4" />
+              </div>
             </motion.div>
-         </div>
-      </section>
+          ))}
+          
+          {/* Coming Soon Card */}
+          <div className="bg-[#F5F5F5] p-8 rounded-2xl border border-dashed border-gray-300 flex flex-col justify-center items-center text-center opacity-70">
+            <div className="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center mb-6">
+              <Layers className="w-6 h-6 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-500 mb-2">More coming soon</h3>
+            <p className="text-sm text-gray-400">Financial modeling & Cap table management</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
-      {/* 8. FOOTER */}
+const AICapabilities = () => {
+  return (
+    <section className="py-24 bg-white overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left Content */}
+          <div className="space-y-8">
+            <Badge className="bg-[#FFF7ED] text-[#FF6A3D] hover:bg-[#FFF7ED] border border-[#FFEDD5]">
+              Powered by Google Gemini
+            </Badge>
+            <h2 className="text-4xl font-bold text-[#111827]">
+              Reasoning, <br /> not just autocomplete.
+            </h2>
+            <p className="text-lg text-[#6B7280] leading-relaxed">
+              StartupAI doesn't just guess next words. It understands business logic, market dynamics, and investor expectations.
+            </p>
+            
+            <div className="space-y-4">
+              {[
+                { label: "Structured JSON Outputs", desc: "Clean data ready for any frontend" },
+                { label: "Search Grounding", desc: "Real-time market data verification" },
+                { label: "Thinking Mode", desc: "Multi-step reasoning chains for complex tasks" }
+              ].map((item, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="mt-1">
+                    <CheckCircle2 className="w-5 h-5 text-[#FF6A3D]" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-[#111827]">{item.label}</h4>
+                    <p className="text-sm text-[#6B7280]">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Preview */}
+          <div className="relative">
+            <div className="absolute -inset-4 bg-gradient-to-r from-[#FF6A3D] to-[#FF4D4D] rounded-3xl opacity-10 blur-2xl"></div>
+            <div className="relative bg-[#0F172A] rounded-2xl border border-gray-800 shadow-2xl overflow-hidden font-mono text-sm">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-800 bg-[#020617]">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-[#EF4444]" />
+                  <div className="w-3 h-3 rounded-full bg-[#F59E0B]" />
+                  <div className="w-3 h-3 rounded-full bg-[#10B981]" />
+                </div>
+                <span className="text-gray-500 ml-2">market_analysis.json</span>
+              </div>
+              <div className="p-6 text-gray-300 overflow-x-auto">
+                <pre>
+{`{
+  "market_opportunity": {
+    "tam": "14.5B",
+    "cagr": "12.4%",
+    "key_drivers": [
+      "Remote work adoption",
+      "AI integration demand"
+    ]
+  },
+  "competitors": [
+    {
+      "name": "LegacyCorp",
+      "weakness": "Slow innovation cycle",
+      "opportunity": "UX modernization"
+    }
+  ],
+  "reasoning_trace": {
+    "confidence": 0.94,
+    "sources": ["Bloomberg", "TechCrunch"]
+  }
+}`}
+                </pre>
+              </div>
+              {/* Floating Badge */}
+              <div className="absolute bottom-6 right-6 bg-[#FF6A3D] text-white px-3 py-1.5 rounded-lg text-xs font-sans font-medium flex items-center gap-2 shadow-lg">
+                <Sparkles className="w-3 h-3" />
+                Thinking Process Complete
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Pricing = () => {
+  const [isAnnual, setIsAnnual] = useState(true);
+
+  return (
+    <section id="pricing" className="py-24 bg-[#FAFAFA]">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-4">Simple pricing for serious founders</h2>
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <span className={cn("text-sm font-medium", !isAnnual ? "text-[#111827]" : "text-[#6B7280]")}>Monthly</span>
+            <button 
+              onClick={() => setIsAnnual(!isAnnual)}
+              className="relative w-14 h-8 bg-[#E5E7EB] rounded-full p-1 transition-colors hover:bg-gray-300 focus:outline-none"
+            >
+              <div 
+                className={cn(
+                  "w-6 h-6 bg-white rounded-full shadow-sm transition-transform",
+                  isAnnual ? "translate-x-6" : "translate-x-0"
+                )} 
+              />
+            </button>
+            <span className={cn("text-sm font-medium", isAnnual ? "text-[#111827]" : "text-[#6B7280]")}>
+              Annual <span className="text-[#FF6A3D] text-xs ml-1 font-bold">-20%</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 items-start">
+          {[
+            {
+              name: "Starter",
+              price: isAnnual ? "0" : "0",
+              desc: "Perfect for exploring ideas",
+              features: ["3 AI generations / month", "Basic deck export", "Community support"],
+              cta: "Get Started",
+              primary: false
+            },
+            {
+              name: "Pro",
+              price: isAnnual ? "29" : "39",
+              desc: "For founders raising capital",
+              features: ["Unlimited generations", "Full export suite (PPTX, PDF)", "Search Grounding", "Priority support"],
+              cta: "Start Free Trial",
+              primary: true
+            },
+            {
+              name: "Teams",
+              price: isAnnual ? "79" : "99",
+              desc: "For accelerators & studios",
+              features: ["5 Team members", "Shared workspace", "Custom templates", "API Access"],
+              cta: "Contact Sales",
+              primary: false
+            }
+          ].map((plan, i) => (
+            <div 
+              key={i} 
+              className={cn(
+                "relative p-8 rounded-2xl bg-white border transition-all",
+                plan.primary 
+                  ? "border-[#FF6A3D] shadow-[0_0_40px_rgba(255,106,61,0.1)] scale-105 z-10" 
+                  : "border-[#E5E7EB] shadow-sm hover:shadow-md"
+              )}
+            >
+              {plan.primary && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#FF6A3D] text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                  Most Popular
+                </div>
+              )}
+              <h3 className="text-xl font-bold text-[#111827]">{plan.name}</h3>
+              <p className="text-[#6B7280] text-sm mt-1 mb-6">{plan.desc}</p>
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="text-4xl font-bold text-[#111827]">${plan.price}</span>
+                <span className="text-gray-500">/mo</span>
+              </div>
+              
+              <ul className="space-y-4 mb-8">
+                {plan.features.map((f, j) => (
+                  <li key={j} className="flex items-center gap-3 text-sm text-[#374151]">
+                    <CheckCircle2 className={cn("w-4 h-4", plan.primary ? "text-[#FF6A3D]" : "text-[#10B981]")} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              
+              <Button 
+                className={cn(
+                  "w-full h-11 rounded-xl font-medium transition-colors",
+                  plan.primary 
+                    ? "bg-[#FF6A3D] hover:bg-[#E55A2D] text-white" 
+                    : "bg-white border border-[#E5E7EB] text-[#111827] hover:bg-gray-50"
+                )}
+              >
+                {plan.cta}
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Footer = ({ onNavigate }: { onNavigate: (view: string) => void }) => {
+  return (
+    <footer className="bg-white border-t border-[#E5E7EB] pt-16 pb-8">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+          <div className="col-span-2 lg:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-6 h-6 bg-[#111827] rounded-md flex items-center justify-center text-white">
+                <Sparkles className="w-3 h-3 text-[#FF6A3D]" />
+              </div>
+              <span className="font-bold text-lg text-[#111827]">StartupAI</span>
+            </div>
+            <p className="text-[#6B7280] text-sm max-w-xs leading-relaxed mb-6">
+              The AI-native operating system for startups. Build decks, documents, and workflows with the power of Gemini 3 Pro.
+            </p>
+            <div className="flex gap-4 text-gray-400">
+               {/* Social placeholders */}
+               <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"><Globe className="w-4 h-4" /></div>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold text-[#111827] mb-4">Product</h4>
+            <ul className="space-y-3 text-sm text-[#6B7280]">
+              <li><a href="#" className="hover:text-[#FF6A3D]">Pitch Deck</a></li>
+              <li><a href="#" className="hover:text-[#FF6A3D]">Visual CRM</a></li>
+              <li><a href="#" className="hover:text-[#FF6A3D]">Document Gen</a></li>
+              <li><a href="#" className="hover:text-[#FF6A3D]">Pricing</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-[#111827] mb-4">Company</h4>
+            <ul className="space-y-3 text-sm text-[#6B7280]">
+              <li><a href="#" className="hover:text-[#FF6A3D]">About</a></li>
+              <li><a href="#" className="hover:text-[#FF6A3D]">Blog</a></li>
+              <li><a href="#" className="hover:text-[#FF6A3D]">Careers</a></li>
+              <li><a href="#" className="hover:text-[#FF6A3D]">Contact</a></li>
+              <li>
+                <button 
+                  onClick={() => onNavigate('style-guide')} 
+                  className="hover:text-[#FF6A3D] text-left transition-colors"
+                >
+                  Style Guide
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-[#111827] mb-4">Legal</h4>
+            <ul className="space-y-3 text-sm text-[#6B7280]">
+              <li><a href="#" className="hover:text-[#FF6A3D]">Privacy</a></li>
+              <li><a href="#" className="hover:text-[#FF6A3D]">Terms</a></li>
+              <li><a href="#" className="hover:text-[#FF6A3D]">Security</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="border-t border-[#E5E7EB] pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-[#9CA3AF]">
+          <p>© 2025 StartupAI Inc. All rights reserved.</p>
+          <div className="flex gap-6">
+            <span>San Francisco, CA</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+// --- Main Page Component ---
+
+export const LandingPageV2: React.FC<LandingPageProps> = ({ onNavigate }) => {
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] font-sans text-[#111827]">
+      <Navbar onNavigate={onNavigate} />
+      <HeroSection onNavigate={onNavigate} />
+      <HowItWorks />
+      <WorkflowDiagram />
+      <ProductModules />
+      <AICapabilities />
+      <Pricing />
       <Footer onNavigate={onNavigate} />
-      
     </div>
   );
 };

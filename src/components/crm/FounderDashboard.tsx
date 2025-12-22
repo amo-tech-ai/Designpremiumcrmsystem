@@ -1,20 +1,54 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Sparkles, TrendingUp, Users, DollarSign, Target, Calendar, ChevronRight, Edit, Plus, BarChart3, FileText, MessageSquare, Zap, Rocket, Settings, Bell } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Sparkles, 
+  TrendingUp, 
+  Users, 
+  DollarSign, 
+  Target, 
+  Calendar, 
+  ChevronRight, 
+  Edit, 
+  Plus, 
+  BarChart3, 
+  FileText, 
+  MessageSquare, 
+  Zap, 
+  Rocket, 
+  Settings, 
+  Bell, 
+  Globe, 
+  Briefcase, 
+  MapPin, 
+  Edit2, 
+  Link as LinkIcon, 
+  ExternalLink, 
+  X, 
+  RefreshCw, 
+  AlertTriangle, 
+  CheckCircle2, 
+  ShieldCheck, 
+  Linkedin, 
+  ArrowRight, 
+  LayoutGrid, 
+  PieChart,
+  MoreHorizontal
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
+import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
+import { Separator } from '../ui/separator';
 import { cn } from '../ui/utils';
 import { useStartupProfile } from './hooks';
-import { EditProfilePanel } from './EditProfilePanel';
-import { SkeletonMetric } from '../ui/skeleton';
+import { toast } from 'sonner@2.0.3';
 
 // --- Default / Fallback Data ---
 const DEFAULT_PROFILE = {
   name: "My Startup",
   tagline: "Your tagline goes here",
-  logo_url: "https://api.dicebear.com/7.x/shapes/svg?seed=Startup&backgroundColor=6366f1",
+  logo_url: "https://api.dicebear.com/7.x/shapes/svg?seed=Startup&backgroundColor=1A1A1A",
   cover_image_url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200",
   stage: "Idea",
   business_model: "SaaS",
@@ -62,29 +96,29 @@ const WORKFLOWS = [
     title: "Fundraising Workflow", 
     desc: "Get ready to pitch investors. Generates tasks, pitch deck, and updates.", 
     icon: TrendingUp,
-    color: "bg-green-100 text-green-700" 
+    status: "In Progress"
   },
   { 
     title: "GTM Workflow", 
     desc: "Launch your product with channel strategy, messaging, and ICP analysis.", 
     icon: Rocket,
-    color: "bg-blue-100 text-blue-700"
+    status: "Pending"
   },
   { 
     title: "Product Roadmap", 
     desc: "Define features, prioritization, and milestone planning.", 
     icon: Zap,
-    color: "bg-purple-100 text-purple-700"
+    status: "Not Started"
   }
 ];
 
 const QUICK_ACTIONS = [
-  { label: "Pitch Deck", icon: Sparkles, color: "text-indigo-600 bg-indigo-50" },
-  { label: "One-Pager", icon: FileText, color: "text-blue-600 bg-blue-50" },
-  { label: "Market Sizing", icon: BarChart3, color: "text-emerald-600 bg-emerald-50" },
-  { label: "GTM Strategy", icon: Rocket, color: "text-purple-600 bg-purple-50" },
-  { label: "Data Room", icon: FileText, color: "text-amber-600 bg-amber-50" },
-  { label: "Outreach", icon: MessageSquare, color: "text-pink-600 bg-pink-50" },
+  { label: "Pitch Deck", icon: Sparkles },
+  { label: "One-Pager", icon: FileText },
+  { label: "Market Sizing", icon: BarChart3 },
+  { label: "GTM Strategy", icon: Rocket },
+  { label: "Data Room", icon: FileText },
+  { label: "Outreach", icon: MessageSquare },
 ];
 
 interface FounderDashboardProps {
@@ -93,19 +127,14 @@ interface FounderDashboardProps {
 }
 
 export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }) => {
-  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false); // Mobile toggle
-  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false); // New state for Edit Panel
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false); 
   
   const { profile, loading } = useStartupProfile();
 
-  // Merge fetched profile with default to ensure no crashes
   const STARTUP_PROFILE = profile ? {
       ...DEFAULT_PROFILE,
       ...profile,
-      // Ensure nested objects are merged correctly if backend returns partials
-      metrics: { ...DEFAULT_PROFILE.metrics, ...profile.metrics, ...profile }, // Flattened in backend resp? Backend returns root fields like mrr, users.
-      // Wait, backend returns mrr, users, growth at root of profileData object.
-      // So we need to map them to metrics object expected by dashboard.
       metrics: {
           mrr: profile.mrr || "$0",
           growth: profile.growth || "0%",
@@ -123,514 +152,305 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({ onNavigate }
   
   if (loading) {
       return (
-          <div className="flex items-center justify-center h-screen bg-[#F8FAFC]">
+          <div className="flex items-center justify-center h-screen bg-[#F7F7F5]">
               <div className="flex flex-col items-center gap-4">
-                  <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-slate-500 font-medium">Loading Dashboard...</p>
+                  <div className="w-8 h-8 border-4 border-[#1A1A1A] border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-[#6B7280] font-medium font-sans">Loading Dashboard...</p>
               </div>
           </div>
       );
   }
 
   const HeroSection = () => (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
-      {/* Cover Image */}
-      <div 
-        className="h-32 md:h-48 w-full bg-cover bg-center relative"
-        style={{ backgroundImage: `url(${STARTUP_PROFILE.cover_image_url || DEFAULT_PROFILE.cover_image_url})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-      </div>
-      
-      <div className="px-6 pb-6 relative">
-        <div className="flex flex-col md:flex-row items-start md:items-end -mt-10 md:-mt-12 gap-4 md:gap-6">
-          {/* Logo */}
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl border-4 border-white bg-white shadow-md flex items-center justify-center overflow-hidden z-10">
-            {STARTUP_PROFILE.logo_url ? (
-                <img src={STARTUP_PROFILE.logo_url} alt="Logo" className="w-full h-full object-cover" />
-            ) : (
-                <div className="w-full h-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl">
-                    {STARTUP_PROFILE.name.charAt(0)}
-                </div>
-            )}
-          </div>
-
-          {/* Main Info */}
-          <div className="flex-grow pt-2 md:pt-0">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                  {STARTUP_PROFILE.name}
-                  <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-indigo-100">{STARTUP_PROFILE.stage}</Badge>
-                </h1>
-                <p className="text-slate-600 mt-1">{STARTUP_PROFILE.tagline}</p>
-                
-                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-sm text-slate-500">
-                  <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" /> {STARTUP_PROFILE.industry}</span>
-                  <span className="flex items-center gap-1"><Settings className="w-3 h-3" /> {STARTUP_PROFILE.business_model}</span>
-                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Est. {STARTUP_PROFILE.year_founded}</span>
-                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {STARTUP_PROFILE.location}</span>
-                  <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {STARTUP_PROFILE.employees} Employees</span>
-                </div>
-              </div>
-
-              {/* Edit Action */}
-              <div className="flex items-center gap-2">
-                <Button 
-                  onClick={() => setIsEditProfileOpen(true)} 
-                  className="hidden md:flex bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm"
-                  title="Edit profile details"
-                >
-                  <Edit2 className="w-4 h-4 mr-2" /> Edit Profile
-                </Button>
-                <Button 
-                   variant="outline" 
-                   size="icon"
-                   className="md:hidden" 
-                   onClick={() => setIsEditProfileOpen(true)}
-                >
-                   <Edit2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
+    <div className="relative mb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#E5E5E5]">
+        <div className="space-y-4">
+           <h1 className="text-4xl font-serif text-[#1A1A1A] tracking-tight leading-tight">
+             {STARTUP_PROFILE.name}
+           </h1>
+           <p className="text-[#6B7280] text-lg max-w-2xl font-sans font-light">
+             {STARTUP_PROFILE.tagline}
+           </p>
+           
+           <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm text-[#6B7280] font-sans font-medium">
+             <span className="flex items-center gap-2"><Briefcase className="w-4 h-4" /> {STARTUP_PROFILE.industry}</span>
+             <span className="flex items-center gap-2"><MapPin className="w-4 h-4" /> {STARTUP_PROFILE.location}</span>
+             <span className="flex items-center gap-2"><Users className="w-4 h-4" /> {STARTUP_PROFILE.employees} Employees</span>
+           </div>
         </div>
 
-        <Separator className="my-6" />
-
-        {/* Profile Strength */}
-        <div className="flex items-center gap-4">
-          <div className="flex-grow max-w-md">
-            <div className="flex justify-between text-xs mb-1.5">
-              <span className="font-semibold text-slate-700">Profile Strength</span>
-              <span className="text-slate-500">{STARTUP_PROFILE.profile_strength}%</span>
-            </div>
-            <Progress value={STARTUP_PROFILE.profile_strength} className="h-2" />
-            <p className="text-[10px] text-slate-400 mt-1">Complete more fields to reach 100%</p>
-          </div>
+        <div className="flex gap-3">
+          <Button 
+            onClick={() => setIsEditProfileOpen(true)} 
+            className="bg-white border border-[#E5E5E5] text-[#1A1A1A] hover:bg-[#F7F7F5] shadow-sm font-sans font-medium h-11 px-6 rounded-xl transition-all"
+          >
+            Edit Profile
+          </Button>
+          <Button 
+             className="bg-[#1A1A1A] text-white hover:bg-black shadow-lg shadow-black/5 font-sans font-medium h-11 px-6 rounded-xl transition-all"
+          >
+             Share Profile
+          </Button>
         </div>
       </div>
     </div>
   );
 
-  const QuickActions = () => (
-    <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4 mb-8">
-      {QUICK_ACTIONS.map((action, i) => (
-        <button 
-          key={i}
-          className="flex flex-col items-center justify-center p-3 md:p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group h-24 md:h-28"
-          onClick={() => toast.info(`Launching ${action.label}...`)}
-        >
-          <div className={cn("w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform", action.color)}>
-             <action.icon className="w-4 h-4 md:w-5 md:h-5" />
-          </div>
-          <span className="text-xs font-semibold text-slate-700 text-center leading-tight">{action.label}</span>
-        </button>
-      ))}
+  const NextBestAction = () => (
+    <div className="bg-[#1A1A1A] rounded-2xl p-6 shadow-md mb-8 flex flex-col md:flex-row items-center justify-between gap-6 text-white relative overflow-hidden group">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      
+      <div className="flex items-center gap-5 relative z-10">
+        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
+          <Sparkles className="w-6 h-6 text-[#F3E8FF]" />
+        </div>
+        <div>
+          <div className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1 font-sans">Next Best Action</div>
+          <h3 className="text-xl font-serif font-medium tracking-wide">Update your Investor Deck</h3>
+          <p className="text-white/70 text-sm mt-1 font-sans">Your fundraising workflow is active but the deck is 2 weeks old.</p>
+        </div>
+      </div>
+      
+      <Button className="bg-white text-[#1A1A1A] hover:bg-[#F3E8FF] border-0 font-bold px-6 h-11 rounded-xl shadow-none relative z-10 whitespace-nowrap">
+        Update Deck
+      </Button>
+    </div>
+  );
+
+  const KPISection = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+       {[
+         { label: "MRR", value: STARTUP_PROFILE.metrics.mrr, change: "+12%", trend: "up" },
+         { label: "Active Users", value: STARTUP_PROFILE.metrics.users, change: "+5%", trend: "up" },
+         { label: "Runway", value: "8 Mo", change: "-1 Mo", trend: "down" },
+         { label: "Profile Score", value: `${STARTUP_PROFILE.profile_strength}%`, change: "Improving", trend: "neutral" }
+       ].map((kpi, i) => (
+         <Card key={i} className="border border-[#E5E5E5] shadow-sm bg-white rounded-2xl hover:shadow-md transition-shadow duration-200">
+            <CardContent className="p-6">
+               <div className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 font-sans">{kpi.label}</div>
+               <div className="flex items-end justify-between">
+                  <div className="text-3xl font-serif text-[#1A1A1A]">{kpi.value}</div>
+                  <div className={cn(
+                    "text-xs font-bold px-2 py-1 rounded-md mb-1",
+                    kpi.trend === 'up' ? "bg-[#DCFCE7] text-[#166534]" :
+                    kpi.trend === 'down' ? "bg-[#FEE2E2] text-[#991B1B]" :
+                    "bg-[#F3F4F6] text-[#4B5563]"
+                  )}>
+                    {kpi.change}
+                  </div>
+               </div>
+            </CardContent>
+         </Card>
+       ))}
     </div>
   );
 
   const InfoCard = ({ title, icon: Icon, children, className, action }: any) => (
-    <Card className={cn("border-slate-200 shadow-sm h-full", className)}>
-      <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between space-y-0 px-4 py-3">
-        <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-800">
-          {Icon && <Icon className="w-4 h-4 text-indigo-600" />} {title}
+    <Card className={cn("border border-[#E5E5E5] shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200", className)}>
+      <CardHeader className="pb-4 pt-6 px-6 border-b border-[#F3F4F6] bg-white flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-lg font-serif text-[#1A1A1A] flex items-center gap-3">
+          {Icon && <Icon className="w-5 h-5 text-[#6B7280]" />} {title}
         </CardTitle>
         {action}
       </CardHeader>
-      <CardContent className="p-4 pt-4">
+      <CardContent className="p-6 font-sans">
         {children}
       </CardContent>
     </Card>
   );
 
-  const Sparkline = ({ data }: { data: number[] }) => (
-    <div className="flex items-end gap-1 h-8 w-full mt-3">
-      {data.map((val, i) => (
-        <div 
-          key={i} 
-          className="flex-1 bg-indigo-500/20 rounded-t-sm hover:bg-indigo-500 transition-colors"
-          style={{ height: `${val}%` }} 
-        />
-      ))}
+  const WorkflowCard = ({ workflow }: { workflow: any }) => (
+    <div className="group relative flex gap-4 p-5 rounded-xl border border-[#E5E5E5] hover:border-[#1A1A1A]/20 bg-white hover:bg-[#F9FAFB] transition-all cursor-pointer">
+       <div className={cn(
+         "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+         workflow.status === 'In Progress' ? "bg-[#FEF3C7] text-[#92400E]" : 
+         workflow.status === 'Completed' ? "bg-[#DCFCE7] text-[#166534]" :
+         "bg-[#F3F4F6] text-[#6B7280]"
+       )}>
+          <workflow.icon className="w-6 h-6" strokeWidth={1.5} />
+       </div>
+       <div className="flex-grow">
+          <div className="flex justify-between items-start mb-1">
+             <h4 className="font-bold text-[#1A1A1A] text-sm font-sans">{workflow.title}</h4>
+             <Badge variant="outline" className={cn(
+               "text-[10px] font-bold uppercase tracking-wider border-0 px-2 py-0.5",
+               workflow.status === 'In Progress' ? "bg-[#FEF3C7] text-[#92400E]" : 
+               "bg-[#F3F4F6] text-[#6B7280]"
+             )}>
+               {workflow.status}
+             </Badge>
+          </div>
+          <p className="text-xs text-[#6B7280] leading-relaxed">{workflow.desc}</p>
+       </div>
+       <ChevronRight className="w-4 h-4 text-[#E5E5E5] group-hover:text-[#1A1A1A] absolute right-4 top-1/2 -translate-y-1/2 transition-colors" />
     </div>
   );
 
-  const FundraisingCard = () => (
-    <InfoCard title="Fundraising" icon={DollarSign} action={<Button variant="ghost" size="icon" className="h-6 w-6"><Edit2 className="w-3 h-3 text-slate-400" /></Button>}>
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 animate-pulse">
-            Currently Raising
-          </Badge>
-          <span className="font-bold text-slate-900">{STARTUP_PROFILE.fundraising.amount}</span>
-        </div>
-        
-        <div>
-          <span className="text-xs font-bold uppercase text-slate-500">Use of Funds</span>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {STARTUP_PROFILE.fundraising.use_of_funds.map((use, i) => (
-              <Badge key={i} variant="secondary" className="bg-slate-50 text-slate-600 border border-slate-100">
-                {use}
-              </Badge>
-            ))}
-          </div>
-        </div>
-        
-        <Button size="sm" variant="outline" className="w-full text-xs h-8">Update Funding Info</Button>
-      </div>
-    </InfoCard>
-  );
-
-  const LinksCard = () => (
-    <InfoCard title="Important Links" icon={LinkIcon} action={<Button variant="ghost" size="icon" className="h-6 w-6"><Plus className="w-3 h-3 text-slate-400" /></Button>}>
-       <div className="space-y-2">
-          {STARTUP_PROFILE.links.map((link, i) => (
-            <a 
-              key={i} 
-              href={link.url}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors group text-sm"
-            >
-               <div className="flex items-center gap-2 text-slate-700">
-                 <link.icon className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                 {link.label}
-               </div>
-               <ExternalLink className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </a>
-          ))}
-       </div>
-    </InfoCard>
-  );
-
-  // Ai Assistant Content
+  // Ai Assistant Content (Right Column)
   const AiAssistantContent = () => (
-     <Card className="border-violet-100 shadow-lg shadow-violet-100/50 bg-gradient-to-b from-white to-violet-50/50 overflow-hidden h-full">
-        <CardHeader className="bg-violet-600 text-white pb-6 pt-6 relative overflow-hidden shrink-0">
-          <div className="relative z-10">
-              <CardTitle className="flex items-center justify-between text-lg">
-                <div className="flex items-center gap-2">
-                   <Sparkles className="w-5 h-5 text-violet-200" /> Gemini Coach
-                </div>
-                <div className="xl:hidden">
-                   <Button size="icon" variant="ghost" onClick={() => setIsAiPanelOpen(false)} className="text-violet-100 hover:bg-violet-500">
-                      <X className="w-5 h-5" />
-                   </Button>
-                </div>
-              </CardTitle>
-              <CardDescription className="text-violet-100 mt-1 opacity-90 flex items-center gap-2">
-                <RefreshCw className="w-3 h-3" /> Updated {STARTUP_PROFILE.ai_insights.last_updated}
-              </CardDescription>
-          </div>
-          {/* Background blobs */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
-        </CardHeader>
-        
-        <CardContent className="pt-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] xl:max-h-none">
-          {/* Match Score */}
-          <div className="flex flex-col items-center justify-center p-4 bg-white/60 rounded-xl border border-violet-100 backdrop-blur-sm">
-              <div className="relative w-24 h-24 flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90">
-                    <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-100" />
-                    <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-violet-600" strokeDasharray={251.2} strokeDashoffset={251.2 * (1 - STARTUP_PROFILE.ai_insights.match_score / 100)} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold text-violet-700">{STARTUP_PROFILE.ai_insights.match_score}%</span>
-                    <span className="text-[10px] uppercase font-bold text-violet-400">Match</span>
-                </div>
+     <div className="bg-white border border-[#E5E5E5] shadow-sm rounded-2xl overflow-hidden h-full flex flex-col">
+        <div className="p-6 border-b border-[#E5E5E5] bg-[#F3E8FF]/30">
+           <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-[#F3E8FF] text-[#A855F7] flex items-center justify-center border border-[#E9D5FF]">
+                 <Sparkles className="w-5 h-5" />
               </div>
-          </div>
-
-          {/* Summary */}
+              <div>
+                 <h3 className="font-serif font-medium text-[#1A1A1A] text-lg">AI Coach</h3>
+                 <p className="text-xs text-[#6B7280] font-sans uppercase tracking-wider">Strategic Insights</p>
+              </div>
+           </div>
+        </div>
+        
+        <div className="p-6 space-y-8 flex-grow overflow-y-auto font-sans">
+          
+          {/* Insight Block */}
           <div>
-              <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Summary</h4>
-              <p className="text-sm text-slate-700 leading-relaxed italic">
-                "{STARTUP_PROFILE.ai_insights.summary}"
-              </p>
+             <h4 className="text-xs font-bold text-[#6B7280] uppercase tracking-widest mb-4">Focus Area</h4>
+             <div className="bg-[#F3E8FF]/20 rounded-xl p-5 border border-[#F3E8FF]">
+                <p className="text-sm text-[#1A1A1A] leading-relaxed italic font-medium">
+                  "{STARTUP_PROFILE.ai_insights.summary}"
+                </p>
+                <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[#6B21A8]">
+                   <Zap className="w-3.5 h-3.5" /> High Impact Opportunity
+                </div>
+             </div>
           </div>
 
           {/* Risks */}
           <div>
-              <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Detected Risks</h4>
-              <div className="space-y-2">
-                {STARTUP_PROFILE.ai_insights.risks.map((item, i) => (
-                    <div key={i} className="flex gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-100 items-start">
-                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                      <span>{item}</span>
+              <h4 className="text-xs font-bold text-[#6B7280] uppercase tracking-widest mb-4">Risk Radar</h4>
+              <div className="space-y-3">
+                {STARTUP_PROFILE.ai_insights.risks.length > 0 ? STARTUP_PROFILE.ai_insights.risks.map((item, i) => (
+                    <div key={i} className="flex gap-3 text-sm text-[#991B1B] bg-[#FEE2E2]/40 p-3 rounded-lg border border-[#FEE2E2] items-start">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span className="leading-snug">{item}</span>
                     </div>
-                ))}
+                )) : (
+                    <div className="text-sm text-[#6B7280] italic">No critical risks detected.</div>
+                )}
               </div>
           </div>
 
-          {/* Next Steps */}
+          {/* Steps */}
           <div>
-              <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Recommended Steps</h4>
-              <div className="space-y-2">
+              <h4 className="text-xs font-bold text-[#6B7280] uppercase tracking-widest mb-4">Suggested Steps</h4>
+              <div className="space-y-3">
                 {STARTUP_PROFILE.ai_insights.steps.map((item, i) => (
-                    <div key={i} className="flex gap-2 text-xs text-violet-700 bg-violet-50 p-2 rounded-lg border border-violet-100 items-start">
-                      <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                      <span>{item}</span>
+                    <div key={i} className="flex gap-3 text-sm text-[#1A1A1A] bg-[#F7F7F5] p-3 rounded-lg border border-[#E5E5E5] hover:border-[#D1D5DB] transition-colors cursor-pointer group items-start">
+                      <div className="w-5 h-5 rounded-full border border-[#D1D5DB] bg-white group-hover:border-[#1A1A1A] transition-colors flex-shrink-0" />
+                      <span className="leading-snug">{item}</span>
                     </div>
                 ))}
               </div>
           </div>
 
-          <Separator className="bg-violet-100" />
-
-          <div className="grid grid-cols-1 gap-2">
-              <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200">
-                Generate Tasks
-              </Button>
-              <Button variant="outline" className="w-full border-violet-200 text-violet-700 hover:bg-violet-50">
-                Improve Profile
-              </Button>
-              <Button variant="ghost" className="w-full text-slate-500 hover:text-violet-600">
-                Ask Gemini Anything
-              </Button>
-          </div>
-        </CardContent>
-     </Card>
+        </div>
+        
+        <div className="p-4 border-t border-[#E5E5E5] bg-[#F7F7F5]">
+           <Button variant="outline" className="w-full bg-white border-[#E5E5E5] text-[#1A1A1A] hover:bg-[#F3E8FF] hover:border-[#F3E8FF] hover:text-[#6B21A8] h-11 rounded-xl font-bold transition-all shadow-sm">
+             Generate Full Report
+           </Button>
+        </div>
+     </div>
   );
 
   // --- Main Layout ---
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-[#F8FAFC] relative">
-      <div className="flex-grow overflow-y-auto scrollbar-thin">
-        <div className="max-w-[1440px] mx-auto p-4 md:p-6 lg:p-8 pb-32 md:pb-8">
+    <div className="flex flex-col h-full overflow-hidden bg-[#F7F7F5] relative font-sans text-[#1A1A1A]">
+      <div className="flex-grow overflow-y-auto custom-scrollbar">
+        <div className="max-w-[1600px] mx-auto p-8 lg:p-10 pb-32">
           
-          {/* 1. Hero */}
+          {/* 1. Hero & Header */}
           <HeroSection />
 
-          {/* 2. Quick Actions */}
-          <QuickActions />
+          {/* 2. Next Best Action */}
+          <NextBestAction />
+
+          {/* 3. KPI Grid */}
+          <KPISection />
 
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
             
-            {/* LEFT COLUMN (Main Content) */}
-            <div className="xl:col-span-9 space-y-6">
+            {/* LEFT COLUMN (Main Content - 2/3) */}
+            <div className="xl:col-span-8 space-y-8">
               
-              {/* Overview Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <InfoCard title="Problem & Solution" icon={Target}>
-                   <div className="space-y-4">
-                     <div>
-                       <span className="text-xs font-bold uppercase text-slate-400">Problem</span>
-                       <p className="text-sm text-slate-700 leading-relaxed mt-1">{STARTUP_PROFILE.problem}</p>
-                     </div>
-                     <div>
-                       <span className="text-xs font-bold uppercase text-slate-400">Solution</span>
-                       <p className="text-sm text-slate-700 leading-relaxed mt-1">{STARTUP_PROFILE.solution}</p>
-                     </div>
-                   </div>
-                </InfoCard>
-
-                <InfoCard title="Target Market" icon={Globe}>
-                   <ul className="space-y-3 text-sm text-slate-700">
-                     <li className="flex justify-between">
-                       <span className="text-slate-500">ICP</span>
-                       <span className="font-medium text-right max-w-[120px] truncate">{STARTUP_PROFILE.icp}</span>
-                     </li>
-                     <li className="flex justify-between">
-                       <span className="text-slate-500">Regions</span>
-                       <span className="font-medium">{STARTUP_PROFILE.target_regions.join(", ")}</span>
-                     </li>
-                   </ul>
-                   <div className="mt-4 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                      <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 mb-1">
-                        <Sparkles className="w-3 h-3" /> AI Insight
-                      </div>
-                      <p className="text-xs text-indigo-900 leading-relaxed">Based on your industry, estimated TAM is $4.5B.</p>
-                   </div>
-                </InfoCard>
-
-                <InfoCard title="Product Features" icon={ShieldCheck}>
-                   <ul className="space-y-2">
-                     {STARTUP_PROFILE.features.map((f, i) => (
-                       <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                         <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                         <span className="leading-tight">{f}</span>
-                       </li>
-                     ))}
-                   </ul>
-                </InfoCard>
+              {/* Active Workflows */}
+              <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-sm p-6 md:p-8">
+                 <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-serif text-xl text-[#1A1A1A]">Active Workflows</h3>
+                    <Button variant="link" className="text-[#6B7280] hover:text-[#1A1A1A] p-0 h-auto font-sans font-medium">View All</Button>
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {WORKFLOWS.map((flow, i) => (
+                       <WorkflowCard key={i} workflow={flow} />
+                    ))}
+                    <button className="flex flex-col items-center justify-center p-5 rounded-xl border border-dashed border-[#E5E5E5] hover:border-[#1A1A1A] hover:bg-[#F7F7F5] transition-all gap-2 text-[#6B7280] hover:text-[#1A1A1A] group h-full min-h-[100px]">
+                       <Plus className="w-6 h-6 text-[#D1D5DB] group-hover:text-[#1A1A1A]" />
+                       <span className="text-xs font-bold uppercase tracking-wider">Add Workflow</span>
+                    </button>
+                 </div>
               </div>
-
-              {/* Business & Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <InfoCard title="Business Model" icon={Briefcase}>
-                   <div className="space-y-3 text-sm">
-                      <div className="flex justify-between py-1 border-b border-slate-100">
-                         <span className="text-slate-500">Model</span>
-                         <span className="font-medium">{STARTUP_PROFILE.business_model}</span>
-                      </div>
-                      <div className="flex justify-between py-1 border-b border-slate-100">
-                         <span className="text-slate-500">Pricing</span>
-                         <span className="font-medium">{STARTUP_PROFILE.pricing_model}</span>
-                      </div>
-                      <div className="flex justify-between py-1">
-                         <span className="text-slate-500">Revenue</span>
-                         <span className="font-medium">{STARTUP_PROFILE.revenue_example}</span>
-                      </div>
+              
+              {/* Quick Assets Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InfoCard title="Pitch Materials" icon={FileText} action={<Button variant="ghost" size="sm"><MoreHorizontal className="w-4 h-4" /></Button>}>
+                   <div className="space-y-1">
+                      {[
+                        { name: "Series A Deck.pdf", date: "2d ago", size: "2.4 MB" },
+                        { name: "Financial Model v3.xlsx", date: "5d ago", size: "1.1 MB" },
+                        { name: "One Pager.pdf", date: "1w ago", size: "800 KB" }
+                      ].map((file, i) => (
+                         <div key={i} className="flex items-center justify-between p-3 hover:bg-[#F7F7F5] rounded-lg transition-colors cursor-pointer group">
+                            <div className="flex items-center gap-3">
+                               <div className="w-8 h-8 bg-[#F3F4F6] rounded-lg flex items-center justify-center text-[#6B7280] group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors">
+                                  <FileText className="w-4 h-4" />
+                               </div>
+                               <div>
+                                  <div className="text-sm font-medium text-[#1A1A1A]">{file.name}</div>
+                                  <div className="text-[10px] text-[#9CA3AF]">{file.date} • {file.size}</div>
+                               </div>
+                            </div>
+                            <Button size="icon" variant="ghost" className="h-7 w-7 opacity-0 group-hover:opacity-100"><ArrowRight className="w-3.5 h-3.5" /></Button>
+                         </div>
+                      ))}
                    </div>
-                   <div className="mt-3 text-xs text-slate-500 bg-slate-50 p-2 rounded border border-slate-100">
-                      <span className="font-bold text-slate-700">AI Note:</span> Consider adding annual pricing incentives.
-                   </div>
+                   <Button variant="outline" className="w-full mt-5 border-[#E5E5E5] text-[#1A1A1A] text-xs font-bold h-9 rounded-lg">View Data Room</Button>
                 </InfoCard>
 
-                <InfoCard title="Founder & Team" icon={Users}>
+                <InfoCard title="Team Availability" icon={Users}>
                    <div className="space-y-4">
                       {STARTUP_PROFILE.founders.map((founder, i) => (
-                         <div key={i} className="flex gap-3 items-start">
-                            <Avatar className="w-9 h-9 border border-slate-200">
+                         <div key={i} className="flex items-center gap-4">
+                            <Avatar className="w-10 h-10 border border-[#E5E5E5]">
                                <AvatarImage src={founder.avatar} />
                                <AvatarFallback>{founder.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="flex-grow">
-                               <div className="flex justify-between items-start">
-                                 <div className="text-sm font-bold text-slate-900">{founder.name}</div>
-                                 <a href={founder.linkedin} className="text-slate-400 hover:text-blue-600"><Linkedin className="w-3 h-3" /></a>
+                               <div className="text-sm font-bold text-[#1A1A1A]">{founder.name}</div>
+                               <div className="flex items-center gap-2 mt-0.5">
+                                  <div className="w-2 h-2 rounded-full bg-[#DCFCE7] border border-[#166534]"></div>
+                                  <span className="text-xs text-[#6B7280]">Online</span>
                                </div>
-                               <div className="text-xs text-slate-500">{founder.title}</div>
-                               <div className="text-xs text-slate-400 mt-0.5 line-clamp-1">{founder.bio}</div>
                             </div>
                          </div>
                       ))}
-                      <Button variant="outline" size="sm" className="w-full text-xs h-8">
-                        <Plus className="w-3 h-3 mr-2" /> Add Co-Founder
-                      </Button>
-                   </div>
-                </InfoCard>
-
-                <InfoCard title="Traction" icon={TrendingUp}>
-                   <div className="grid grid-cols-2 gap-4">
-                      <div>
-                         <div className="text-xs text-slate-500 uppercase font-bold">MRR</div>
-                         <div className="text-lg font-bold text-slate-900">{STARTUP_PROFILE.metrics.mrr}</div>
-                      </div>
-                      <div>
-                         <div className="text-xs text-slate-500 uppercase font-bold">Users</div>
-                         <div className="text-lg font-bold text-slate-900">{STARTUP_PROFILE.metrics.users}</div>
-                      </div>
-                      <div>
-                         <div className="text-xs text-slate-500 uppercase font-bold">Growth</div>
-                         <div className="text-lg font-bold text-green-600">+{STARTUP_PROFILE.metrics.growth}</div>
-                      </div>
-                      <div>
-                         <div className="text-xs text-slate-500 uppercase font-bold">Waitlist</div>
-                         <div className="text-lg font-bold text-slate-900">{STARTUP_PROFILE.metrics.waitlist}</div>
+                      <div className="pt-2">
+                        <Button variant="ghost" className="w-full text-xs text-[#6B7280] hover:text-[#1A1A1A]">Manage Team Access</Button>
                       </div>
                    </div>
-                   <Sparkline data={STARTUP_PROFILE.metrics.history} />
                 </InfoCard>
-              </div>
-
-              {/* Funding & Links & Competitors */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <FundraisingCard />
-                <LinksCard />
-                <InfoCard title="Competitors" icon={Target} action={<Badge variant="outline">Overlap: Low</Badge>}>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {STARTUP_PROFILE.competitors.list.map((comp, i) => (
-                      <Badge key={i} variant="outline" className="text-sm py-1 px-3 bg-slate-50 text-slate-700 font-medium">
-                        {comp}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm text-slate-600">
-                    <span className="font-bold text-slate-800">Differentiator:</span> {STARTUP_PROFILE.competitors.differentiator}
-                  </div>
-                </InfoCard>
-              </div>
-
-              {/* Workflows */}
-              <div>
-                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <Rocket className="w-5 h-5 text-indigo-600" /> Recommended Workflows
-                 </h3>
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {WORKFLOWS.map((flow, i) => (
-                       <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                          <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center mb-3", flow.color)}>
-                             <flow.icon className="w-5 h-5" />
-                          </div>
-                          <h4 className="font-bold text-slate-900 mb-1 group-hover:text-indigo-600 transition-colors flex items-center justify-between">
-                             {flow.title} <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </h4>
-                          <p className="text-sm text-slate-500 leading-relaxed">{flow.desc}</p>
-                       </div>
-                    ))}
-                 </div>
               </div>
 
             </div>
 
-            {/* RIGHT COLUMN (AI Panel - Desktop) */}
-            <div className="hidden xl:block xl:col-span-3 sticky top-6">
-               <AiAssistantContent />
+            {/* RIGHT COLUMN (AI Panel - 1/3) */}
+            <div className="xl:col-span-4 h-full min-h-[600px]">
+              <AiAssistantContent />
             </div>
 
           </div>
         </div>
       </div>
-
-      {/* Mobile Floating Action Bar & Toggle */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 z-40">
-         <div className="flex justify-end mb-4">
-             <Button 
-                size="lg" 
-                className="rounded-full bg-violet-600 hover:bg-violet-700 shadow-xl shadow-violet-200/50 h-14 w-14 p-0"
-                onClick={() => setIsAiPanelOpen(true)}
-             >
-                 <Sparkles className="w-6 h-6" />
-             </Button>
-         </div>
-         <div className="bg-slate-900/90 backdrop-blur-md text-white rounded-full p-2 shadow-2xl flex items-center justify-between pl-6 pr-2 border border-slate-700">
-            <span className="font-semibold text-sm">Actions</span>
-            <div className="flex gap-2">
-               <Button size="sm" className="rounded-full bg-indigo-600 hover:bg-indigo-500 text-xs h-9">
-                  <Sparkles className="w-3 h-3 mr-2" /> Pitch Deck
-               </Button>
-               <Button size="icon" variant="ghost" className="rounded-full hover:bg-white/10 text-slate-300 h-9 w-9">
-                  <MessageSquare className="w-4 h-4" />
-               </Button>
-            </div>
-         </div>
-      </div>
-
-      {/* Mobile AI Panel (Bottom Sheet) */}
-      <AnimatePresence>
-        {isAiPanelOpen && (
-           <>
-             <motion.div 
-               initial={{ opacity: 0 }}
-               animate={{ opacity: 1 }}
-               exit={{ opacity: 0 }}
-               onClick={() => setIsAiPanelOpen(false)}
-               className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 xl:hidden"
-             />
-             <motion.div 
-               initial={{ y: "100%" }}
-               animate={{ y: 0 }}
-               exit={{ y: "100%" }}
-               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-               className="fixed bottom-0 left-0 right-0 h-[85vh] bg-white z-50 rounded-t-3xl xl:hidden shadow-2xl overflow-hidden"
-             >
-                <div className="h-1.5 w-12 bg-slate-300 rounded-full mx-auto mt-3 mb-1" />
-                <div className="h-full pb-10">
-                  <AiAssistantContent />
-                </div>
-             </motion.div>
-           </>
-        )}
-      </AnimatePresence>
-
-      {/* Edit Profile Panel */}
-      <EditProfilePanel 
-        isOpen={isEditProfileOpen} 
-        onClose={() => setIsEditProfileOpen(false)} 
-        initialData={STARTUP_PROFILE}
-      />
-      
     </div>
   );
 };

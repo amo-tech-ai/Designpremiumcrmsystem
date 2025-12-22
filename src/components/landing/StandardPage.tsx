@@ -9,9 +9,10 @@ interface StandardPageProps {
   subtitle?: string;
   onNavigate: (view: string) => void;
   children?: React.ReactNode;
+  currentView?: string;
 }
 
-export const StandardPage: React.FC<StandardPageProps> = ({ title, subtitle, onNavigate, children }) => {
+export const StandardPage: React.FC<StandardPageProps> = ({ title, subtitle, onNavigate, children, currentView }) => {
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
       
@@ -60,7 +61,7 @@ export const StandardPage: React.FC<StandardPageProps> = ({ title, subtitle, onN
         </div>
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer onNavigate={onNavigate} currentView={currentView} />
     </div>
   );
 };

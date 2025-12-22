@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Sparkles, ArrowLeft, Loader2 } from 'lucide-react';
+import { Check, Sparkles, ArrowLeft, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "../ui/button";
 import { toast } from "sonner@2.0.3";
 import { generateDeck } from '../../services/edgeFunctions';
 import { logger } from '../../utils/logger';
+import { supabase } from '../../utils/supabase/client';
+import { cn } from "../ui/utils";
 
 // Import new wizard components
 import { PitchWizardData, INITIAL_DATA, STEPS, WizardStepId } from '../pitch-wizard/types';

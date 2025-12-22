@@ -22,7 +22,10 @@ import {
   Music,
   Calendar,
   Instagram,
-  Mic2
+  Mic2,
+  CheckCircle2,
+  ChevronRight,
+  BarChart3
 } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -32,83 +35,92 @@ export const GTMStrategy: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(1);
 
   return (
-    <div className="flex flex-col xl:flex-row h-full bg-[#F6F7FB] overflow-hidden font-sans text-slate-800">
+    <div className="flex flex-col xl:flex-row h-full bg-[#FAF9F7] overflow-hidden font-sans text-[#1A1F2C]">
       
       {/* Main Content Area */}
       <div className="flex-grow flex flex-col h-full overflow-y-auto custom-scrollbar order-2 xl:order-1">
-        <div className="max-w-6xl mx-auto w-full p-6 md:p-8 space-y-10 md:space-y-12">
+        <div className="max-w-[1400px] mx-auto w-full p-8 md:p-12 space-y-12">
           
-          {/* 1. HEADER SECTION (EVENT-OS Context) */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Go-To-Market Strategy (GTM)</h1>
-              <p className="text-slate-500 text-lg max-w-2xl font-medium">
-                A simple step-by-step plan to launch your event product, reach attendees, attract sponsors, and grow steadily.
+          {/* 1. HEADER SECTION */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#E3E7EE] pb-8">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                 <h1 className="text-3xl font-bold text-[#1A1F2C] tracking-tight">Go-To-Market Strategy</h1>
+                 <Badge variant="secondary" className="bg-[#EAF1FF] text-[#3A4250] border-[#DCE4F4] font-semibold px-2.5 py-0.5 rounded-full text-xs">
+                    <Sparkles className="w-3 h-3 mr-1.5 inline text-[#6070A0]" /> AI Powered
+                 </Badge>
+              </div>
+              <p className="text-[#4A4F5B] text-lg max-w-2xl font-medium leading-relaxed">
+                A simple step-by-step plan to launch your product, reach customers, attract partners, and grow steadily.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button variant="outline" className="bg-white hover:bg-slate-50 gap-2 border-slate-200 text-slate-600 rounded-xl shadow-sm">
-                <LayoutTemplate className="w-4 h-4" /> View Templates
+            <div className="flex flex-wrap gap-4">
+              <Button variant="outline" className="bg-white hover:bg-[#F3F6FB] gap-2 border-[#E3E7EE] text-[#4A4F5B] rounded-xl shadow-sm font-medium h-11 px-5">
+                <LayoutTemplate className="w-4 h-4 text-[#7A8191]" /> View Templates
               </Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-lg shadow-blue-900/20 gap-2 rounded-xl border-0">
-                <Sparkles className="w-4 h-4" /> Generate Strategy with AI
+              <Button className="bg-[#3A4250] hover:bg-[#2C333F] text-white shadow-md shadow-[#3A4250]/20 gap-2 rounded-xl border-0 h-11 px-5 font-medium transition-all">
+                <Sparkles className="w-4 h-4 text-[#EAF1FF]" /> Generate Strategy
               </Button>
             </div>
           </div>
 
-          {/* 2. EVENT-OS OVERVIEW CARDS */}
+          {/* 2. OVERVIEW CARDS */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { 
                 title: 'Audience & Market', 
-                desc: 'Understand your event niche, attendee groups, and customer demand.', 
+                desc: 'Understand your niche, customer segments, and demand.', 
                 icon: Users, 
-                color: 'text-blue-600', 
-                bg: 'bg-blue-50' 
+                bg: 'bg-[#EAF1FF]',
+                iconColor: 'text-[#3A4250]'
               },
               { 
                 title: 'Messaging & Value', 
-                desc: 'Explain what makes your event or product experience unique.', 
+                desc: 'Explain what makes your product experience unique.', 
                 icon: MessageSquare, 
-                color: 'text-violet-600', 
-                bg: 'bg-violet-50' 
+                bg: 'bg-[#F3F6FB]',
+                iconColor: 'text-[#6070A0]'
               },
               { 
                 title: 'Launch Channels', 
-                desc: 'Choose how you’ll reach attendees, partners, and your earliest customers.', 
+                desc: 'Choose how you’ll reach partners and early customers.', 
                 icon: Megaphone, 
-                color: 'text-teal-600', 
-                bg: 'bg-teal-50' 
+                bg: 'bg-[#FFF9E6]',
+                iconColor: 'text-[#E0B45A]'
               }
             ].map((card, i) => (
-              <div key={i} className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-105", card.bg, card.color)}>
-                  <card.icon className="w-6 h-6" />
+              <div key={i} className="bg-white p-6 rounded-2xl border border-[#E3E7EE] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all group cursor-pointer h-full flex flex-col">
+                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-transform group-hover:scale-105", card.bg)}>
+                  <card.icon className={cn("w-7 h-7", card.iconColor)} strokeWidth={1.5} />
                 </div>
-                <h3 className="font-bold text-lg text-slate-800 mb-2">{card.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed font-medium">{card.desc}</p>
+                <h3 className="font-bold text-xl text-[#1A1F2C] mb-2">{card.title}</h3>
+                <p className="text-[#4A4F5B] text-sm leading-relaxed font-medium">{card.desc}</p>
+                <div className="mt-auto pt-4 flex items-center text-xs font-bold text-[#7A8191] group-hover:text-[#3A4250] transition-colors uppercase tracking-wide">
+                  View Details <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                </div>
               </div>
             ))}
           </div>
 
-          {/* 3. EVENT-OS LAUNCH WORKFLOW (6 Steps) */}
+          {/* 3. LAUNCH WORKFLOW (Steps) */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-800">Launch Workflow</h2>
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-xl font-bold text-[#1A1F2C]">Launch Workflow</h2>
+              <span className="text-sm font-medium text-[#7A8191]">Step {activeStep} of 6</span>
             </div>
 
-            <div className="relative">
+            <div className="relative bg-white p-8 rounded-3xl border border-[#E3E7EE] shadow-sm">
               {/* Connector Line (Desktop) */}
-              <div className="hidden lg:block absolute top-1/2 left-0 w-full h-1 bg-slate-200 -z-10 transform -translate-y-1/2 rounded-full"></div>
+              <div className="hidden lg:block absolute top-[88px] left-12 right-12 h-0.5 bg-[#F3F6FB] -z-0"></div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 relative z-10">
                 {[
-                  { id: 1, title: 'Know Your Audience', desc: 'Profiles, needs, and segments.', icon: Users },
-                  { id: 2, title: 'Create Messaging', desc: 'What you offer and why it matters.', icon: MessageSquare },
-                  { id: 3, title: 'Event/Product Readiness', desc: 'Theme, tickets, onboarding, and feature setup.', icon: Calendar },
-                  { id: 4, title: 'Marketing Channels', desc: 'IG, TikTok, LinkedIn, PR, partnerships.', icon: Megaphone },
-                  { id: 5, title: 'Activation & Sales', desc: 'Convert interest into signups and paid users.', icon: Ticket },
-                  { id: 6, title: 'Scale & Repeat', desc: 'Grow, refine, expand.', icon: TrendingUp }
+                  { id: 1, title: 'Know Audience', desc: 'Needs & Segments', icon: Users },
+                  { id: 2, title: 'Messaging', desc: 'Value Prop', icon: MessageSquare },
+                  { id: 3, title: 'Product Ready', desc: 'Feature Setup', icon: CheckCircle2 },
+                  { id: 4, title: 'Channels', desc: 'PR & Outreach', icon: Megaphone },
+                  { id: 5, title: 'Sales', desc: 'Conversion', icon: Ticket },
+                  { id: 6, title: 'Scale', desc: 'Growth Loop', icon: TrendingUp }
                 ].map((step, idx) => {
                   const isActive = activeStep === step.id;
                   const isCompleted = activeStep > step.id;
@@ -117,21 +129,26 @@ export const GTMStrategy: React.FC = () => {
                     <div 
                       key={step.id}
                       onClick={() => setActiveStep(step.id)}
-                      className={cn(
-                        "relative flex flex-col items-center text-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 h-full justify-center bg-white",
-                        isActive ? "border-blue-500 shadow-md ring-4 ring-blue-50 scale-105 z-10" : "border-transparent shadow-sm hover:border-blue-200",
-                        !isActive && "border-slate-100"
-                      )}
+                      className="group flex flex-col items-center text-center cursor-pointer"
                     >
                       <div className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors",
-                        isActive ? "bg-blue-600 text-white" : isCompleted ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"
+                        "w-12 h-12 rounded-full flex items-center justify-center mb-4 transition-all duration-300 border-4",
+                        isActive 
+                          ? "bg-[#3A4250] text-white border-[#EAF1FF] shadow-lg scale-110" 
+                          : isCompleted 
+                            ? "bg-[#EAF1FF] text-[#3A4250] border-white" 
+                            : "bg-[#F3F6FB] text-[#9CA3AF] border-white group-hover:bg-[#E3E7EE]"
                       )}>
-                        {isCompleted ? <CheckCircle className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
+                        {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <step.icon className="w-5 h-5" />}
                       </div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">STEP 0{step.id}</div>
-                      <h3 className={cn("font-bold text-sm mb-1 leading-tight", isActive ? "text-blue-900" : "text-slate-700")}>{step.title}</h3>
-                      <p className="text-xs text-slate-500 font-medium">{step.desc}</p>
+                      
+                      <div className={cn(
+                        "flex flex-col items-center transition-opacity",
+                        isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100"
+                      )}>
+                        <h3 className={cn("font-bold text-sm mb-1 leading-tight", isActive ? "text-[#1A1F2C]" : "text-[#7A8191]")}>{step.title}</h3>
+                        <p className="text-xs text-[#9CA3AF] font-medium hidden lg:block">{step.desc}</p>
+                      </div>
                     </div>
                   );
                 })}
@@ -139,79 +156,71 @@ export const GTMStrategy: React.FC = () => {
             </div>
           </div>
 
-          {/* 4. EVENT FLOW DIAGRAM */}
-          <div className="py-4 md:py-8">
-             <div className="bg-white/50 rounded-2xl p-8 border border-slate-200/60 overflow-x-auto">
-                <div className="flex items-center justify-between min-w-[900px] relative px-4">
-                   {/* Diagram Nodes */}
-                   {[
-                     'Know Audience', 
-                     'Craft Messaging', 
-                     'Prepare Product', 
-                     'Select Channels', 
-                     'Activate & Sell', 
-                     'Grow & Repeat'
-                   ].map((label, i, arr) => (
-                     <React.Fragment key={i}>
-                       <div className="flex flex-col items-center gap-3 z-10 relative group">
-                          <div className="px-5 py-3 bg-white rounded-full border border-slate-200 shadow-sm flex items-center justify-center text-center min-w-[140px] transition-all group-hover:border-blue-300 group-hover:shadow-md group-hover:-translate-y-1">
-                             <span className="text-sm font-semibold text-slate-600 group-hover:text-blue-700">{label}</span>
-                          </div>
-                          <div className="w-2 h-2 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></div>
-                       </div>
-                       {i < arr.length - 1 && (
-                         <div className="flex-grow h-px bg-slate-300 mx-2 relative top-[-14px]">
-                            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 bg-[#F6F7FB] p-1 rounded-full">
-                               <ArrowRight className="w-4 h-4 text-slate-300" />
-                            </div>
-                         </div>
-                       )}
-                     </React.Fragment>
-                   ))}
-                </div>
-             </div>
-          </div>
-
-          {/* 5. INTERNAL STRATEGY SECTIONS (EVENT-OS Themed) */}
+          {/* 4. INTERNAL STRATEGY SECTIONS */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
             {/* Audience Section */}
-            <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><Users className="w-5 h-5" /></div>
-                  <h3 className="font-bold text-slate-800 text-lg">Audience & Segments</h3>
-               </div>
-               <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                     <div className="text-xs font-bold text-slate-400 uppercase mb-2">Primary Target</div>
-                     <div className="font-semibold text-slate-700">Fashion & Tech Innovators</div>
+            <div className="bg-white p-8 rounded-2xl border border-[#E3E7EE] shadow-sm hover:shadow-md transition-shadow flex flex-col gap-6">
+               <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#EAF1FF] text-[#3A4250] flex items-center justify-center border border-[#DCE4F4]">
+                    <Users className="w-6 h-6" strokeWidth={1.5} />
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                     <div className="text-xs font-bold text-slate-400 uppercase mb-2">Key Interests</div>
-                     <ul className="text-sm text-slate-600 space-y-2">
-                        <li className="flex items-start gap-2"><span className="text-blue-400">•</span> Sustainable Fashion</li>
-                        <li className="flex items-start gap-2"><span className="text-blue-400">•</span> Digital Showrooms</li>
-                        <li className="flex items-start gap-2"><span className="text-blue-400">•</span> Exclusive Brand Drops</li>
+                  <div>
+                    <h3 className="font-bold text-[#1A1F2C] text-lg">Audience</h3>
+                    <p className="text-xs text-[#7A8191] font-medium">Target segments</p>
+                  </div>
+               </div>
+               
+               <div className="space-y-4">
+                  <div className="p-5 bg-[#FAF9F7] rounded-xl border border-[#E3E7EE]">
+                     <div className="text-xs font-bold text-[#7A8191] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                       <Target className="w-3.5 h-3.5" /> Primary Target
+                     </div>
+                     <div className="font-bold text-[#1A1F2C] text-base">Fashion & Tech Innovators</div>
+                  </div>
+                  <div className="p-5 bg-[#FAF9F7] rounded-xl border border-[#E3E7EE]">
+                     <div className="text-xs font-bold text-[#7A8191] uppercase tracking-wider mb-3">Key Interests</div>
+                     <ul className="text-sm text-[#4A4F5B] space-y-2.5 font-medium">
+                        <li className="flex items-center gap-2.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#3A4250]"></div> Sustainable Fashion
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#3A4250]"></div> Digital Showrooms
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#3A4250]"></div> Brand Drops
+                        </li>
                      </ul>
                   </div>
                </div>
             </div>
 
-            {/* Value Messaging Section */}
-            <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center"><MessageSquare className="w-5 h-5" /></div>
-                  <h3 className="font-bold text-slate-800 text-lg">Core Messaging</h3>
-               </div>
-               <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                     <div className="text-xs font-bold text-slate-400 uppercase mb-2">One-Liner</div>
-                     <div className="font-semibold text-slate-700 italic">"The future of fashion is immersive and digital."</div>
+            {/* Messaging Section */}
+            <div className="bg-white p-8 rounded-2xl border border-[#E3E7EE] shadow-sm hover:shadow-md transition-shadow flex flex-col gap-6">
+               <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#F3F6FB] text-[#6070A0] flex items-center justify-center border border-[#E3E7EE]">
+                    <MessageSquare className="w-6 h-6" strokeWidth={1.5} />
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                     <div className="text-xs font-bold text-slate-400 uppercase mb-2">Vibe Keywords</div>
+                  <div>
+                    <h3 className="font-bold text-[#1A1F2C] text-lg">Messaging</h3>
+                    <p className="text-xs text-[#7A8191] font-medium">Core value prop</p>
+                  </div>
+               </div>
+               
+               <div className="space-y-4">
+                  <div className="p-5 bg-[#FAF9F7] rounded-xl border border-[#E3E7EE]">
+                     <div className="text-xs font-bold text-[#7A8191] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                       <Sparkles className="w-3.5 h-3.5" /> One-Liner
+                     </div>
+                     <div className="font-medium text-[#1A1F2C] italic leading-relaxed text-base">"The future of fashion is immersive and digital."</div>
+                  </div>
+                  <div className="p-5 bg-[#FAF9F7] rounded-xl border border-[#E3E7EE]">
+                     <div className="text-xs font-bold text-[#7A8191] uppercase tracking-wider mb-3">Keywords</div>
                      <div className="flex flex-wrap gap-2">
                         {['Innovative', 'Seamless', 'Global'].map(tag => (
-                           <Badge key={tag} variant="secondary" className="bg-white border border-slate-200 text-slate-600 font-normal px-3 py-1">{tag}</Badge>
+                           <Badge key={tag} variant="secondary" className="bg-white border border-[#E3E7EE] text-[#4A4F5B] hover:bg-[#F3F6FB] font-medium px-3 py-1.5 rounded-lg text-xs">
+                             {tag}
+                           </Badge>
                         ))}
                      </div>
                   </div>
@@ -219,25 +228,33 @@ export const GTMStrategy: React.FC = () => {
             </div>
 
             {/* Channels Section */}
-            <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center"><Megaphone className="w-5 h-5" /></div>
-                  <h3 className="font-bold text-slate-800 text-lg">Launch Channels</h3>
+            <div className="bg-white p-8 rounded-2xl border border-[#E3E7EE] shadow-sm hover:shadow-md transition-shadow flex flex-col gap-6">
+               <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#FFF9E6] text-[#E0B45A] flex items-center justify-center border border-[#E3E7EE]">
+                    <Megaphone className="w-6 h-6" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-[#1A1F2C] text-lg">Channels</h3>
+                    <p className="text-xs text-[#7A8191] font-medium">Launch plan</p>
+                  </div>
                </div>
-               <div className="space-y-3">
+               
+               <div className="space-y-1">
                   {[
                     { channel: 'Instagram & TikTok', status: 'Active', metric: 'Growing Reach' },
                     { channel: 'Fashion PR', status: 'Active', metric: '2 Partnerships' },
                     { channel: 'LinkedIn Outreach', status: 'Planning', metric: 'Targeting Founders' }
                   ].map((c, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-lg transition-colors">
+                    <div key={i} className="flex items-center justify-between p-3.5 border-b border-[#F3F6FB] last:border-0 hover:bg-[#FAF9F7] rounded-xl transition-colors cursor-pointer group">
                        <div>
-                          <div className="font-semibold text-slate-700 text-sm">{c.channel}</div>
-                          <div className="text-xs text-slate-400">{c.metric}</div>
+                          <div className="font-bold text-[#1A1F2C] text-sm group-hover:text-[#3A4250]">{c.channel}</div>
+                          <div className="text-xs text-[#7A8191] mt-0.5">{c.metric}</div>
                        </div>
                        <Badge variant={c.status === 'Active' ? 'default' : 'secondary'} className={cn(
-                          "text-[10px] px-2 py-0.5",
-                          c.status === 'Active' ? "bg-teal-100 text-teal-700 hover:bg-teal-200 border-teal-200" : "bg-slate-100 text-slate-500"
+                          "text-[10px] px-2.5 py-0.5 font-bold border rounded-lg",
+                          c.status === 'Active' 
+                            ? "bg-[#ECFFE9] text-[#2F5E3D] border-[#A8E6C1]" 
+                            : "bg-[#F3F6FB] text-[#7A8191] border-[#E3E7EE]"
                        )}>
                           {c.status}
                        </Badge>
@@ -250,33 +267,39 @@ export const GTMStrategy: React.FC = () => {
         </div>
       </div>
 
-      {/* 6. AI ASSISTANT PANEL (EVENT-OS Data) */}
-      <div className="w-full xl:w-[350px] bg-white xl:border-l border-b xl:border-b-0 border-slate-200 flex flex-col flex-shrink-0 z-20 order-1 xl:order-2">
-         <div className="p-6 border-b border-slate-100 bg-blue-50/30">
-            <div className="flex items-center gap-2 mb-2">
-               <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4" />
+      {/* 5. AI ASSISTANT PANEL */}
+      <div className="w-full xl:w-[400px] bg-white border-l border-[#E3E7EE] flex flex-col flex-shrink-0 z-20 order-1 xl:order-2 shadow-[-4px_0_24px_rgba(0,0,0,0.02)]">
+         <div className="p-6 border-b border-[#E3E7EE] bg-[#FAF9F7]">
+            <div className="flex items-center gap-3 mb-1">
+               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#EAF1FF] to-[#DCE4F4] text-[#3A4250] flex items-center justify-center shadow-sm border border-[#fff]">
+                  <Sparkles className="w-5 h-5" />
                </div>
-               <h3 className="font-bold text-blue-900">EventOS AI</h3>
+               <div>
+                 <h3 className="font-bold text-[#1A1F2C] text-lg">Strategy AI</h3>
+                 <p className="text-xs text-[#7A8191] font-medium">Real-time launch insights</p>
+               </div>
             </div>
-            <p className="text-sm text-slate-600">Real-time insights for your launch.</p>
          </div>
          
          {/* Assistant Content */}
-         <div className="p-6 space-y-6 overflow-y-auto max-h-[400px] xl:max-h-none">
+         <div className="p-6 space-y-8 overflow-y-auto max-h-[400px] xl:max-h-none flex-grow custom-scrollbar">
             
             {/* Helpful Insights */}
             <div className="space-y-3">
-               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Helpful Insights</h4>
-               <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 transition-all hover:shadow-sm">
-                  <div className="flex items-start gap-3">
-                     <Lightbulb className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+               <h4 className="text-xs font-bold text-[#7A8191] uppercase tracking-wider flex items-center gap-2">
+                 <Lightbulb className="w-3.5 h-3.5" /> Insights
+               </h4>
+               <div className="bg-[#EAF1FF]/50 rounded-2xl p-5 border border-[#DCE4F4] hover:shadow-sm transition-all">
+                  <div className="flex items-start gap-4">
+                     <div className="mt-1 bg-white p-1.5 rounded-lg shadow-sm text-[#3A4250]">
+                        <TrendingUp className="w-4 h-4" />
+                     </div>
                      <div>
-                        <p className="text-sm text-blue-900 leading-relaxed font-medium mb-2">
+                        <p className="text-sm text-[#3A4250] leading-relaxed font-medium mb-3">
                            Your pricing may be low for your target users. Consider VIP or tiered options.
                         </p>
-                        <p className="text-sm text-blue-900 leading-relaxed font-medium">
-                           Your venue or platform capacity is under forecast; increase promotional reach.
+                        <p className="text-sm text-[#3A4250] leading-relaxed font-medium">
+                           Your platform capacity is under forecast; increase promotional reach.
                         </p>
                      </div>
                   </div>
@@ -285,15 +308,19 @@ export const GTMStrategy: React.FC = () => {
 
             {/* Things to Improve */}
             <div className="space-y-3">
-               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Things to Improve</h4>
-               <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 transition-all hover:shadow-sm">
-                  <div className="flex items-start gap-3">
-                     <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+               <h4 className="text-xs font-bold text-[#7A8191] uppercase tracking-wider flex items-center gap-2">
+                 <AlertCircle className="w-3.5 h-3.5" /> Attention Needed
+               </h4>
+               <div className="bg-[#FFF9E6]/50 rounded-2xl p-5 border border-[#F6DFA9] hover:shadow-sm transition-all">
+                  <div className="flex items-start gap-4">
+                     <div className="mt-1 bg-white p-1.5 rounded-lg shadow-sm text-[#E0B45A]">
+                        <BarChart3 className="w-4 h-4" />
+                     </div>
                      <div>
-                        <p className="text-sm text-amber-900 leading-relaxed font-medium mb-2">
+                        <p className="text-sm text-[#4A4F5B] leading-relaxed font-medium mb-3">
                            Social engagement dropped this week; try boosting key posts.
                         </p>
-                        <p className="text-sm text-amber-900 leading-relaxed font-medium">
+                        <p className="text-sm text-[#4A4F5B] leading-relaxed font-medium">
                            Consider collaborating with creators or micro-influencers.
                         </p>
                      </div>
@@ -303,48 +330,58 @@ export const GTMStrategy: React.FC = () => {
 
             {/* Suggested Next Steps */}
             <div className="space-y-3">
-               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Suggested Next Steps</h4>
+               <h4 className="text-xs font-bold text-[#7A8191] uppercase tracking-wider flex items-center gap-2">
+                 <CheckCircle2 className="w-3.5 h-3.5" /> Next Steps
+               </h4>
                <div className="space-y-2">
                   {[
-                    "Draft outreach messages for potential partners",
-                    "Update your hero visuals to match your theme",
-                    "Check your funnel for drop-off points"
+                    "Draft outreach messages for partners",
+                    "Update your hero visuals",
+                    "Check funnel for drop-off points"
                   ].map((task, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-blue-200 hover:shadow-sm transition-all cursor-pointer group">
-                       <div className="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-blue-500 bg-white flex-shrink-0"></div>
-                       <span className="text-sm text-slate-600 group-hover:text-slate-900 font-medium">{task}</span>
+                    <div key={i} className="flex items-center gap-3.5 p-3.5 rounded-xl bg-[#FAF9F7] border border-[#E3E7EE] hover:bg-white hover:border-[#DCE4F4] hover:shadow-sm transition-all cursor-pointer group">
+                       <div className="w-5 h-5 rounded-full border-2 border-[#DCE4F4] group-hover:border-[#3A4250] bg-white flex-shrink-0 transition-colors"></div>
+                       <span className="text-sm text-[#4A4F5B] group-hover:text-[#1A1F2C] font-semibold">{task}</span>
                     </div>
                   ))}
                </div>
             </div>
 
             {/* Market Signals */}
-            <div className="pt-4 border-t border-slate-100">
-               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Market Signals</h4>
-               <div className="bg-slate-50 rounded-xl p-4 space-y-3">
-                  <div className="flex justify-between items-center text-sm">
-                     <span className="text-slate-600">Competition</span>
-                     <Badge variant="outline" className="bg-white text-orange-500 border-orange-200">High Activity</Badge>
+            <div className="pt-6 border-t border-[#E3E7EE]">
+               <h4 className="text-xs font-bold text-[#7A8191] uppercase tracking-wider mb-4 flex items-center gap-2">
+                 <Globe className="w-3.5 h-3.5" /> Market Signals
+               </h4>
+               <div className="bg-[#FAF9F7] rounded-2xl p-5 space-y-4 border border-[#E3E7EE]">
+                  <div>
+                    <div className="flex justify-between items-center text-sm mb-1.5">
+                       <span className="text-[#4A4F5B] font-bold">Competition</span>
+                       <Badge variant="outline" className="bg-white text-[#E0B45A] border-[#F6DFA9] text-[10px] px-2 py-0.5 font-bold">High Activity</Badge>
+                    </div>
+                    <p className="text-xs text-[#7A8191] font-medium leading-relaxed">
+                       High activity in event and creative planning sectors.
+                    </p>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1 mb-2 pl-1">
-                     High activity in event and creative planning sectors.
-                  </p>
                   
-                  <div className="flex justify-between items-center text-sm">
-                     <span className="text-slate-600">Trends</span>
-                     <Badge variant="outline" className="bg-white text-teal-600 border-teal-200">AI Tools (+14%)</Badge>
+                  <div className="h-px bg-[#E3E7EE] w-full"></div>
+
+                  <div>
+                    <div className="flex justify-between items-center text-sm mb-1.5">
+                       <span className="text-[#4A4F5B] font-bold">Trends</span>
+                       <Badge variant="outline" className="bg-white text-[#4CAF73] border-[#A8E6C1] text-[10px] px-2 py-0.5 font-bold">AI Tools (+14%)</Badge>
+                    </div>
+                     <p className="text-xs text-[#7A8191] font-medium leading-relaxed">
+                       Rising interest in AI-assisted event tools.
+                    </p>
                   </div>
-                   <p className="text-xs text-slate-500 mt-1 pl-1">
-                     Rising interest in AI-assisted event tools.
-                  </p>
                </div>
             </div>
 
          </div>
          
-         <div className="p-4 border-t border-slate-100 bg-slate-50/30 mt-auto">
-            <Button variant="outline" className="w-full bg-white border-slate-200 text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm h-10 rounded-xl">
-               Ask EventOS AI a Question
+         <div className="p-6 border-t border-[#E3E7EE] bg-white mt-auto">
+            <Button variant="outline" className="w-full bg-white border-[#E3E7EE] text-[#4A4F5B] hover:bg-[#F3F6FB] hover:text-[#3A4250] hover:border-[#DCE4F4] shadow-sm h-11 rounded-xl font-bold transition-all">
+               Ask Strategy AI a Question
             </Button>
          </div>
       </div>

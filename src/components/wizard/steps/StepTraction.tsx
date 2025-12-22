@@ -29,30 +29,30 @@ export const StepTraction = () => {
       {/* Left Column: Metrics */}
       <div className="lg:col-span-2 space-y-6">
          
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* MRR Card */}
-            <Card>
+            <Card className="border border-[#E5E5E5] bg-white rounded-2xl shadow-sm">
                <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                     <Label className="text-slate-500 font-medium">Monthly Revenue (MRR)</Label>
-                     <div className="p-1.5 bg-emerald-100 rounded text-emerald-700">
+                     <Label className="text-[#6B7280] font-sans font-medium">Monthly Revenue (MRR)</Label>
+                     <div className="p-1.5 bg-[#DCFCE7] rounded-md text-[#166534]">
                         <TrendingUp className="w-4 h-4" />
                      </div>
                   </div>
                   <div className="flex items-baseline gap-1 mb-4">
-                     <span className="text-2xl font-bold text-slate-900">$</span>
-                     <Input className="text-3xl font-bold border-none shadow-none p-0 h-auto w-full focus-visible:ring-0 placeholder:text-slate-300" placeholder="0.00" defaultValue="14,200" />
+                     <span className="text-2xl font-serif font-medium text-[#1A1A1A]">$</span>
+                     <Input className="text-3xl font-serif font-medium border-none shadow-none p-0 h-auto w-full focus-visible:ring-0 placeholder:text-[#E5E5E5] text-[#1A1A1A]" placeholder="0.00" defaultValue="14,200" />
                   </div>
                   <div className="h-16 -mx-2">
                      <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={data}>
                            <defs>
                               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                                 <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                 <stop offset="5%" stopColor="#166534" stopOpacity={0.1}/>
+                                 <stop offset="95%" stopColor="#166534" stopOpacity={0}/>
                               </linearGradient>
                            </defs>
-                           <Area type="monotone" dataKey="value" stroke="#10b981" fill="url(#colorValue)" strokeWidth={2} />
+                           <Area type="monotone" dataKey="value" stroke="#166534" fill="url(#colorValue)" strokeWidth={2} />
                         </AreaChart>
                      </ResponsiveContainer>
                   </div>
@@ -60,54 +60,57 @@ export const StepTraction = () => {
             </Card>
 
             {/* Users Card */}
-            <Card>
+            <Card className="border border-[#E5E5E5] bg-white rounded-2xl shadow-sm">
                <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                     <Label className="text-slate-500 font-medium">Total Users / Waitlist</Label>
-                     <div className="p-1.5 bg-blue-100 rounded text-blue-700">
+                     <Label className="text-[#6B7280] font-sans font-medium">Total Users / Waitlist</Label>
+                     <div className="p-1.5 bg-[#F7F7F5] rounded-md text-[#1A1A1A]">
                         <Users className="w-4 h-4" />
                      </div>
                   </div>
                   <div className="flex items-baseline gap-1 mb-2">
-                     <Input className="text-3xl font-bold border-none shadow-none p-0 h-auto w-full focus-visible:ring-0 placeholder:text-slate-300" placeholder="0" type="number" defaultValue="2500" />
+                     <Input className="text-3xl font-serif font-medium border-none shadow-none p-0 h-auto w-full focus-visible:ring-0 placeholder:text-[#E5E5E5] text-[#1A1A1A]" placeholder="0" type="number" defaultValue="2500" />
                   </div>
                   <div className="flex items-center gap-2 mt-4">
-                     <div className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-medium flex items-center">
+                     <div className="px-2 py-1 bg-[#DCFCE7] text-[#166534] rounded text-xs font-bold flex items-center font-sans">
                         <TrendingUp className="w-3 h-3 mr-1" /> +15% MoM
                      </div>
-                     <Label className="text-xs text-slate-400">Growth Rate</Label>
+                     <Label className="text-xs text-[#9CA3AF] font-sans">Growth Rate</Label>
                   </div>
                </CardContent>
             </Card>
          </div>
 
          {/* Growth Chart Detail */}
-         <Card>
-            <CardHeader>
-               <CardTitle className="text-lg">Growth Trajectory</CardTitle>
+         <Card className="border border-[#E5E5E5] bg-white rounded-2xl shadow-sm">
+            <CardHeader className="pb-4 border-b border-[#E5E5E5]">
+               <CardTitle className="text-lg font-serif font-medium text-[#1A1A1A]">Growth Trajectory</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                <div className="h-[200px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                      <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                         <defs>
-                           <linearGradient id="colorIndigo" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                           <linearGradient id="colorBlack" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#1A1A1A" stopOpacity={0.1}/>
+                              <stop offset="95%" stopColor="#1A1A1A" stopOpacity={0}/>
                            </linearGradient>
                         </defs>
-                        <Tooltip />
-                        <Area type="monotone" dataKey="value" stroke="#6366f1" fill="url(#colorIndigo)" strokeWidth={3} />
+                        <Tooltip 
+                            contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E5E5', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
+                            itemStyle={{ color: '#1A1A1A', fontFamily: 'Inter' }}
+                        />
+                        <Area type="monotone" dataKey="value" stroke="#1A1A1A" fill="url(#colorBlack)" strokeWidth={2} />
                      </AreaChart>
                   </ResponsiveContainer>
                </div>
                
                {/* AI Insight Inline */}
-               <div className="mt-6 bg-indigo-50 rounded-lg p-4 border border-indigo-100 flex gap-3 items-start">
-                  <Sparkles className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+               <div className="mt-6 bg-[#F3E8FF] rounded-xl p-4 border border-[#E9D5FF] flex gap-3 items-start">
+                  <Sparkles className="w-5 h-5 text-[#A855F7] flex-shrink-0 mt-0.5" />
                   <div>
-                     <p className="text-sm font-medium text-indigo-900">Gemini Analysis</p>
-                     <p className="text-sm text-indigo-700 mt-1">
+                     <p className="text-sm font-bold text-[#6B21A8] font-sans">Gemini Analysis</p>
+                     <p className="text-sm text-[#4A0E8F] mt-1 font-sans">
                         Based on your $14k MRR, traction appears <strong>Early Stage</strong>. Your 15% MoM growth is strong for this stage. AI can help validate your retention metrics in the next step.
                      </p>
                   </div>
@@ -119,28 +122,28 @@ export const StepTraction = () => {
 
       {/* Right Column: Milestones */}
       <div className="space-y-6">
-         <Card className="h-full">
-            <CardHeader>
-               <CardTitle className="text-lg">Key Milestones</CardTitle>
+         <Card className="h-full border border-[#E5E5E5] bg-white rounded-2xl shadow-sm">
+            <CardHeader className="pb-4 border-b border-[#E5E5E5]">
+               <CardTitle className="text-lg font-serif font-medium text-[#1A1A1A]">Key Milestones</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
                {milestones.map((milestone) => (
-                  <div key={milestone.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100">
-                     <div className={`mt-0.5 ${milestone.checked ? 'text-emerald-500' : 'text-slate-300'}`}>
+                  <div key={milestone.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#F7F7F5] transition-colors cursor-pointer border border-transparent hover:border-[#E5E5E5]">
+                     <div className={`mt-0.5 ${milestone.checked ? 'text-[#166534]' : 'text-[#D1D5DB]'}`}>
                         {milestone.checked ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                      </div>
                      <div>
-                        <div className={`font-medium ${milestone.checked ? 'text-slate-900' : 'text-slate-500'}`}>
+                        <div className={`font-medium font-sans ${milestone.checked ? 'text-[#1A1A1A]' : 'text-[#6B7280]'}`}>
                            {milestone.label}
                         </div>
                         {milestone.checked && (
-                           <div className="text-xs text-emerald-600 mt-0.5">Completed</div>
+                           <div className="text-xs text-[#166534] mt-0.5 font-bold">Completed</div>
                         )}
                      </div>
                   </div>
                ))}
                
-               <button className="w-full py-3 text-sm text-indigo-600 font-medium border border-dashed border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors mt-4">
+               <button className="w-full py-3 text-sm text-[#1A1A1A] font-bold border border-dashed border-[#E5E5E5] rounded-xl hover:bg-[#F7F7F5] hover:border-[#1A1A1A] transition-colors mt-4 font-sans">
                   + Add Custom Milestone
                </button>
             </CardContent>

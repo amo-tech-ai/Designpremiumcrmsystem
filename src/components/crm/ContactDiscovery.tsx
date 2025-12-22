@@ -18,7 +18,9 @@ import {
   CheckCircle2,
   X,
   MessageCircle,
-  TrendingUp
+  TrendingUp,
+  Mail,
+  Phone
 } from 'lucide-react';
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -128,16 +130,16 @@ const MOCK_CONTACTS: DiscoveryContact[] = [
 // --- Components ---
 
 const KPICard = ({ title, value, change, icon: Icon, colorClass }: any) => (
-  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-start justify-between">
+  <div className="bg-white p-6 rounded-2xl border border-[#E3E7EE] shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-start justify-between">
     <div>
-      <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{title}</p>
-      <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
-      <p className={cn("text-xs font-medium mt-1 flex items-center gap-1", change.startsWith('+') ? "text-emerald-600" : "text-slate-500")}>
+      <p className="text-[#7A8191] text-xs font-bold uppercase tracking-wider mb-2">{title}</p>
+      <h3 className="text-3xl font-bold text-[#1A1F2C] mb-1">{value}</h3>
+      <p className={cn("text-xs font-medium flex items-center gap-1", change.startsWith('+') ? "text-[#3A4250]" : "text-[#7A8191]")}>
         {change.startsWith('+') && <TrendingUp className="w-3 h-3" />}
         {change}
       </p>
     </div>
-    <div className={cn("p-2 rounded-lg", colorClass)}>
+    <div className={cn("p-3 rounded-xl", colorClass)}>
       <Icon className="w-5 h-5" />
     </div>
   </div>
@@ -203,49 +205,49 @@ export const ContactDiscovery: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full bg-slate-50/50 relative overflow-hidden font-sans text-slate-900">
+    <div className="flex h-full bg-[#FAF9F7] relative overflow-hidden font-sans text-[#1A1F2C]">
       
       {/* Main Content */}
       <div className="flex-grow flex flex-col h-full overflow-hidden">
         
         {/* HEADER */}
-        <div className="bg-white border-b border-slate-200 px-8 py-6 z-10 shadow-sm shrink-0">
-          <div className="flex justify-between items-center mb-6">
+        <div className="bg-[#FAF9F7] px-8 py-8 z-10 shrink-0">
+          <div className="flex justify-between items-end mb-8">
              <div>
-                <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                <h1 className="text-3xl font-bold text-[#1A1F2C] flex items-center gap-3 tracking-tight">
                    Contact Discovery
-                   <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-normal py-0.5">
-                      <Sparkles className="w-3 h-3 mr-1 inline" /> AI Powered
+                   <Badge variant="secondary" className="border border-[#DCE4F4] bg-[#EAF1FF] text-[#3A4250] text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
+                      <Sparkles className="w-3 h-3 mr-1.5 inline text-[#6070A0]" /> AI Powered
                    </Badge>
                 </h1>
-                <p className="text-slate-500 text-sm mt-1">Find and enrich new prospects with intelligent matching.</p>
+                <p className="text-[#7A8191] text-base mt-2 font-medium">Find and enrich new prospects with intelligent matching.</p>
              </div>
-             <div className="flex gap-3">
-                <Button variant="outline" className="gap-2 text-slate-600" onClick={handleEnrich} disabled={isEnriching}>
+             <div className="flex gap-4">
+                <Button variant="outline" className="gap-2 text-[#4A4F5B] bg-white border-[#E3E7EE] hover:bg-[#F3F6FB] hover:text-[#3A4250] hover:border-[#DCE4F4] shadow-sm rounded-xl h-11 px-5" onClick={handleEnrich} disabled={isEnriching}>
                   <RefreshCw className={cn("w-4 h-4", isEnriching && "animate-spin")} />
                   {isEnriching ? "Enriching..." : "Enrich Data"}
                 </Button>
-                <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200">
+                <Button className="gap-2 bg-[#3A4250] hover:bg-[#2C333F] text-white shadow-md shadow-[#3A4250]/20 rounded-xl h-11 px-5 font-medium">
                   <UserPlus className="w-4 h-4" /> Import Contacts
                 </Button>
              </div>
           </div>
 
           {/* Search & Filters Bar */}
-          <div className="flex flex-col xl:flex-row gap-4 justify-between">
+          <div className="bg-white p-4 rounded-2xl border border-[#E3E7EE] shadow-sm flex flex-col xl:flex-row gap-4 justify-between items-center">
              {/* Search */}
-             <div className="relative flex-grow max-w-2xl">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+             <div className="relative flex-grow w-full xl:max-w-xl">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7A8191]" />
                 <Input 
                   placeholder="Search by name, company, role, or keywords..." 
-                  className="pl-10 h-11 border-slate-200 bg-slate-50 focus:bg-white transition-all shadow-sm"
+                  className="pl-11 h-12 border-[#E3E7EE] bg-[#FAF9F7] focus:bg-white focus:border-[#DCE4F4] focus:ring-4 focus:ring-[#EAF1FF] transition-all rounded-xl text-[#1A1F2C] placeholder:text-[#9CA3AF]"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 {searchQuery && (
                    <button 
                      onClick={() => setSearchQuery('')}
-                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[#7A8191] hover:text-[#3A4250]"
                    >
                       <X className="w-4 h-4" />
                    </button>
@@ -253,7 +255,7 @@ export const ContactDiscovery: React.FC = () => {
              </div>
 
              {/* Filters */}
-             <div className="flex flex-wrap gap-2 items-center">
+             <div className="flex flex-wrap gap-3 items-center w-full xl:w-auto justify-end">
                 <FilterDropdown 
                   label="Type" 
                   value={activeFilters.type} 
@@ -275,7 +277,7 @@ export const ContactDiscovery: React.FC = () => {
                   onChange={(val) => setActiveFilters(prev => ({ ...prev, region: val }))}
                   icon={MapPin}
                 />
-                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-indigo-600">
+                <Button variant="ghost" size="icon" className="text-[#7A8191] hover:text-[#3A4250] hover:bg-[#F3F6FB] rounded-xl h-10 w-10">
                    <Filter className="w-4 h-4" />
                 </Button>
              </div>
@@ -283,7 +285,7 @@ export const ContactDiscovery: React.FC = () => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-grow overflow-y-auto p-8 custom-scrollbar">
+        <div className="flex-grow overflow-y-auto px-8 pb-12 custom-scrollbar">
            
            {/* KPI Row */}
            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
@@ -292,21 +294,21 @@ export const ContactDiscovery: React.FC = () => {
                 value="128" 
                 change="+12% this week" 
                 icon={UserPlus} 
-                colorClass="bg-blue-50 text-blue-600" 
+                colorClass="bg-[#EAF1FF] text-[#6070A0]" 
               />
               <KPICard 
                 title="High Potential" 
                 value="42" 
                 change="Match score > 85" 
                 icon={Sparkles} 
-                colorClass="bg-purple-50 text-purple-600" 
+                colorClass="bg-[#F3F6FB] text-[#3A4250]" 
               />
               <KPICard 
                 title="Investor Matches" 
                 value="15" 
                 change="+3 new funds" 
                 icon={TrendingUp} 
-                colorClass="bg-emerald-50 text-emerald-600" 
+                colorClass="bg-[#FFECEC] text-[#FF8B6B]" 
               />
               <KPICard 
                 title="LinkedIn Imports" 
@@ -318,54 +320,54 @@ export const ContactDiscovery: React.FC = () => {
            </div>
 
            {/* Results Header */}
-           <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+           <div className="flex items-center justify-between mb-5 px-1">
+              <h2 className="text-xl font-bold text-[#1A1F2C] flex items-center gap-3">
                  Search Results 
-                 <Badge variant="secondary" className="ml-2 bg-slate-200 text-slate-600 hover:bg-slate-200">
-                    {filteredContacts.length}
+                 <Badge variant="secondary" className="bg-[#EAF1FF] text-[#3A4250] hover:bg-[#DCE4F4] text-xs font-bold px-2.5 py-0.5 border border-[#DCE4F4]">
+                    {filteredContacts.length} Found
                  </Badge>
               </h2>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                 <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> All emails verified</span>
+              <div className="flex items-center gap-2 text-sm text-[#7A8191] font-medium">
+                 <span className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-[#E3E7EE] shadow-sm"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> All emails verified</span>
               </div>
            </div>
 
            {/* Results List */}
-           <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+           <div className="bg-white border border-[#E3E7EE] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
               <table className="w-full text-left">
-                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                 <thead className="bg-[#F3F6FB] border-b border-[#E3E7EE] text-[#7A8191] text-xs font-bold uppercase tracking-wider">
                     <tr>
-                       <th className="px-6 py-4 w-[300px]">Profile</th>
-                       <th className="px-6 py-4">Role & Location</th>
-                       <th className="px-6 py-4">Type & Source</th>
-                       <th className="px-6 py-4 w-[250px]">
+                       <th className="px-8 py-5 w-[320px]">Profile</th>
+                       <th className="px-6 py-5">Role & Location</th>
+                       <th className="px-6 py-5">Type & Source</th>
+                       <th className="px-6 py-5 w-[280px]">
                           <div className="flex items-center gap-1.5">
-                             <BrainCircuit className="w-3.5 h-3.5 text-purple-500" /> AI Match
+                             <BrainCircuit className="w-4 h-4 text-[#6070A0]" /> AI Match
                           </div>
                        </th>
-                       <th className="px-6 py-4 text-right">Actions</th>
+                       <th className="px-8 py-5 text-right">Actions</th>
                     </tr>
                  </thead>
-                 <tbody className="divide-y divide-slate-100">
+                 <tbody className="divide-y divide-[#F3F6FB]">
                     {filteredContacts.map((contact) => (
                        <tr 
                          key={contact.id} 
                          className={cn(
-                           "group hover:bg-slate-50 transition-colors cursor-pointer",
-                           selectedContact?.id === contact.id ? "bg-indigo-50/50" : ""
+                           "group hover:bg-[#F9FAFC] transition-all cursor-pointer",
+                           selectedContact?.id === contact.id ? "bg-[#EAF1FF]/40" : ""
                          )}
                          onClick={() => setSelectedContact(contact)}
                        >
                           {/* Profile */}
-                          <td className="px-6 py-4">
-                             <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10 border border-slate-100 shadow-sm bg-white">
+                          <td className="px-8 py-5">
+                             <div className="flex items-center gap-4">
+                                <Avatar className="h-11 w-11 border-2 border-white shadow-md bg-white">
                                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${contact.avatarSeed}`} />
-                                   <AvatarFallback>{contact.name.substring(0, 2)}</AvatarFallback>
+                                   <AvatarFallback className="bg-[#F3F6FB] text-[#3A4250] font-bold">{contact.name.substring(0, 2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                   <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{contact.name}</div>
-                                   <div className="text-sm text-slate-500 flex items-center gap-1.5">
+                                   <div className="font-bold text-[#1A1F2C] text-base group-hover:text-[#3A4250] transition-colors">{contact.name}</div>
+                                   <div className="text-sm text-[#7A8191] flex items-center gap-1.5 font-medium mt-0.5">
                                       {contact.company}
                                       {contact.source === 'LinkedIn' && <Linkedin className="w-3 h-3 text-[#0A66C2]" />}
                                    </div>
@@ -374,27 +376,27 @@ export const ContactDiscovery: React.FC = () => {
                           </td>
 
                           {/* Role & Location */}
-                          <td className="px-6 py-4">
-                             <div className="text-sm font-medium text-slate-700">{contact.role}</div>
-                             <div className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                          <td className="px-6 py-5">
+                             <div className="text-sm font-semibold text-[#4A4F5B]">{contact.role}</div>
+                             <div className="text-xs text-[#7A8191] flex items-center gap-1.5 mt-1 font-medium">
                                 <MapPin className="w-3 h-3" /> {contact.location}
                              </div>
                           </td>
 
                           {/* Type & Tags */}
-                          <td className="px-6 py-4">
-                             <div className="flex flex-col gap-1.5 items-start">
+                          <td className="px-6 py-5">
+                             <div className="flex flex-col gap-2 items-start">
                                 <Badge variant="outline" className={cn(
-                                   "text-[10px] px-2 py-0.5 border-0 font-medium",
-                                   contact.type === 'Lead' ? "bg-blue-100 text-blue-700" :
-                                   contact.type === 'Investor' ? "bg-emerald-100 text-emerald-700" :
-                                   "bg-amber-100 text-amber-700"
+                                   "text-[10px] px-2.5 py-0.5 border font-bold rounded-lg shadow-sm",
+                                   contact.type === 'Lead' ? "bg-[#EAF1FF] text-[#3A4250] border-[#DCE4F4]" :
+                                   contact.type === 'Investor' ? "bg-[#ECFFE9] text-[#2F5E3D] border-[#A8E6C1]" :
+                                   "bg-[#FFF9E6] text-[#7A5C1B] border-[#F6DFA9]"
                                 )}>
                                    {contact.type}
                                 </Badge>
-                                <div className="flex flex-wrap gap-1">
+                                <div className="flex flex-wrap gap-1.5">
                                    {contact.tags.map(tag => (
-                                      <span key={tag} className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-sm">
+                                      <span key={tag} className="text-[10px] text-[#7A8191] bg-[#F3F6FB] border border-[#E3E7EE] px-2 py-0.5 rounded-md font-medium">
                                          {tag}
                                       </span>
                                    ))}
@@ -403,52 +405,52 @@ export const ContactDiscovery: React.FC = () => {
                           </td>
 
                           {/* AI Match Score */}
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-5">
                              <div className="w-full">
-                                <div className="flex justify-between items-end mb-1">
-                                   <span className="text-xs font-bold text-slate-700">{contact.matchScore}%</span>
-                                   <span className="text-[10px] font-medium text-purple-600">High Fit</span>
+                                <div className="flex justify-between items-end mb-1.5">
+                                   <span className="text-sm font-bold text-[#3A4250]">{contact.matchScore}%</span>
+                                   <span className="text-[10px] font-bold text-[#6070A0] uppercase tracking-wide">High Fit</span>
                                 </div>
-                                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mb-2">
+                                <div className="h-2.5 w-full bg-[#F3F6FB] rounded-full overflow-hidden mb-2 border border-[#E3E7EE]">
                                    <div 
                                       className={cn(
-                                        "h-full rounded-full bg-gradient-to-r",
-                                        contact.matchScore > 90 ? "from-emerald-400 to-emerald-500" :
-                                        contact.matchScore > 75 ? "from-purple-400 to-purple-500" :
-                                        "from-amber-400 to-amber-500"
+                                        "h-full rounded-full bg-gradient-to-r shadow-sm",
+                                        contact.matchScore > 90 ? "from-[#4CAF73] to-[#A8E6C1]" :
+                                        contact.matchScore > 75 ? "from-[#6F7EBC] to-[#C9D7F2]" :
+                                        "from-[#E0B45A] to-[#F6DFA9]"
                                       )}
                                       style={{ width: `${contact.matchScore}%` }}
                                    />
                                 </div>
-                                <p className="text-[10px] text-slate-500 line-clamp-1 flex items-center gap-1">
-                                   <Sparkles className="w-3 h-3 text-purple-400 inline" />
+                                <p className="text-[11px] text-[#7A8191] line-clamp-1 flex items-center gap-1.5 font-medium">
+                                   <Sparkles className="w-3 h-3 text-[#6070A0] inline" />
                                    {contact.matchReason}
                                 </p>
                              </div>
                           </td>
 
                           {/* Actions */}
-                          <td className="px-6 py-4 text-right">
-                             <div className="flex items-center justify-end gap-2">
+                          <td className="px-8 py-5 text-right">
+                             <div className="flex items-center justify-end gap-3">
                                 <Button 
-                                   size="xs" 
-                                   className="h-8 text-xs bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm opacity-0 group-hover:opacity-100 transition-all mr-2"
+                                   size="sm" 
+                                   className="h-9 text-xs bg-[#3A4250] text-white hover:bg-[#2C333F] shadow-sm opacity-0 group-hover:opacity-100 transition-all font-medium rounded-lg px-4"
                                    onClick={(e) => handleAddToCRM(e, contact)}
                                 >
-                                   <UserPlus className="w-3 h-3 mr-1" /> Add to CRM
+                                   <UserPlus className="w-3.5 h-3.5 mr-1.5" /> Add
                                 </Button>
                                 
-                                <div className="hidden group-hover:flex gap-2 mr-2">
+                                <div className="hidden group-hover:flex gap-2">
                                    <Button 
                                       variant="outline" 
-                                      size="xs" 
-                                      className="h-8 text-[10px] bg-white hover:text-indigo-600 hover:border-indigo-200"
+                                      size="sm" 
+                                      className="h-9 text-xs bg-white hover:text-[#3A4250] hover:bg-[#F3F6FB] hover:border-[#DCE4F4] font-medium rounded-lg"
                                       title={contact.aiNextStep}
                                    >
-                                      <MessageCircle className="w-3 h-3 mr-1" /> Next Step
+                                      <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Next Step
                                    </Button>
                                 </div>
-                                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-indigo-600">
+                                <Button variant="ghost" size="icon" className="text-[#7A8191] hover:text-[#3A4250] hover:bg-[#F3F6FB] rounded-lg">
                                    <ArrowRight className="w-4 h-4" />
                                 </Button>
                              </div>
@@ -471,14 +473,14 @@ export const ContactDiscovery: React.FC = () => {
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
                onClick={() => setSelectedContact(null)}
-               className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm z-20"
+               className="absolute inset-0 bg-[#3A4250]/20 backdrop-blur-sm z-20"
              />
              <motion.div 
                initial={{ x: '100%' }}
                animate={{ x: 0 }}
                exit={{ x: '100%' }}
                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-               className="absolute right-0 top-0 bottom-0 w-[500px] bg-white shadow-2xl z-30 border-l border-slate-200"
+               className="absolute right-0 top-0 bottom-0 w-[550px] bg-white shadow-2xl z-30 border-l border-[#E3E7EE]"
              >
                 <div className="h-full flex flex-col">
                    <ContactPanel 
@@ -519,22 +521,22 @@ const FilterDropdown = ({ label, value, options, onChange, icon: Icon }: any) =>
            onClick={() => setIsOpen(!isOpen)}
            onBlur={() => setTimeout(() => setIsOpen(false), 200)}
            className={cn(
-             "h-10 px-3 rounded-lg border flex items-center gap-2 text-sm font-medium transition-all",
+             "h-11 px-4 rounded-xl border flex items-center gap-2.5 text-sm font-semibold transition-all shadow-sm",
              value !== 'All' 
-               ? "bg-indigo-50 border-indigo-200 text-indigo-700" 
-               : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+               ? "bg-[#EAF1FF] border-[#DCE4F4] text-[#3A4250]" 
+               : "bg-white border-[#E3E7EE] text-[#4A4F5B] hover:border-[#DCE4F4] hover:bg-[#F9FAFC]"
            )}
          >
-            <Icon className={cn("w-4 h-4", value !== 'All' ? "text-indigo-500" : "text-slate-400")} />
-            {label}: {value}
+            <Icon className={cn("w-4 h-4", value !== 'All' ? "text-[#6070A0]" : "text-[#7A8191]")} />
+            <span className="text-[#7A8191] font-normal">{label}:</span> {value}
          </button>
          
          {isOpen && (
-            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-slate-100 py-1 z-20 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute top-full left-0 mt-2 w-52 bg-white rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-[#E3E7EE] py-1.5 z-20 animate-in fade-in zoom-in-95 duration-100 overflow-hidden">
                {options.map((opt: string) => (
                   <button
                     key={opt}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
+                    className="w-full text-left px-5 py-2.5 text-sm text-[#4A4F5B] font-medium hover:bg-[#F3F6FB] hover:text-[#3A4250] transition-colors"
                     onClick={() => {
                        onChange(opt);
                        setIsOpen(false);

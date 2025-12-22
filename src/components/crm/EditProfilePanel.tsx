@@ -39,6 +39,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { cn } from "../ui/utils";
 import { supabase } from '../../utils/supabase/client';
 import { projectId } from '../../utils/supabase/info';
+import { toast } from 'react-toastify';
 
 const SERVER_URL = `https://${projectId}.supabase.co/functions/v1/make-server-6522a742`;
 
@@ -117,7 +118,13 @@ export const EditProfilePanel: React.FC<EditProfilePanelProps> = ({ isOpen, onCl
     setIsSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+      
+      // If no session, warn user
+      if (!session) {
+        toast.error("Please sign in to save changes");
+        setIsSaving(false);
+        return;
+      }
 
       // Construct payload matching the POST /startup-profile expectation
       // Note: The backend endpoint maps 'description' -> 'tagline', and 'longDescription' -> 'description'

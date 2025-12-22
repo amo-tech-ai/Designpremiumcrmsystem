@@ -1,14 +1,16 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Plus, Filter, ChevronDown, Sparkles, TrendingUp, Loader2, X, BarChart3, Zap } from 'lucide-react';
+import { Plus, Filter, ChevronDown, Sparkles, TrendingUp, Loader2, X, BarChart3, Zap, Search, LayoutGrid } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { cn } from '../ui/utils';
 import { ContactPanel } from './ContactPanel';
-import { useDeals, useCRMStats } from './hooks';
-import { useRealtimeCRM } from './realtimeHooks';
+import { DealPanel } from './DealPanel';
+import { useDeals, useCRMStats, useRealtimeCRM } from './hooks';
 import { DealCard } from './DealCard';
 import { SkeletonDealCard } from '../ui/skeleton';
+import { steps, investorSteps } from './data';
 
 // Simple relative time helper to avoid date-fns dependency
 const formatRelativeTime = (dateString: string) => {

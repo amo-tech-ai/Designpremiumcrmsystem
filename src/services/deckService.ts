@@ -79,7 +79,11 @@ export const analyzeSlide = (slide: FrontendSlide): AnalysisResult => {
 export const getDecks = async () => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    
+    // If no user, return empty array (guest mode)
+    if (!user) {
+      return { data: [], error: null };
+    }
 
     const { data, error } = await supabase
       .from('decks')

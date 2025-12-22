@@ -18,25 +18,59 @@ const getAuthHeaders = async () => {
 
 const getStartupId = async () => {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  if (!user) {
+    console.error('No authenticated user found');
+    return null;
+  }
+  
+  console.log('Looking for startup for user:', user.id);
   
   // Try to find startup associated with user
   // First try direct user_id match
-  const { data: startup } = await supabase
+  const { data: startup, error: fetchError } = await supabase
     .from('startups')
     .select('id')
     .eq('user_id', user.id)
     .single();
-    
-  if (startup) return startup.id;
-
-  // If not found, check org membership (assuming user might belong to an org that has a startup)
-  // This is more complex, for now fallback to creating one or handling error
-  // But given the "seed" logic in other places, maybe we should just create one if missing?
-  // Or query via orgs.
   
-  // Let's assume for now 1:1 user:startup or it exists.
-  return null;
+  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows returned
+    console.error('Error fetching startup:', fetchError);
+  }
+    
+  if (startup) {
+    console.log('Found existing startup:', startup.id);
+    return startup.id;
+  }
+
+  // If no startup exists, create a default one for demo/testing purposes
+  // This allows the CRM to work without requiring onboarding
+  console.log('No startup found, creating default startup for user:', user.id);
+  
+  try {
+    const { data: newStartup, error: createError } = await supabase
+      .from('startups')
+      .insert({
+        user_id: user.id,
+        name: 'My Startup',
+        tagline: 'Add your tagline',
+        industry: 'Technology',
+        stage: 'Pre-Seed'
+      })
+      .select()
+      .single();
+    
+    if (createError) {
+      console.error('Error creating default startup:', createError);
+      console.error('Error details:', JSON.stringify(createError, null, 2));
+      return null;
+    }
+    
+    console.log('Successfully created default startup:', newStartup.id);
+    return newStartup.id;
+  } catch (err) {
+    console.error('Failed to create default startup:', err);
+    return null;
+  }
 };
 
 export const addContact = async (
@@ -47,12 +81,16 @@ export const addContact = async (
 ) => {
   try {
     const startupId = await getStartupId();
-    if (!startupId) throw new Error("No startup profile found. Please complete onboarding.");
+    
+    // Log warning but continue - contacts can exist without startup_id for demo purposes
+    if (!startupId) {
+      console.warn('No startup ID available - contact will be created without startup association');
+    }
 
     // 1. Handle Account (Find or Create)
     let accountId = null;
-    if (account.name) {
-      // Check if account exists
+    if (account.name && startupId) {
+      // Check if account exists (only if we have a startup)
       const { data: existingAccount } = await supabase
         .from('crm_accounts')
         .select('id')
@@ -76,16 +114,20 @@ export const addContact = async (
           .select()
           .single();
           
-        if (accError) throw accError;
-        accountId = newAccount.id;
+        if (accError) {
+          console.error('Account creation error:', accError);
+          // Continue without account
+        } else {
+          accountId = newAccount.id;
+        }
       }
     }
 
-    // 2. Create Contact
+    // 2. Create Contact (with or without startup_id)
     const { data: newContact, error: contactError } = await supabase
       .from('crm_contacts')
       .insert({
-        startup_id: startupId,
+        startup_id: startupId, // Can be null
         account_id: accountId,
         first_name: contact.first_name,
         last_name: contact.last_name,
@@ -93,12 +135,15 @@ export const addContact = async (
         title: contact.title,
         phone: contact.phone,
         linkedin_url: contact.linkedin_url,
-        // role: contact.role // role is usually 'Decision Maker' etc, not passed in arg but maybe in contact object
+        tags: contact.tags || [],
       })
       .select()
       .single();
 
-    if (contactError) throw contactError;
+    if (contactError) {
+      console.error('Contact creation error:', contactError);
+      throw contactError;
+    }
 
     // 3. Create Enrichment (if provided)
     if (enrichment) {

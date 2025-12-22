@@ -10,6 +10,10 @@ interface WizardFooterProps {
   onBack: () => void;
   isSaving?: boolean;
   canNext?: boolean;
+  nextLabel?: string;
+  loadingLabel?: string;
+  className?: string;
+  variant?: 'default' | 'floating';
 }
 
 export const WizardFooter: React.FC<WizardFooterProps> = ({ 
@@ -18,33 +22,83 @@ export const WizardFooter: React.FC<WizardFooterProps> = ({
   onNext, 
   onBack,
   isSaving = false,
-  canNext = true
+  canNext = true,
+  nextLabel,
+  loadingLabel = "Saving changes...",
+  className,
+  variant = 'default'
 }) => {
   const isLastStep = currentStep === totalSteps - 1;
+  const isFloating = variant === 'floating';
+
+  if (isFloating) {
+    return (
+      <div className={cn("fixed bottom-8 right-8 z-50 flex items-center gap-3", className)}>
+         {/* Floating Back Button (only if step > 0) */}
+         <Button 
+           variant="outline" 
+           onClick={onBack} 
+           disabled={currentStep === 0 || isSaving}
+           className={cn(
+             "h-14 w-14 rounded-full border-[#E5E5E5] bg-white text-[#1A1A1A] shadow-lg hover:bg-[#F7F7F5] p-0 flex items-center justify-center transition-all",
+             (currentStep === 0) && "hidden"
+           )}
+         >
+           <ChevronLeft className="w-5 h-5" />
+         </Button>
+
+         {/* Floating Next Button */}
+         <Button 
+            onClick={onNext} 
+            disabled={!canNext || isSaving}
+            className={cn(
+              "h-14 px-8 rounded-full font-sans font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-base",
+              "bg-[#1A1A1A] hover:bg-black text-white"
+            )}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                {nextLabel || (isLastStep ? "Finish & Save" : "Next Step")}
+                {!isLastStep && <ChevronRight className="w-5 h-5 ml-2" />}
+              </>
+            )}
+          </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 md:px-10 z-40">
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div className={cn("fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E5E5] p-5 md:px-10 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]", className)}>
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-4">
            <Button 
              variant="ghost" 
              onClick={onBack} 
-             disabled={currentStep === 0}
-             className="text-slate-500 hover:text-slate-900"
+             disabled={currentStep === 0 || isSaving}
+             className="text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F7F7F5] font-sans font-medium"
            >
              <ChevronLeft className="w-4 h-4 mr-1" /> Back
            </Button>
            
-           <div className="hidden md:flex items-center gap-2 text-xs text-slate-400">
+           <div className="hidden md:flex items-center gap-2 text-xs font-medium text-[#9CA3AF] font-sans">
              {isSaving ? (
                 <>
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Saving changes...
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1A1A1A]" />
+                  <span className="text-[#6B7280]">{loadingLabel}</span>
                 </>
              ) : (
                 <>
-                  <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                  Changes saved
+                  {currentStep > 0 && (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#166534]" />
+                      <span className="text-[#6B7280]">Changes saved</span>
+                    </>
+                  )}
                 </>
              )}
            </div>
@@ -52,14 +106,23 @@ export const WizardFooter: React.FC<WizardFooterProps> = ({
 
         <Button 
           onClick={onNext} 
-          disabled={!canNext}
+          disabled={!canNext || isSaving}
           className={cn(
-            "min-w-[120px] transition-all",
-            isLastStep ? "bg-emerald-600 hover:bg-emerald-700" : "bg-indigo-600 hover:bg-indigo-700"
+            "min-w-[140px] transition-all h-11 rounded-xl font-sans font-bold shadow-md hover:shadow-lg",
+            isLastStep ? "bg-[#1A1A1A] hover:bg-black text-white" : "bg-[#1A1A1A] hover:bg-black text-white"
           )}
         >
-          {isLastStep ? "Finish & Save" : "Next Step"}
-          {!isLastStep && <ChevronRight className="w-4 h-4 ml-1" />}
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              {nextLabel || (isLastStep ? "Finish & Save" : "Next Step")}
+              {!isLastStep && <ChevronRight className="w-4 h-4 ml-2" />}
+            </>
+          )}
         </Button>
       </div>
     </div>

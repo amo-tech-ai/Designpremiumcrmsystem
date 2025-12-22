@@ -32,7 +32,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     <div className="flex-grow bg-[#F3F4F6] flex flex-col relative overflow-hidden h-full">
       {/* Top Bar info could go here, but sidebar handles navigation title */}
       
-      <div className="flex-grow flex items-center justify-center p-8 md:p-12 relative overflow-y-auto">
+      <div className="flex-grow flex flex-col p-8 md:p-12 relative overflow-y-auto">
         
         {/* Previous Button */}
         <Button
@@ -48,7 +48,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         </Button>
 
         {/* Slide Card Container */}
-        <div className="w-full max-w-[960px] aspect-video shadow-xl rounded-xl transition-all duration-300">
+        <div className="w-full max-w-[960px] aspect-video shadow-xl rounded-xl transition-all duration-300 m-auto">
            <SlideRenderer 
              slide={currentSlide} 
              onChange={onUpdateSlide} 

@@ -11,15 +11,18 @@ import { AppErrorBoundary, EditorErrorBoundary, CRMErrorBoundary } from './compo
 import { Loader2 } from 'lucide-react';
 
 // Lazy load heavy components for better performance
+const ProjectsDashboard = lazy(() => import('./components/projects/ProjectsDashboard').then(m => ({ default: m.ProjectsDashboard })));
 const PipelineDashboard = lazy(() => import('./components/crm/PipelineDashboard').then(m => ({ default: m.PipelineDashboard })));
 const TasksDashboard = lazy(() => import('./components/crm/TasksDashboard').then(m => ({ default: m.TasksDashboard })));
 const ActivityFeed = lazy(() => import('./components/crm/ActivityFeed').then(m => ({ default: m.ActivityFeed })));
 const AIInsights = lazy(() => import('./components/crm/AIInsights').then(m => ({ default: m.AIInsights })));
 const FounderDashboard = lazy(() => import('./components/crm/FounderDashboard').then(m => ({ default: m.FounderDashboard })));
 const ContactsDashboard = lazy(() => import('./components/crm/ContactsDashboard').then(m => ({ default: m.ContactsDashboard })));
+const ContactDetailPage = lazy(() => import('./components/crm/ContactDetailPage').then(m => ({ default: m.ContactDetailPage })));
 const ContactDiscovery = lazy(() => import('./components/crm/ContactDiscovery').then(m => ({ default: m.ContactDiscovery })));
 const GTMStrategy = lazy(() => import('./components/crm/GTMStrategy').then(m => ({ default: m.GTMStrategy })));
 const PitchDeckWizard = lazy(() => import('./components/crm/PitchDeckWizard').then(m => ({ default: m.PitchDeckWizard })));
+const EventWizard = lazy(() => import('./components/event-wizard/EventWizard').then(m => ({ default: m.EventWizard })));
 const StartupProfileWizard = lazy(() => import('./components/wizard/StartupProfileWizard').then(m => ({ default: m.StartupProfileWizard })));
 const PitchDeckEditor = lazy(() => import('./components/crm/PitchDeckEditor').then(m => ({ default: m.PitchDeckEditor })));
 const LeanCanvasBuilder = lazy(() => import('./components/crm/LeanCanvasBuilder').then(m => ({ default: m.LeanCanvasBuilder })));
@@ -29,6 +32,7 @@ const HowItWorksPage = lazy(() => import('./components/landing/HowItWorksPage').
 const BusinessModelPage = lazy(() => import('./components/landing/BusinessModelPage').then(m => ({ default: m.BusinessModelPage })));
 const LandingPage = lazy(() => import('./components/landing/LandingPage').then(m => ({ default: m.LandingPage })));
 const LandingPageV2 = lazy(() => import('./components/landing/LandingPageV2').then(m => ({ default: m.LandingPageV2 })));
+const StyleGuidePage = lazy(() => import('./components/style-guide/StyleGuidePage').then(m => ({ default: m.StyleGuidePage })));
 const StandardPage = lazy(() => import('./components/landing/StandardPage').then(m => ({ default: m.StandardPage })));
 const UserProfile = lazy(() => import('./components/user-profile/UserProfile').then(m => ({ default: m.UserProfile })));
 const CompanyProfileEditor = lazy(() => import('./components/company-profile/CompanyProfileEditor').then(m => ({ default: m.CompanyProfileEditor })));
@@ -47,13 +51,13 @@ const LoadingFallback = () => (
   </div>
 );
 
-type View = 'dashboard' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'startup-profile' | 'company-profile' | 'editor' | 'landing' | 'landing-v2' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile' | 'settings-account' | 'settings-billing' | 'settings-workspaces' | 'support';
+type View = 'dashboard' | 'projects' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'contact-detail' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'event-wizard' | 'startup-profile' | 'company-profile' | 'editor' | 'landing' | 'landing-v2' | 'style-guide' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile' | 'settings-account' | 'settings-billing' | 'settings-workspaces' | 'support';
 type PipelineMode = 'sales' | 'investor';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<View>('landing-v2');
+  const [currentView, setCurrentView] = useState<View>('contacts');
   const [pipelineMode, setPipelineMode] = useState<PipelineMode>('investor');
   
   const [activeSalesStepId, setActiveSalesStepId] = useState<string>(steps[0].id);
@@ -119,6 +123,14 @@ export default function App() {
       </Suspense>
     );
   }
+
+  if (currentView === 'style-guide') {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <StyleGuidePage onNavigate={(view) => setCurrentView(view as View)} />
+      </Suspense>
+    );
+  }
   
   if (currentView === 'how-it-works') {
     return (
@@ -142,7 +154,11 @@ export default function App() {
     };
     return (
       <Suspense fallback={<LoadingFallback />}>
-        <StandardPage title={pageTitles[currentView]} onNavigate={(view) => setCurrentView(view as View)} />
+        <StandardPage 
+          title={pageTitles[currentView]} 
+          onNavigate={(view) => setCurrentView(view as View)} 
+          currentView={currentView}
+        />
       </Suspense>
     );
   }
@@ -158,7 +174,7 @@ export default function App() {
   // APPLICATION SHELL (Dashboard, Tools, CRM)
   return (
     <AppErrorBoundary>
-      <div className="flex h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
+      <div className="flex h-screen bg-[#F7F9FC] text-[#1A1F2C] font-sans overflow-hidden">
         <Toaster />
         
         {/* SIDEBAR NAVIGATION (Desktop) */}
@@ -167,7 +183,7 @@ export default function App() {
         </div>
         
         {/* MAIN CONTENT AREA */}
-        <div className="flex-grow flex flex-col h-full overflow-hidden relative bg-slate-50/50">
+        <div className="flex-grow flex flex-col h-full overflow-hidden relative bg-[#F7F9FC]">
           
           {/* TOP HEADER (Mobile Nav + Search + Profile) */}
           <TopNavbar 
@@ -185,6 +201,12 @@ export default function App() {
                     onLeadClick={handleLeadClick}
                   />
                 </CRMErrorBoundary>
+              )}
+
+              {currentView === 'projects' && (
+                <div className="h-full overflow-y-auto">
+                   <ProjectsDashboard />
+                </div>
               )}
 
               {currentView === 'documents' && <DocumentWorkspace />}
@@ -231,6 +253,12 @@ export default function App() {
                 </CRMErrorBoundary>
               )}
               
+              {currentView === 'contact-detail' && (
+                <CRMErrorBoundary>
+                  <ContactDetailPage onBack={() => setCurrentView('contacts')} />
+                </CRMErrorBoundary>
+              )}
+              
               {currentView === 'discovery' && (
                 <CRMErrorBoundary>
                   <ContactDiscovery />
@@ -249,6 +277,8 @@ export default function App() {
                 </EditorErrorBoundary>
               )}
               
+              {currentView === 'event-wizard' && <EventWizard onNavigate={(view) => setCurrentView(view as View)} />}
+
               {currentView === 'startup-profile' && <StartupProfileWizard onNavigate={(view) => setCurrentView(view as View)} />}
 
               {currentView === 'profile' && <UserProfile onNavigate={(view) => setCurrentView(view as View)} />}

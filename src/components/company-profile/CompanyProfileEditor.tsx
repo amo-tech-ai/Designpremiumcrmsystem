@@ -23,7 +23,11 @@ import {
   Sparkles,
   Save,
   MapPin,
-  Calendar
+  Calendar,
+  LayoutGrid,
+  BarChart3,
+  Share2,
+  PieChart
 } from 'lucide-react';
 import { toast } from "sonner@2.0.3";
 import { cn } from "../ui/utils";
@@ -161,7 +165,12 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
   const onSubmit = async (data: CompanyProfileFormValues) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("No session found");
+      
+      // If no session, warn user
+      if (!session) {
+        toast.error("Please sign in to save your profile");
+        return;
+      }
 
       const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6522a742/company-profile`, {
         method: 'POST',
@@ -189,10 +198,10 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
 
   if (isLoading) {
     return (
-      <div className="min-h-full w-full bg-[#F7F8FA] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-           <Sparkles className="w-6 h-6 text-indigo-600 animate-spin" />
-           <span className="text-sm text-slate-500">Loading company data...</span>
+      <div className="min-h-full w-full bg-[#FAFBFE] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+           <div className="w-10 h-10 border-4 border-[#6F7EBC] border-t-transparent rounded-full animate-spin"></div>
+           <span className="text-sm font-medium text-[#7A8191]">Loading company data...</span>
         </div>
       </div>
     );
@@ -200,28 +209,28 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="min-h-full w-full bg-[#F7F8FA] relative flex flex-col">
+      <form onSubmit={handleSubmit(onSubmit)} className="min-h-full w-full bg-[#FAFBFE] relative flex flex-col font-sans">
         
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 sticky top-0 z-20">
-          <Button variant="ghost" size="icon" onClick={() => onNavigate?.('dashboard')} className="-ml-2">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+        <div className="md:hidden bg-white border-b border-[#E3E7EE] px-4 py-3 flex items-center gap-3 sticky top-0 z-20">
+          <Button variant="ghost" size="icon" onClick={() => onNavigate?.('dashboard')} className="-ml-2 text-[#6B7280]">
+            <ArrowLeft className="w-5 h-5" />
           </Button>
-          <span className="font-semibold text-slate-900">Edit Company</span>
+          <span className="font-bold text-[#1A1F2C]">Edit Company</span>
         </div>
 
-        <div className="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6 md:space-y-8 pb-32">
+        <div className="flex-grow p-4 md:p-8 max-w-[1400px] mx-auto w-full space-y-6 md:space-y-8 pb-32">
           
           {/* Page Header (Desktop) */}
           <div className="hidden md:flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Edit Company Profile</h1>
-              <p className="text-slate-500 mt-1">Manage your company's public information and business details.</p>
+              <h1 className="text-3xl font-bold text-[#1A1F2C] tracking-tight">Edit Company Profile</h1>
+              <p className="text-[#7A8191] mt-2 font-medium text-lg">Manage your company's public information and business details.</p>
             </div>
             <Button 
               variant="outline" 
               onClick={() => onNavigate?.('dashboard')}
-              className="text-slate-600"
+              className="bg-white border-[#E3E7EE] text-[#6B7280] hover:text-[#1A1F2C] hover:bg-[#FAFBFE] shadow-sm rounded-xl font-bold px-6 h-11 transition-all"
             >
               Back to Dashboard
             </Button>
@@ -259,23 +268,23 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
               exit={{ y: 100, opacity: 0 }}
               className="fixed bottom-0 left-0 right-0 z-40 p-4 md:pb-6 pointer-events-none flex justify-center"
             >
-              <div className="bg-white/90 backdrop-blur-md border border-slate-200/60 shadow-2xl shadow-slate-200/50 rounded-2xl p-2 pl-6 pr-2 flex items-center gap-6 pointer-events-auto max-w-xl w-full mx-4 md:mx-auto">
-                <span className="text-sm font-medium text-slate-600 hidden sm:block">
+              <div className="bg-white/90 backdrop-blur-md border border-[#E3E7EE] shadow-lg shadow-[#E3E7EE] rounded-2xl p-3 pl-6 pr-3 flex items-center gap-6 pointer-events-auto max-w-xl w-full mx-4 md:mx-auto">
+                <span className="text-sm font-medium text-[#4A4F5B] hidden sm:block">
                   You have unsaved changes to your company profile
                 </span>
-                <div className="flex items-center gap-2 ml-auto">
+                <div className="flex items-center gap-3 ml-auto">
                   <Button 
                     type="button" 
                     variant="ghost" 
                     onClick={() => reset()}
-                    className="hover:bg-slate-100 text-slate-600"
+                    className="hover:bg-[#FAFBFE] text-[#7A8191] font-bold rounded-xl"
                   >
                     Cancel
                   </Button>
                   <Button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 rounded-xl px-6"
+                    className="bg-[#6F7EBC] hover:bg-[#5A69A6] text-white shadow-sm rounded-xl px-6 font-bold"
                   >
                     {isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>
@@ -311,11 +320,11 @@ const CompIdentityCard = () => {
   };
 
   return (
-    <Card className="border-none shadow-sm bg-white rounded-[20px] overflow-hidden">
+    <Card className="border-[#E3E7EE] shadow-sm bg-white rounded-[20px] overflow-hidden group hover:shadow-md transition-all duration-300">
       
       {/* Cover Image */}
       <div 
-        className="h-32 bg-slate-100 relative group cursor-pointer border-b border-slate-100 bg-cover bg-center transition-all"
+        className="h-40 bg-[#F2F4FF] relative group cursor-pointer border-b border-[#E3E7EE] bg-cover bg-center transition-all"
         style={coverPreview ? { backgroundImage: `url(${coverPreview})` } : {}}
         onClick={() => coverInputRef.current?.click()}
       >
@@ -327,15 +336,15 @@ const CompIdentityCard = () => {
           onChange={(e) => handleFileChange(e, 'cover')}
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="secondary" size="sm" className="gap-2 pointer-events-none">
+          <Button variant="secondary" size="sm" className="gap-2 pointer-events-none bg-white/90 text-[#4A4F5B] hover:bg-white rounded-xl font-bold shadow-sm">
             <Upload className="w-4 h-4" /> Change Cover
           </Button>
         </div>
       </div>
 
-      <CardContent className="pt-0 relative">
+      <CardContent className="pt-0 relative p-8">
         {/* Logo */}
-        <div className="relative -mt-10 mb-6 flex justify-between items-end">
+        <div className="relative -mt-14 mb-8 flex justify-between items-end">
           <div className="relative group cursor-pointer" onClick={() => logoInputRef.current?.click()}>
             <input 
               type="file" 
@@ -344,16 +353,16 @@ const CompIdentityCard = () => {
               accept="image/*"
               onChange={(e) => handleFileChange(e, 'logo')}
             />
-            <div className="w-20 h-20 rounded-xl bg-white border-4 border-white shadow-lg flex items-center justify-center overflow-hidden relative">
+            <div className="w-24 h-24 rounded-2xl bg-white border-[6px] border-white shadow-lg flex items-center justify-center overflow-hidden relative">
               {logoPreview ? (
                 <img src={logoPreview} alt="Company Logo" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-2xl">
+                <div className="w-full h-full bg-[#E8EEF5] flex items-center justify-center text-[#6F7EBC] font-bold text-3xl">
                   S
                 </div>
               )}
             </div>
-            <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                <Camera className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -362,20 +371,20 @@ const CompIdentityCard = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label>Company Name <span className="text-red-500">*</span></Label>
+              <Label className="text-[#4A4F5B] font-bold text-sm">Company Name <span className="text-[#F2B6B6]">*</span></Label>
               <Input 
                 {...register("companyName", { required: "Company name is required" })}
-                className={cn("h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white", errors.companyName && "border-red-500")}
+                className={cn("h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium", errors.companyName && "border-[#F2B6B6]")}
               />
-              {errors.companyName && <span className="text-xs text-red-500">{errors.companyName.message}</span>}
+              {errors.companyName && <span className="text-xs text-[#F2B6B6]">{errors.companyName.message}</span>}
             </div>
             <div className="space-y-2">
-              <Label>Founded Year</Label>
+              <Label className="text-[#4A4F5B] font-bold text-sm">Founded Year</Label>
               <div className="relative">
-                 <Calendar className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
+                 <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
                  <Input 
                    {...register("foundedYear")}
-                   className="pl-9 h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white"
+                   className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium"
                    placeholder="YYYY"
                  />
               </div>
@@ -383,29 +392,29 @@ const CompIdentityCard = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Tagline</Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">Tagline</Label>
             <Input 
               {...register("tagline")}
-              className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white"
+              className="h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium"
               placeholder="e.g. The AI-powered CRM..."
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Short Description</Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">Short Description</Label>
             <Textarea 
               {...register("description")}
-              className="min-h-[100px] rounded-xl bg-slate-50 border-slate-200 focus:bg-white resize-none p-3"
+              className="min-h-[100px] rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 resize-none p-4 text-[#1A1F2C] font-medium"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Headquarters</Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">Headquarters</Label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
+              <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
               <Input 
                 {...register("headquarters")}
-                className="pl-9 h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white"
+                className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium"
                 placeholder="City, Country"
               />
             </div>
@@ -420,16 +429,22 @@ const CompBusinessInfoCard = () => {
   const { register, setValue, watch } = useFormContext<CompanyProfileFormValues>();
   
   return (
-    <Card className="border-none shadow-sm bg-white rounded-[20px]">
-      <CardHeader>
-        <CardTitle className="text-lg">Business Information</CardTitle>
+    <Card className="border-[#E3E7EE] shadow-sm bg-white rounded-[20px] hover:shadow-md transition-all duration-300">
+      <CardHeader className="border-b border-[#E3E7EE] pb-4 px-8 pt-6 flex flex-row items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#ECF4FF] flex items-center justify-center border border-[#E3E7EE]">
+            <Building2 className="w-6 h-6 text-[#6F7EBC]" strokeWidth={1.5} />
+        </div>
+        <div>
+            <CardTitle className="text-xl font-bold text-[#1A1F2C]">Business Information</CardTitle>
+            <CardDescription className="text-sm text-[#7A8191] font-medium mt-0.5">Industry, model, and segmentation</CardDescription>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6 px-8 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label>Industry <span className="text-red-500">*</span></Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">Industry <span className="text-[#F2B6B6]">*</span></Label>
             <Select onValueChange={(val) => setValue('industry', val, { shouldDirty: true })} defaultValue={watch('industry')}>
-              <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white">
+              <SelectTrigger className="h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white text-[#1A1F2C] font-medium">
                 <SelectValue placeholder="Select industry" />
               </SelectTrigger>
               <SelectContent>
@@ -442,9 +457,9 @@ const CompBusinessInfoCard = () => {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Business Model</Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">Business Model</Label>
             <Select onValueChange={(val) => setValue('businessModel', val, { shouldDirty: true })} defaultValue={watch('businessModel')}>
-              <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white">
+              <SelectTrigger className="h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white text-[#1A1F2C] font-medium">
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent>
@@ -457,40 +472,40 @@ const CompBusinessInfoCard = () => {
           </div>
         </div>
 
-        {/* Tags Sections - Using a simplified implementation for now */}
+        {/* Tags Sections */}
         <div className="space-y-2">
-          <Label>Customer Segments</Label>
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl min-h-[44px] flex flex-wrap gap-2">
+          <Label className="text-[#4A4F5B] font-bold text-sm">Customer Segments</Label>
+          <div className="p-3 bg-[#FAFBFE] border border-[#E3E7EE] rounded-xl min-h-[48px] flex flex-wrap gap-2 items-center">
             {watch('customerSegments').map((tag, i) => (
-              <Badge key={i} variant="secondary" className="bg-white border border-slate-200 text-slate-700 font-normal hover:bg-slate-100 pl-2 pr-1 py-1">
-                {tag} <X className="w-3 h-3 ml-1 cursor-pointer text-slate-400 hover:text-red-500" />
+              <Badge key={i} variant="secondary" className="bg-white border border-[#E3E7EE] text-[#4A4F5B] font-bold text-xs hover:bg-[#F2F4FF] pl-2.5 pr-1.5 py-1.5 rounded-lg shadow-sm">
+                {tag} <X className="w-3 h-3 ml-1.5 cursor-pointer text-[#7A8191] hover:text-[#F2B6B6]" />
               </Badge>
             ))}
-            <button type="button" className="text-xs text-indigo-600 font-medium px-2 py-1 hover:bg-indigo-50 rounded flex items-center gap-1">
-              <Plus className="w-3 h-3" /> Add
+            <button type="button" className="text-xs text-[#6F7EBC] font-bold px-3 py-1.5 hover:bg-[#F2F4FF] rounded-lg flex items-center gap-1.5 transition-colors">
+              <Plus className="w-3.5 h-3.5" /> Add
             </button>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>Key Features</Label>
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl min-h-[44px] flex flex-wrap gap-2">
+          <Label className="text-[#4A4F5B] font-bold text-sm">Key Features</Label>
+          <div className="p-3 bg-[#FAFBFE] border border-[#E3E7EE] rounded-xl min-h-[48px] flex flex-wrap gap-2 items-center">
              {watch('keyFeatures').map((tag, i) => (
-              <Badge key={i} variant="secondary" className="bg-white border border-slate-200 text-slate-700 font-normal hover:bg-slate-100 pl-2 pr-1 py-1">
-                {tag} <X className="w-3 h-3 ml-1 cursor-pointer text-slate-400 hover:text-red-500" />
+              <Badge key={i} variant="secondary" className="bg-white border border-[#E3E7EE] text-[#4A4F5B] font-bold text-xs hover:bg-[#F2F4FF] pl-2.5 pr-1.5 py-1.5 rounded-lg shadow-sm">
+                {tag} <X className="w-3 h-3 ml-1.5 cursor-pointer text-[#7A8191] hover:text-[#F2B6B6]" />
               </Badge>
             ))}
-             <button type="button" className="text-xs text-indigo-600 font-medium px-2 py-1 hover:bg-indigo-50 rounded flex items-center gap-1">
-              <Plus className="w-3 h-3" /> Add
+             <button type="button" className="text-xs text-[#6F7EBC] font-bold px-3 py-1.5 hover:bg-[#F2F4FF] rounded-lg flex items-center gap-1.5 transition-colors">
+              <Plus className="w-3.5 h-3.5" /> Add
             </button>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>Differentiator</Label>
+          <Label className="text-[#4A4F5B] font-bold text-sm">Differentiator</Label>
           <Input 
             {...register("differentiator")}
-            className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white"
+            className="h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium"
             placeholder="What makes you unique?"
           />
         </div>
@@ -503,38 +518,44 @@ const CompSocialLinksCard = () => {
   const { register } = useFormContext<CompanyProfileFormValues>();
 
   return (
-    <Card className="border-none shadow-sm bg-white rounded-[20px]">
-      <CardHeader>
-        <CardTitle className="text-lg">Social Links</CardTitle>
+    <Card className="border-[#E3E7EE] shadow-sm bg-white rounded-[20px] hover:shadow-md transition-all duration-300">
+      <CardHeader className="border-b border-[#E3E7EE] pb-4 px-8 pt-6 flex flex-row items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#E8EEF5] flex items-center justify-center border border-[#E3E7EE]">
+            <Share2 className="w-6 h-6 text-[#4A5B78]" strokeWidth={1.5} />
+        </div>
+        <div>
+            <CardTitle className="text-xl font-bold text-[#1A1F2C]">Social Links</CardTitle>
+            <CardDescription className="text-sm text-[#7A8191] font-medium mt-0.5">Online presence and communities</CardDescription>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <CardContent className="space-y-4 pt-6 px-8 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
-            <Label>Website</Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">Website</Label>
             <div className="relative">
-              <Globe className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-              <Input {...register("website")} className="pl-9 h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white" />
+              <Globe className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <Input {...register("website")} className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium" />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>LinkedIn</Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">LinkedIn</Label>
             <div className="relative">
-              <Linkedin className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-              <Input {...register("linkedin")} className="pl-9 h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white" />
+              <Linkedin className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <Input {...register("linkedin")} className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium" />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Twitter / X</Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">Twitter / X</Label>
             <div className="relative">
-              <Twitter className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-              <Input {...register("twitter")} className="pl-9 h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white" />
+              <Twitter className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <Input {...register("twitter")} className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium" />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>GitHub</Label>
+            <Label className="text-[#4A4F5B] font-bold text-sm">GitHub</Label>
             <div className="relative">
-              <Github className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-              <Input {...register("github")} className="pl-9 h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white" />
+              <Github className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <Input {...register("github")} className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium" />
             </div>
           </div>
         </div>
@@ -551,31 +572,39 @@ const CompTeamHighlightsCard = () => {
   });
 
   return (
-    <Card className="border-none shadow-sm bg-white rounded-[20px]">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg">Team Highlights</CardTitle>
-        <Button variant="ghost" size="sm" onClick={() => append({ name: "", role: "" })} className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
-          <Plus className="w-4 h-4 mr-1" /> Add Member
+    <Card className="border-[#E3E7EE] shadow-sm bg-white rounded-[20px] hover:shadow-md transition-all duration-300">
+      <CardHeader className="flex flex-row items-center justify-between border-b border-[#E3E7EE] pb-4 px-8 pt-6">
+        <div className="flex items-center gap-4">
+           <div className="w-12 h-12 rounded-2xl bg-[#ECF4FF] flex items-center justify-center border border-[#E3E7EE]">
+               <Users className="w-6 h-6 text-[#6F7EBC]" strokeWidth={1.5} />
+           </div>
+           <div>
+               <CardTitle className="text-xl font-bold text-[#1A1F2C]">Team Highlights</CardTitle>
+               <CardDescription className="text-sm text-[#7A8191] font-medium mt-0.5">Key members and roles</CardDescription>
+           </div>
+        </div>
+        <Button variant="ghost" size="sm" onClick={() => append({ name: "", role: "" })} className="text-[#6F7EBC] hover:text-[#5A69A6] hover:bg-[#F2F4FF] font-bold rounded-xl h-10 px-4">
+          <Plus className="w-4 h-4 mr-2" /> Add Member
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6 px-8 pb-8">
         <div className="space-y-3">
           {fields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-indigo-100 text-indigo-700">
+            <div key={field.id} className="flex items-center gap-4 p-4 bg-[#FAFBFE] rounded-xl border border-[#E3E7EE]">
+              <Avatar className="h-10 w-10 border border-[#E3E7EE]">
+                <AvatarFallback className="bg-[#C9D7F2] text-[#6F7EBC] font-bold">
                   {field.name.charAt(0) || "T"}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-grow grid grid-cols-2 gap-3">
+              <div className="flex-grow grid grid-cols-2 gap-4">
                  <Input 
                    defaultValue={field.name}
-                   className="h-9 bg-white border-slate-200 text-sm"
+                   className="h-10 bg-white border-[#E3E7EE] text-sm text-[#1A1F2C] rounded-lg font-medium"
                    placeholder="Name"
                  />
                  <Input 
                    defaultValue={field.role}
-                   className="h-9 bg-white border-slate-200 text-sm"
+                   className="h-10 bg-white border-[#E3E7EE] text-sm text-[#1A1F2C] rounded-lg font-medium"
                    placeholder="Role"
                  />
               </div>
@@ -591,52 +620,58 @@ const CompMetricsCard = () => {
   const { register } = useFormContext<CompanyProfileFormValues>();
 
   return (
-    <Card className="border-none shadow-sm bg-white rounded-[20px]">
-      <CardHeader>
-        <CardTitle className="text-lg">Key Metrics</CardTitle>
+    <Card className="border-[#E3E7EE] shadow-sm bg-white rounded-[20px] hover:shadow-md transition-all duration-300">
+      <CardHeader className="border-b border-[#E3E7EE] pb-4 px-8 pt-6 flex flex-row items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#ECFFE9] flex items-center justify-center border border-[#E3E7EE]">
+            <BarChart3 className="w-6 h-6 text-[#4CAF73]" strokeWidth={1.5} />
+        </div>
+        <div>
+            <CardTitle className="text-xl font-bold text-[#1A1F2C]">Key Metrics</CardTitle>
+            <CardDescription className="text-sm text-[#7A8191] font-medium mt-0.5">Traction and growth numbers</CardDescription>
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500 uppercase">Monthly Revenue</Label>
+      <CardContent className="pt-6 px-8 pb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="space-y-2">
+            <Label className="text-xs text-[#9CA3AF] uppercase font-bold tracking-wider">Monthly Revenue</Label>
             <div className="relative">
-              <DollarSign className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
-              <Input {...register("mrr")} className="pl-8 h-9 bg-slate-50 border-slate-200 focus:bg-white text-sm font-medium" />
+              <DollarSign className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <Input {...register("mrr")} className="pl-10 h-11 bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] text-sm font-bold text-[#1A1F2C] rounded-xl" />
             </div>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500 uppercase">Active Users</Label>
+          <div className="space-y-2">
+            <Label className="text-xs text-[#9CA3AF] uppercase font-bold tracking-wider">Active Users</Label>
             <div className="relative">
-              <Users className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
-              <Input {...register("users")} className="pl-8 h-9 bg-slate-50 border-slate-200 focus:bg-white text-sm font-medium" />
+              <Users className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <Input {...register("users")} className="pl-10 h-11 bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] text-sm font-bold text-[#1A1F2C] rounded-xl" />
             </div>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500 uppercase">Growth (MoM)</Label>
+          <div className="space-y-2">
+            <Label className="text-xs text-[#9CA3AF] uppercase font-bold tracking-wider">Growth (MoM)</Label>
             <div className="relative">
-              <TrendingUp className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
-              <Input {...register("growth")} className="pl-8 h-9 bg-slate-50 border-slate-200 focus:bg-white text-sm font-medium" />
+              <TrendingUp className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <Input {...register("growth")} className="pl-10 h-11 bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] text-sm font-bold text-[#1A1F2C] rounded-xl" />
             </div>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500 uppercase">Waitlist</Label>
+          <div className="space-y-2">
+            <Label className="text-xs text-[#9CA3AF] uppercase font-bold tracking-wider">Waitlist</Label>
             <div className="relative">
-              <Users className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
-              <Input {...register("waitlist")} className="pl-8 h-9 bg-slate-50 border-slate-200 focus:bg-white text-sm font-medium" />
+              <Users className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <Input {...register("waitlist")} className="pl-10 h-11 bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] text-sm font-bold text-[#1A1F2C] rounded-xl" />
             </div>
           </div>
         </div>
         
         {/* Simple Sparkline Visual */}
-        <div className="mt-6 pt-4 border-t border-slate-100">
-           <div className="flex items-center justify-between mb-2">
-             <span className="text-sm font-medium text-slate-600">Growth Trajectory</span>
-             <Badge variant="outline" className="text-green-600 bg-green-50 border-green-200">+15% this month</Badge>
+        <div className="mt-8 pt-6 border-t border-[#E3E7EE]">
+           <div className="flex items-center justify-between mb-4">
+             <span className="text-sm font-bold text-[#4A4F5B]">Growth Trajectory</span>
+             <Badge variant="outline" className="text-[#4CAF73] bg-[#ECFFE9] border-[#A8E6C1] font-bold rounded-lg px-2">+15% this month</Badge>
            </div>
-           <div className="h-16 w-full flex items-end gap-1">
+           <div className="h-20 w-full flex items-end gap-1.5">
              {[30, 45, 40, 55, 65, 60, 75, 85, 80, 95, 100].map((h, i) => (
-               <div key={i} className="flex-1 bg-indigo-100 rounded-t-sm hover:bg-indigo-200 transition-colors relative group" style={{ height: `${h}%` }}>
-                 <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+               <div key={i} className="flex-1 bg-[#C9D7F2] rounded-t-lg hover:bg-[#6F7EBC] transition-colors relative group" style={{ height: `${h}%` }}>
+                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#1A1F2C] text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-bold shadow-lg">
                    Data Point {i+1}
                  </div>
                </div>
@@ -652,16 +687,22 @@ const CompFundingCard = () => {
   const { register, setValue, watch } = useFormContext<CompanyProfileFormValues>();
 
   return (
-    <Card className="border-none shadow-sm bg-white rounded-[20px]">
-      <CardHeader>
-        <CardTitle className="text-lg">Funding Information</CardTitle>
+    <Card className="border-[#E3E7EE] shadow-sm bg-white rounded-[20px] hover:shadow-md transition-all duration-300">
+      <CardHeader className="border-b border-[#E3E7EE] pb-4 px-8 pt-6 flex flex-row items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#FFF9E6] flex items-center justify-center border border-[#E3E7EE]">
+            <PieChart className="w-6 h-6 text-[#E0B45A]" strokeWidth={1.5} />
+        </div>
+        <div>
+            <CardTitle className="text-xl font-bold text-[#1A1F2C]">Funding Information</CardTitle>
+            <CardDescription className="text-sm text-[#7A8191] font-medium mt-0.5">Investment stage and capital</CardDescription>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6 px-8 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            <div className="space-y-2">
-             <Label>Current Stage</Label>
+             <Label className="text-[#4A4F5B] font-bold text-sm">Current Stage</Label>
              <Select onValueChange={(val) => setValue('stage', val, { shouldDirty: true })} defaultValue={watch('stage')}>
-                <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white">
+                <SelectTrigger className="h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white text-[#1A1F2C] font-medium">
                   <SelectValue placeholder="Select stage" />
                 </SelectTrigger>
                 <SelectContent>
@@ -673,24 +714,27 @@ const CompFundingCard = () => {
              </Select>
            </div>
            <div className="space-y-2">
-             <Label>Raise Amount Target</Label>
-             <Input 
-               {...register("raiseAmount")}
-               className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white"
-             />
+             <Label className="text-[#4A4F5B] font-bold text-sm">Raise Amount Target</Label>
+             <div className="relative">
+                <DollarSign className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+                <Input 
+                  {...register("raiseAmount")}
+                  className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] text-[#1A1F2C] font-bold"
+                />
+             </div>
            </div>
         </div>
 
         <div className="space-y-2">
-           <Label>Use of Funds</Label>
-           <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl min-h-[44px] flex flex-wrap gap-2">
+           <Label className="text-[#4A4F5B] font-bold text-sm">Use of Funds</Label>
+           <div className="p-3 bg-[#FAFBFE] border border-[#E3E7EE] rounded-xl min-h-[48px] flex flex-wrap gap-2 items-center">
               {watch('useOfFunds').map((tag, i) => (
-                <Badge key={i} variant="secondary" className="bg-white border border-slate-200 text-slate-700 font-normal hover:bg-slate-100 pl-2 pr-1 py-1">
-                  {tag} <X className="w-3 h-3 ml-1 cursor-pointer text-slate-400 hover:text-red-500" />
+                <Badge key={i} variant="secondary" className="bg-white border border-[#E3E7EE] text-[#4A4F5B] font-bold text-xs hover:bg-[#F2F4FF] pl-2.5 pr-1.5 py-1.5 rounded-lg shadow-sm">
+                  {tag} <X className="w-3 h-3 ml-1.5 cursor-pointer text-[#7A8191] hover:text-[#F2B6B6]" />
                 </Badge>
               ))}
-              <button type="button" className="text-xs text-indigo-600 font-medium px-2 py-1 hover:bg-indigo-50 rounded flex items-center gap-1">
-                <Plus className="w-3 h-3" /> Add
+              <button type="button" className="text-xs text-[#6F7EBC] font-bold px-3 py-1.5 hover:bg-[#F2F4FF] rounded-lg flex items-center gap-1.5 transition-colors">
+                <Plus className="w-3.5 h-3.5" /> Add
               </button>
            </div>
         </div>
@@ -716,67 +760,69 @@ const CompAIPanel = () => {
   };
 
   return (
-    <Card className="border-none shadow-lg shadow-indigo-100 bg-white rounded-[20px] overflow-hidden ring-1 ring-indigo-50">
-      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 text-white">
-        <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="w-4 h-4 text-indigo-100" />
-          <h3 className="font-semibold">AI Profile Insights</h3>
+    <Card className="border-none shadow-sm shadow-[#C9D7F2] bg-white rounded-[20px] overflow-hidden ring-1 ring-[#E3E7EE] group hover:shadow-md transition-all duration-300">
+      <div className="bg-gradient-to-r from-[#C9D7F2] to-[#AFC3F7] p-6 text-[#4A5B78]">
+        <div className="flex items-center gap-2.5 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-white/30 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" fill="currentColor" />
+          </div>
+          <h3 className="font-bold text-lg">AI Profile Insights</h3>
         </div>
-        <p className="text-xs text-indigo-100 opacity-90">Real-time analysis of your company data.</p>
+        <p className="text-xs text-[#4A5B78] opacity-90 font-bold tracking-wide uppercase mt-1">Real-time Analysis</p>
       </div>
       
-      <CardContent className="p-5 space-y-6">
+      <CardContent className="p-6 space-y-6">
         
         {/* Summary Section */}
-        <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
+        <div className="space-y-3">
+          <h4 className="text-sm font-bold text-[#1A1F2C] flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#4CAF73]" strokeWidth={2.5} />
             Strengths
           </h4>
-          <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+          <p className="text-sm text-[#4A4F5B] leading-relaxed bg-[#ECFFE9] p-4 rounded-xl border border-[#A8E6C1]/30 font-medium">
             {aiResult ? aiResult.strengths : "Click Auto-Improve to analyze your profile."}
           </p>
         </div>
 
         {/* Risks Section */}
-        <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
+        <div className="space-y-3">
+          <h4 className="text-sm font-bold text-[#1A1F2C] flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-[#F6DFA9]" strokeWidth={2.5} />
             Risks Identified
           </h4>
-          <p className="text-sm text-slate-600 leading-relaxed bg-amber-50 p-3 rounded-lg border border-amber-100">
+          <p className="text-sm text-[#4A4F5B] leading-relaxed bg-[#FFF9E6] p-4 rounded-xl border border-[#F6DFA9]/30 font-medium">
              {aiResult ? aiResult.risks : "..."}
           </p>
         </div>
 
         {/* Actions */}
-        <div className="space-y-2 pt-2">
-          <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-indigo-500" />
+        <div className="space-y-3 pt-2">
+          <h4 className="text-sm font-bold text-[#1A1F2C] flex items-center gap-2">
+            <Lightbulb className="w-4 h-4 text-[#6F7EBC]" strokeWidth={2.5} />
             Recommended Actions
           </h4>
-          <div className="space-y-2">
+          <div className="space-y-2.5">
              {aiResult?.actions?.map((action, i) => (
-                <div key={i} className="text-xs p-2 bg-indigo-50 text-indigo-800 rounded border border-indigo-100 flex items-center gap-2">
-                  <Plus className="w-3 h-3 flex-shrink-0" /> {action}
+                <div key={i} className="text-xs p-3 bg-[#F2F4FF] text-[#6F7EBC] rounded-xl border border-[#C9D7F2] flex items-center gap-2.5 font-bold">
+                  <Plus className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={3} /> {action}
                 </div>
              ))}
              {!aiResult && (
-               <div className="text-xs text-slate-400 italic">No actions generated yet.</div>
+               <div className="text-xs text-[#7A8191] italic pl-1 font-medium">No actions generated yet.</div>
              )}
           </div>
         </div>
 
-        <Separator />
+        <Separator className="bg-[#E3E7EE]" />
 
         <div className="grid grid-cols-1 gap-3">
           <Button 
              size="sm" 
              onClick={handleAnalyze}
              disabled={processing}
-             className="w-full text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+             className="w-full h-11 text-xs bg-[#6F7EBC] hover:bg-[#5A69A6] text-white font-bold rounded-xl shadow-md shadow-[#C9D7F2]/50 transition-all active:scale-[0.98]"
           >
-            {processing ? <Sparkles className="w-3 h-3 animate-spin mr-2" /> : <Sparkles className="w-3 h-3 mr-2" />}
+            {processing ? <Sparkles className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
             {processing ? "Analyzing..." : "Auto-Improve Profile"}
           </Button>
         </div>

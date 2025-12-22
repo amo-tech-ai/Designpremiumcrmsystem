@@ -3,8 +3,8 @@ import { Loader2, ChevronLeft, Save, Eye, Share2, Download, Plus, Trash2, Copy, 
 import { Button } from '../ui/button';
 import { toast } from 'sonner@2.0.3';
 import { supabase } from '../../utils/supabase/client';
-import { SlideEditor } from '../editor/SlideEditor';
-import { SlideOutline } from '../editor/SlideOutline';
+import { EditorCanvas as SlideEditor } from '../editor/EditorCanvas';
+import { EditorSidebarLeft as SlideOutline } from '../editor/EditorSidebarLeft';
 import { EditorSidebarRight } from '../editor/EditorSidebarRight';
 import { logger } from '../../utils/logger';
 

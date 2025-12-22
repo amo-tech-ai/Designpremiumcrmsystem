@@ -1,10 +1,17 @@
-import { useContacts } from './hooks';
-import { useRealtimeCRM } from './realtimeHooks';
+import { useState, useMemo } from 'react';
+import { useContacts, useRealtimeCRM } from './hooks';
 import { ContactPanel } from './ContactPanel';
 import { AddContactSidebar } from './AddContactSidebar';
 import { SkeletonContactCard } from '../ui/skeleton';
 import { AnimatePresence, motion } from 'motion/react';
-import { LayoutGrid, List, MoreHorizontal } from 'lucide-react';
+import { LayoutGrid, List, MoreHorizontal, Plus, Search, Sparkles, Filter, ChevronDown } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { cn } from '../ui/utils';
+import { ContactCard } from './ContactCard';
+import { seedSampleContacts } from './sampleContacts';
+import { supabase } from '../../utils/supabase/client';
+import { toast } from 'sonner';
 
 export const ContactsDashboard: React.FC = () => {
   const { contacts, loading, getContacts } = useContacts();
@@ -17,6 +24,28 @@ export const ContactsDashboard: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'sales' | 'investor' | 'linkedin'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  // Handler to seed sample contacts
+  const handleSeedSampleContacts = async () => {
+    setIsSeeding(true);
+    try {
+      const result = await seedSampleContacts(supabase);
+      if (result.success && !result.skipped) {
+        toast.success(`Added ${result.count} sample contacts`);
+        await getContacts(); // Refresh the list
+      } else if (result.skipped) {
+        toast.info('Sample contacts already exist');
+      } else {
+        toast.error('Failed to add sample contacts');
+      }
+    } catch (err) {
+      console.error('Error seeding contacts:', err);
+      toast.error('Failed to add sample contacts');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   const filteredContacts = useMemo(() => {
     return contacts.filter(c => {
@@ -154,12 +183,23 @@ export const ContactsDashboard: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-medium text-slate-700 mb-1">No contacts found</h3>
                 <p className="max-w-xs text-center mb-6">Add your first contact or sync from LinkedIn to get started.</p>
-                <Button 
-                   onClick={() => setIsAddSidebarOpen(true)} 
-                   className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                 >
-                   <Plus className="w-4 h-4 mr-2" /> Add Contact
-                </Button>
+                <div className="flex gap-3">
+                  <Button 
+                     onClick={() => setIsAddSidebarOpen(true)} 
+                     className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                   >
+                     <Plus className="w-4 h-4 mr-2" /> Add Contact
+                  </Button>
+                  <Button 
+                     onClick={handleSeedSampleContacts}
+                     disabled={isSeeding}
+                     variant="outline"
+                     className="gap-2"
+                   >
+                     <Sparkles className="w-4 h-4" />
+                     {isSeeding ? 'Adding...' : 'Add Sample Contacts'}
+                  </Button>
+                </div>
              </div>
           ) : (
              <>

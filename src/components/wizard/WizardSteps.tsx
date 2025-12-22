@@ -9,15 +9,15 @@ interface WizardStepsProps {
 
 export const WizardSteps: React.FC<WizardStepsProps> = ({ currentStep, steps }) => {
   return (
-    <div className="w-full border-b border-slate-200 bg-white px-6 py-4">
+    <div className="w-full border-b border-[#E5E5E5] bg-[#F7F7F5] px-6 py-6">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between relative">
           {/* Progress Bar Background */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 -z-10 rounded-full" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[1px] bg-[#E5E5E5] -z-10" />
           
           {/* Active Progress Bar */}
           <div 
-            className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-600 -z-10 rounded-full transition-all duration-500 ease-in-out"
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-[1px] bg-[#1A1A1A] -z-10 transition-all duration-500 ease-in-out"
             style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
           />
 
@@ -26,22 +26,22 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({ currentStep, steps }) 
             const isCompleted = index < currentStep;
 
             return (
-              <div key={step} className="flex flex-col items-center gap-2">
+              <div key={step} className="flex flex-col items-center gap-2 group cursor-default">
                 <div 
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-300 bg-white",
-                    isActive ? "border-indigo-600 text-indigo-600 scale-110 shadow-md ring-4 ring-indigo-50" : 
-                    isCompleted ? "border-indigo-600 bg-indigo-600 text-white" : 
-                    "border-slate-200 text-slate-400"
+                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-all duration-300 z-10 font-sans",
+                    isActive ? "border-[#1A1A1A] bg-[#1A1A1A] text-white shadow-sm" : 
+                    isCompleted ? "border-[#1A1A1A] bg-white text-[#1A1A1A]" : 
+                    "border-[#E5E5E5] bg-white text-[#9CA3AF]"
                   )}
                 >
                   {isCompleted ? <Check className="w-4 h-4" /> : index + 1}
                 </div>
                 <span className={cn(
-                  "text-xs font-medium transition-colors absolute mt-10",
-                  isActive ? "text-indigo-700" : 
-                  isCompleted ? "text-slate-600" : 
-                  "text-slate-400"
+                  "text-[10px] font-bold uppercase tracking-wider transition-colors absolute mt-10 font-sans",
+                  isActive ? "text-[#1A1A1A]" : 
+                  isCompleted ? "text-[#1A1A1A]" : 
+                  "text-[#9CA3AF]"
                 )}>
                   {step}
                 </span>

@@ -59,8 +59,8 @@ export const UploadCard: React.FC<UploadCardProps> = ({
   return (
     <div 
       className={cn(
-        "relative border-2 border-dashed rounded-xl p-6 transition-all cursor-pointer group hover:bg-slate-50",
-        isDragOver ? "border-indigo-500 bg-indigo-50/50" : "border-slate-200"
+        "relative border border-dashed rounded-xl p-6 transition-all cursor-pointer group hover:bg-[#F7F7F5]",
+        isDragOver ? "border-[#1A1A1A] bg-[#F7F7F5]" : "border-[#E5E5E5]"
       )}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -76,22 +76,22 @@ export const UploadCard: React.FC<UploadCardProps> = ({
       />
       
       {preview ? (
-        <div className="relative w-full h-40 bg-slate-100 rounded-lg overflow-hidden">
+        <div className="relative w-full h-40 bg-[#F7F7F5] rounded-lg overflow-hidden">
            <img src={preview} alt="Preview" className="w-full h-full object-cover" />
            <button 
              onClick={clearImage}
-             className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm hover:bg-white text-slate-500 hover:text-red-500 transition-colors"
+             className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm hover:bg-white text-[#6B7280] hover:text-[#991B1B] transition-colors"
            >
              <X className="w-4 h-4" />
            </button>
         </div>
       ) : (
-        <div className="flex flex-col items-center text-center py-4">
-           <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <UploadCloud className="w-6 h-6" />
+        <div className="flex flex-col items-center text-center py-6">
+           <div className="w-12 h-12 bg-white border border-[#E5E5E5] text-[#1A1A1A] rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
+              <UploadCloud className="w-6 h-6" strokeWidth={1.5} />
            </div>
-           <h4 className="text-sm font-semibold text-slate-900">{label}</h4>
-           <p className="text-xs text-slate-500 mt-1">{sublabel}</p>
+           <h4 className="text-sm font-bold text-[#1A1A1A] font-sans">{label}</h4>
+           <p className="text-xs text-[#6B7280] mt-1 font-sans font-medium">{sublabel}</p>
         </div>
       )}
     </div>

@@ -606,6 +606,13 @@ app.post("/make-server-6522a742/crm/ai/score", async (c) => {
     if (!user) return c.json({ error: "Unauthorized" }, 401);
     
     const { contact_id } = await c.req.json();
+    
+    // Validate UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!contact_id || !uuidRegex.test(contact_id)) {
+      return c.json({ error: "Invalid contact ID format" }, 400);
+    }
+
     const supabase = getSupabase();
 
     const { data: contact } = await supabase

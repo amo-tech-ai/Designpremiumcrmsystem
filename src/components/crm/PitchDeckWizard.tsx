@@ -15,6 +15,7 @@ import { DeckTemplateSystem } from './DeckTemplateSystem';
 import { StepDetails } from '../pitch-wizard/steps/StepDetails';
 import { StepFinancials } from '../pitch-wizard/steps/StepFinancials';
 import { PitchDeckGenerationScreen } from '../pitch-wizard/PitchDeckGenerationScreen';
+import { EditorErrorBoundary } from '../ErrorBoundary';  // FIXED: Import from correct location
 
 interface PitchDeckWizardProps {
   onNavigate?: (view: string) => void;
@@ -135,7 +136,14 @@ export const PitchDeckWizard: React.FC<PitchDeckWizardProps> = ({ onNavigate }) 
 
   // --- Conditional Rendering for Generation Screen ---
   if (isGenerating && generatedDeckId) {
-    return <PitchDeckGenerationScreen deckId={generatedDeckId} onComplete={() => handleGenerationComplete(generatedDeckId)} />;
+    return (
+      <EditorErrorBoundary>
+        <PitchDeckGenerationScreen 
+          deckId={generatedDeckId} 
+          onComplete={() => handleGenerationComplete(generatedDeckId)} 
+        />
+      </EditorErrorBoundary>
+    );
   }
 
   useEffect(() => {

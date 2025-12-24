@@ -5,6 +5,7 @@ export interface PitchWizardData {
   description: string;
   website: string;
   urls: string[];
+  companyName?: string;  // Added: optional company name
 
   // Step 2: Aesthetic
   theme: string;
@@ -29,6 +30,7 @@ export const INITIAL_DATA: PitchWizardData = {
   description: '',
   website: '',
   urls: [],
+  companyName: '',  // Added: initialize empty string
   theme: 'minimal-dark',
   businessType: [],
   stage: '',

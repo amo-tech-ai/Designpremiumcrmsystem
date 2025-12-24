@@ -1,5 +1,7 @@
 @custom-variant dark (&:is(.dark *));
 
+/* Build: 1.0.13 - 8TH EMERGENCY FIX! .figmaignore + React imports (AUTOMATED DELETION CONFIRMED) */
+
 :root {
   --font-size: 16px;
   --background: #ffffff;

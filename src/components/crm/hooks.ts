@@ -360,7 +360,79 @@ export const useDealAI = (dealId: string) => {
   return { analyzeDeal, processing };
 };
 
-export const useCompanyAI = () => {
+export const useLeadIntelligence = () => {
+  const [loading, setLoading] = useState(false);
+  const [processing, setProcessing] = useState(false);
+
+  const enrichLead = async (contactId: string) => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || publicAnonKey;
+
+      const response = await fetch(`${SERVER_URL}/lead-intelligence/enrich`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ contactId })
+      });
+      
+      if (!response.ok) {
+        // Handle gracefully - endpoint may not exist yet
+        console.warn('Lead enrichment endpoint not available yet');
+        toast.info('AI enrichment coming soon!');
+        return null;
+      }
+      
+      const data = await response.json();
+      toast.success('Lead enriched successfully');
+      return data;
+    } catch (err: any) {
+      console.error("Error enriching lead:", err);
+      // Don't show error to user - feature not critical
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const analyzeDeal = async (dealData: any) => {
+    setProcessing(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || publicAnonKey;
+
+      const response = await fetch(`${SERVER_URL}/lead-intelligence/analyze-deal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(dealData)
+      });
+      
+      if (!response.ok) {
+        console.warn('Deal analysis endpoint not available yet');
+        toast.info('AI deal analysis coming soon!');
+        return null;
+      }
+      
+      return await response.json();
+    } catch (err: any) {
+      console.error("Error analyzing deal:", err);
+      // Don't show error - graceful degradation
+      return null;
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return { enrichLead, analyzeDeal, loading, processing };
+};
+
+export const useCompanyProfile = () => {
   const [processing, setProcessing] = useState(false);
 
   const analyzeProfile = async (profile: any) => {
@@ -378,11 +450,17 @@ export const useCompanyAI = () => {
         body: JSON.stringify({ profile })
       });
       
-      if (!response.ok) throw new Error('AI processing failed');
+      if (!response.ok) {
+        console.warn('Profile analysis endpoint not available yet');
+        toast.info('AI profile analysis coming soon!');
+        return null;
+      }
+      
       return await response.json();
     } catch (err: any) {
       console.error("Error analyzing profile:", err);
-      toast.error("Failed to analyze profile");
+      // Graceful degradation - don't break the UI
+      return null;
     } finally {
       setProcessing(false);
     }

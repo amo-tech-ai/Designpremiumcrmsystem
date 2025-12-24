@@ -17,7 +17,20 @@ export const StepContext: React.FC<StepContextProps> = ({ data, updateData }) =>
   const [urlInput, setUrlInput] = React.useState('');
 
   const handleAddUrl = () => {
-    if (urlInput && !data.urls.includes(urlInput) && data.urls.length < 5) {
+    // FIXED: Added URL validation
+    if (!urlInput) return;
+    
+    // Validate URL format
+    try {
+      new URL(urlInput);
+    } catch {
+      // Show error toast (if toast is available)
+      console.error('Invalid URL format');
+      return;
+    }
+    
+    // Check for duplicates and limit
+    if (!data.urls.includes(urlInput) && data.urls.length < 5) {
       updateData({ urls: [...data.urls, urlInput] });
       setUrlInput('');
     }

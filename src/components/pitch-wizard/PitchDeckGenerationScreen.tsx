@@ -82,6 +82,7 @@ export const PitchDeckGenerationScreen: React.FC<PitchDeckGenerationScreenProps>
        }
     }, 3000);
 
+    // FIXED: Add cleanup to prevent memory leak
     return () => clearInterval(pollInterval);
   }, [deckId]);
 

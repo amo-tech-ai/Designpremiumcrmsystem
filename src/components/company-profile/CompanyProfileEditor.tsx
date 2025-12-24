@@ -42,7 +42,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
-import { useCompanyAI } from "../crm/hooks";
+import { useCompanyProfile } from "../crm/hooks";
 
 // --- Types ---
 
@@ -748,7 +748,7 @@ const CompFundingCard = () => {
 const CompAIPanel = () => {
   const { watch } = useFormContext<CompanyProfileFormValues>();
   const profile = watch();
-  const { analyzeProfile, processing } = useCompanyAI();
+  const { analyzeProfile, processing } = useCompanyProfile();
   const [aiResult, setAiResult] = useState<{ strengths: string; risks: string; actions: string[] } | null>(null);
 
   const handleAnalyze = async () => {

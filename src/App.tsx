@@ -1,14 +1,18 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Session } from '@supabase/supabase-js';
-import { supabase } from './utils/supabase/client';
-import { AuthPage } from './components/auth/AuthPage';
-import { TopNavbar } from './components/layout/TopNavbar';
-import { Sidebar } from './components/layout/Sidebar';
-import { steps, investorSteps } from './components/crm/data';
-import { cn } from "./components/ui/utils";
-import { Toaster } from "sonner@2.0.3";
-import { AppErrorBoundary, EditorErrorBoundary, CRMErrorBoundary } from './components/ErrorBoundary';
+import { Suspense, lazy, useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import type { Session } from '@supabase/supabase-js';
+import { supabase } from './utils/supabase/client';
+import { steps, investorSteps } from './components/crm/data';
+import { ErrorBoundary as AppErrorBoundary } from './components/ErrorBoundary';
+import { ErrorBoundary as CRMErrorBoundary } from './components/ErrorBoundary';
+import { ErrorBoundary as EditorErrorBoundary } from './components/ErrorBoundary';
+import { Sidebar } from './components/layout/Sidebar';
+import { TopNavbar } from './components/layout/TopNavbar';
+import { AuthPage } from './components/auth/AuthPage';
+import { Toaster } from './components/ui/sonner';
+
+// Build 1.0.13 - 8TH EMERGENCY FIX! React imports + .figmaignore (AUTOMATED DELETION CONFIRMED)
 
 // Lazy load heavy components for better performance
 const ProjectsDashboard = lazy(() => import('./components/projects/ProjectsDashboard').then(m => ({ default: m.ProjectsDashboard })));
@@ -55,6 +59,9 @@ type View = 'dashboard' | 'projects' | 'documents' | 'pipeline' | 'tasks' | 'act
 type PipelineMode = 'sales' | 'investor';
 
 export default function App() {
+  // 🔓 DEV MODE: Set to true to bypass authentication during development
+  const DEV_MODE_BYPASS_AUTH = true;
+  
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState<View>('contacts');
@@ -67,6 +74,17 @@ export default function App() {
   const [deckId, setDeckId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    // Skip auth check if DEV_MODE_BYPASS_AUTH is enabled
+    if (DEV_MODE_BYPASS_AUTH) {
+      console.log('%c🔓 DEV MODE ACTIVE', 'background: #FCD34D; color: #000; padding: 8px 12px; font-weight: bold; font-size: 14px;');
+      console.log('%cAuthentication bypassed for development', 'color: #F59E0B; font-weight: bold;');
+      console.log('%cNote: Database operations requiring user.id will fail', 'color: #F59E0B;');
+      console.log('%cPerfect for UI/UX testing and component development', 'color: #10B981;');
+      console.log('%cTo re-enable auth: Set DEV_MODE_BYPASS_AUTH = false in App.tsx', 'color: #3B82F6;');
+      setLoading(false);
+      return;
+    }
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
@@ -90,12 +108,125 @@ export default function App() {
           setCurrentView('wizard'); // Force wizard view to show the generation screen
        }
     } else if (path.startsWith('/pitch-deck/editor/')) {
-      const id = path.split('/pitch-deck/editor/')[1];
-      if (id) {
-        setDeckId(id);
-        setCurrentView('editor');
-      }
+       const id = path.split('/pitch-deck/editor/')[1];
+       if (id) {
+          setDeckId(id);
+          setCurrentView('editor');
+       }
     }
+  }, []);
+
+  // ========================================
+  // URL SYNC: Bidirectional routing support
+  // ========================================
+  
+  // Sync URL when view changes (pushState)
+  useEffect(() => {
+    const viewToPath: Record<View, string> = {
+      'landing': '/',
+      'landing-v2': '/landing-v2',
+      'style-guide': '/style-guide',
+      'how-it-works': '/how-it-works',
+      'business-model': '/business-model',
+      'dashboard': '/app',
+      'contacts': '/app/contacts',
+      'contact-detail': '/app/contacts/detail',
+      'pipeline': '/app/pipeline',
+      'tasks': '/app/tasks',
+      'activities': '/app/activities',
+      'insights': '/app/insights',
+      'projects': '/app/projects',
+      'documents': '/app/documents',
+      'discovery': '/app/discovery',
+      'gtm': '/app/gtm',
+      'lean-canvas': '/app/lean-canvas',
+      'wizard': '/app/wizard',
+      'event-wizard': '/app/event-wizard',
+      'startup-profile': '/app/startup-profile',
+      'company-profile': '/app/company-profile',
+      'editor': deckId ? `/app/editor/${deckId}` : '/app/editor',
+      'templates': '/app/templates',
+      'about': '/about',
+      'careers': '/careers',
+      'legal': '/legal',
+      'contact': '/contact',
+      'blog': '/blog',
+      'community': '/community',
+      'help': '/help',
+      'pricing': '/pricing',
+      'profile': '/app/profile',
+      'settings': '/app/settings',
+      'settings-account': '/app/settings/account',
+      'settings-billing': '/app/settings/billing',
+      'settings-workspaces': '/app/settings/workspaces',
+      'support': '/app/support',
+    };
+    
+    const path = viewToPath[currentView] || '/';
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, '', path);
+    }
+  }, [currentView, deckId]);
+
+  // Handle browser back/forward (popstate)
+  useEffect(() => {
+    const pathToView = (pathname: string): View => {
+      if (pathname === '/') return 'landing';
+      if (pathname === '/landing-v2') return 'landing-v2';
+      if (pathname === '/style-guide') return 'style-guide';
+      if (pathname === '/how-it-works') return 'how-it-works';
+      if (pathname === '/business-model') return 'business-model';
+      if (pathname === '/app' || pathname === '/app/') return 'dashboard';
+      if (pathname === '/app/contacts') return 'contacts';
+      if (pathname.startsWith('/app/contacts/')) return 'contact-detail';
+      if (pathname === '/app/pipeline') return 'pipeline';
+      if (pathname === '/app/tasks') return 'tasks';
+      if (pathname === '/app/activities') return 'activities';
+      if (pathname === '/app/insights') return 'insights';
+      if (pathname === '/app/projects') return 'projects';
+      if (pathname === '/app/documents') return 'documents';
+      if (pathname === '/app/discovery') return 'discovery';
+      if (pathname === '/app/gtm') return 'gtm';
+      if (pathname === '/app/lean-canvas') return 'lean-canvas';
+      if (pathname === '/app/wizard' || pathname.startsWith('/pitch-deck/generating/')) return 'wizard';
+      if (pathname === '/app/event-wizard') return 'event-wizard';
+      if (pathname === '/app/startup-profile') return 'startup-profile';
+      if (pathname === '/app/company-profile') return 'company-profile';
+      if (pathname.startsWith('/app/editor/') || pathname.startsWith('/pitch-deck/editor/')) {
+        const parts = pathname.split('/');
+        const id = parts[parts.length - 1];
+        if (id) setDeckId(id);
+        return 'editor';
+      }
+      if (pathname === '/app/templates') return 'templates';
+      if (pathname === '/app/profile') return 'profile';
+      if (pathname === '/app/settings') return 'settings';
+      if (pathname === '/app/settings/account') return 'settings-account';
+      if (pathname === '/app/settings/billing') return 'settings-billing';
+      if (pathname === '/app/settings/workspaces') return 'settings-workspaces';
+      if (pathname === '/app/support') return 'support';
+      if (pathname === '/about') return 'about';
+      if (pathname === '/careers') return 'careers';
+      if (pathname === '/legal') return 'legal';
+      if (pathname === '/contact') return 'contact';
+      if (pathname === '/blog') return 'blog';
+      if (pathname === '/community') return 'community';
+      if (pathname === '/help') return 'help';
+      if (pathname === '/pricing') return 'pricing';
+      return 'landing'; // fallback
+    };
+
+    const handlePopState = () => {
+      const view = pathToView(window.location.pathname);
+      setCurrentView(view);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Initialize view from URL on mount
+    handlePopState();
+
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const handleLeadClick = (lead: any) => {
@@ -164,18 +295,24 @@ export default function App() {
   }
 
   // Auth Protection for App Shell
-  /*
-  if (!session) {
+  if (!session && !DEV_MODE_BYPASS_AUTH) {
     if (loading) return null; // Or a loading spinner
     return <AuthPage onAuthSuccess={() => setCurrentView('dashboard')} />;
   }
-  */
 
   // APPLICATION SHELL (Dashboard, Tools, CRM)
   return (
     <AppErrorBoundary>
       <div className="flex h-screen bg-[#F7F9FC] text-[#1A1F2C] font-sans overflow-hidden">
         <Toaster />
+        
+        {/* DEV MODE INDICATOR */}
+        {DEV_MODE_BYPASS_AUTH && (
+          <div className="fixed top-4 right-4 z-[100] bg-yellow-500 text-black px-4 py-2 rounded-lg shadow-lg font-bold text-sm flex items-center gap-2 animate-pulse">
+            <span>🔓</span>
+            <span>DEV MODE - Auth Disabled</span>
+          </div>
+        )}
         
         {/* SIDEBAR NAVIGATION (Desktop) */}
         <div className="hidden md:block h-full shadow-xl z-30">

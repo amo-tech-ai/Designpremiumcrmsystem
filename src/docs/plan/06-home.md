@@ -34,6 +34,14 @@ Top line shows a small badge with gradient border containing text "AI-Powered Op
 
 Two call-to-action buttons sit horizontally: primary button with indigo background, white text, sixteen pixel rounded corners, and hover lift effect. Secondary button with white background, slate text, and border. Below buttons, show social proof with small avatar cluster and text "Join 10,000+ founders."
 
+**Primary CTA Button Behavior:**
+- **For Unauthenticated Users:** "Get Started" button links to /signup (new user registration)
+- **For Authenticated Users:** "Get Started" button links to /app/dashboard (main application)
+- **Button Text:** Changes to "Go to Dashboard" when user is logged in
+
+**Secondary CTA Button:**
+- "Learn More" links to /#how-it-works (scroll to How It Works section)
+
 **Floating Dashboard Card (Right Side):**
 
 Card shows a mini-dashboard preview with real metrics, charts, and AI insights. Uses glassmorphism effect with backdrop blur, subtle white overlay at ten percent opacity, and border with gradient. Inside the card, display three metric cards stacked vertically showing "Deck Generated," "Contacts Enriched," and "Deals Closed" with animated counter numbers. Add micro-interaction: numbers count up on page load.
@@ -349,6 +357,13 @@ Left side shows logo and brand name. Center shows navigation links: Product, Fea
 **Responsive:** Desktop full navbar, tablet hamburger menu, mobile bottom navigation bar with icons.
 
 **Routes:** Product goes to /#features anchor, Features to /#how-it-works anchor, Pricing to /pricing page, Docs to /docs page, About to /about page, Sign In to /login, Get Started to /signup.
+
+**Navigation Button Behavior:**
+- **"Sign In" Link:** Always links to /login for authentication
+- **"Get Started" Button:**
+  - **For Unauthenticated Users:** Links to /signup (new user registration)
+  - **For Authenticated Users:** Links to /app/dashboard (main application)
+  - **Button Text:** Changes to "Go to Dashboard" when user is logged in
 
 ### Footer
 

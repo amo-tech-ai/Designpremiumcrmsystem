@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { WizardSteps } from './WizardSteps';
 import { WizardFooter } from './WizardFooter';
 import { StepContext } from './steps/StepContext';
-import { StepTeam } from './steps/StepTeam';
 import { StepBusiness } from './steps/StepBusiness';
 import { StepTraction } from './steps/StepTraction';
 import { StepFunding } from './steps/StepFunding';
 import { StepSummary } from './steps/StepSummary';
 import { StepAISummary } from './steps/StepAISummary';
+import { StepSmartInterview } from './steps/StepSmartInterview';
 import { motion, AnimatePresence } from 'motion/react';
 import { StartupProfileProvider, useStartupProfile } from './StartupProfileContext';
 
@@ -15,12 +15,19 @@ interface StartupProfileWizardProps {
   onNavigate: (view: string) => void;
 }
 
-const STEPS = ["Context", "AI Analysis", "Founders", "Business", "Traction", "Funding", "Review"];
+const STEPS = ["Context", "AI Analysis", "Smart Interview", "Business", "Traction", "Funding", "Review"];
 
 const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const { saveData, isSaving, data } = useStartupProfile();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const handleAutofill = async () => {
     // Simulate AI processing
@@ -30,7 +37,7 @@ const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
     
     // Proceed to Step 2
     setCurrentStep(prev => prev + 1);
-    window.scrollTo(0, 0);
+    scrollToTop();
   };
 
   const handleNext = async () => {
@@ -40,7 +47,7 @@ const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
     
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
-      window.scrollTo(0, 0);
+      scrollToTop();
     } else {
       onNavigate('dashboard');
     }
@@ -49,7 +56,7 @@ const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
-      window.scrollTo(0, 0);
+      scrollToTop();
     }
   };
 
@@ -57,7 +64,7 @@ const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
     switch (currentStep) {
       case 0: return <StepContext />;
       case 1: return <StepAISummary />;
-      case 2: return <StepTeam />;
+      case 2: return <StepSmartInterview />;
       case 3: return <StepBusiness />;
       case 4: return <StepTraction />;
       case 5: return <StepFunding />;
@@ -67,9 +74,9 @@ const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F7F5] flex flex-col font-sans text-[#1A1A1A]">
+    <div ref={scrollContainerRef} className="h-full overflow-y-auto bg-[#fafaf8] flex flex-col font-sans text-[#1a1a1a]">
       {/* Top Navigation - Fixed at Top (Z-Index 30 to stay below modals but above content) */}
-      <div className="sticky top-0 z-30 shadow-sm border-b border-[#E5E5E5] bg-[#F7F7F5]/95 backdrop-blur-sm">
+      <div className="sticky top-0 z-30 shadow-sm border-b border-stone-200 bg-[#fafaf8]/95 backdrop-blur-sm">
         <WizardSteps currentStep={currentStep} steps={STEPS} />
       </div>
 
@@ -77,18 +84,18 @@ const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
           padding-top: pt-10 md:pt-16 (64px)
           padding-bottom: pb-40 (160px) to ensure content clears the fixed footer + 64px margin 
       */}
-      <main className="flex-grow w-full max-w-7xl mx-auto px-6 pt-10 md:pt-16 pb-40">
-        <div className="mb-10 text-center md:text-left">
-          <div className="flex items-center gap-3 justify-center md:justify-start mb-2">
-            <span className="text-xs font-bold text-[#6B21A8] uppercase tracking-wider bg-[#F3E8FF] px-2 py-1 rounded-md">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-6 pt-12 md:pt-20 pb-40">
+        <div className="mb-12 md:mb-16 text-center md:text-left">
+          <div className="flex items-center gap-3 justify-center md:justify-start mb-4">
+            <span className="text-xs font-bold text-[#0d5f4e] uppercase tracking-wider bg-[#0d5f4e]/10 px-3 py-1.5 rounded-full">
               Step {currentStep + 1} of {STEPS.length}
             </span>
           </div>
-          <h1 className="text-4xl font-serif font-medium text-[#1A1A1A] tracking-tight">{STEPS[currentStep]}</h1>
-          <p className="text-[#6B7280] mt-3 text-lg font-sans font-light max-w-2xl">
+          <h1 className="text-4xl md:text-5xl font-serif font-medium text-[#1a1a1a] tracking-tight mb-4">{STEPS[currentStep]}</h1>
+          <p className="text-stone-600 mt-3 text-lg font-sans font-normal max-w-2xl leading-relaxed">
             {currentStep === 0 && "Add your links and Gemini 3 will build your profile."}
             {currentStep === 1 && "Review what Gemini found from your links and inputs."}
-            {currentStep === 2 && "Who is behind the magic? Add your founding team members."}
+            {currentStep === 2 && "Answer a few intelligent questions to refine your investor profile."}
             {currentStep === 3 && "Define your business model, pricing, and market position."}
             {currentStep === 4 && "Show your traction metrics, growth, and key milestones."}
             {currentStep === 5 && "Detail your funding history and future capital requirements."}
@@ -102,7 +109,7 @@ const WizardContent: React.FC<StartupProfileWizardProps> = ({ onNavigate }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             className="w-full"
           >
             {renderStep()}

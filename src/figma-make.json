@@ -1,0 +1,15 @@
+{
+  "name": "startupai",
+  "version": "1.0.14",
+  "description": "StartupAI - AI Operating System for Founders",
+  "deployment": {
+    "skip": [
+      "supabase",
+      "edge-functions"
+    ]
+  },
+  "supabase": {
+    "enabled": false,
+    "autoDeployFunctions": false
+  }
+}

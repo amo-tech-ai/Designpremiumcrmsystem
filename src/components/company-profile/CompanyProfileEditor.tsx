@@ -198,10 +198,10 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
 
   if (isLoading) {
     return (
-      <div className="min-h-full w-full bg-[#FAFBFE] flex items-center justify-center">
+      <div className="min-h-full w-full bg-[#FAFAF8] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-           <div className="w-10 h-10 border-4 border-[#6F7EBC] border-t-transparent rounded-full animate-spin"></div>
-           <span className="text-sm font-medium text-[#7A8191]">Loading company data...</span>
+           <div className="w-10 h-10 border-4 border-[#0d5f4e] border-t-transparent rounded-full animate-spin"></div>
+           <span className="text-sm font-medium text-stone-600">Loading company data...</span>
         </div>
       </div>
     );
@@ -209,28 +209,28 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="min-h-full w-full bg-[#FAFBFE] relative flex flex-col font-sans">
+      <form onSubmit={handleSubmit(onSubmit)} className="min-h-full w-full bg-[#FAFAF8] relative flex flex-col font-sans">
         
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-[#E3E7EE] px-4 py-3 flex items-center gap-3 sticky top-0 z-20">
-          <Button variant="ghost" size="icon" onClick={() => onNavigate?.('dashboard')} className="-ml-2 text-[#6B7280]">
+        <div className="md:hidden bg-white border-b border-stone-200 px-4 py-3 flex items-center gap-3 sticky top-0 z-20">
+          <Button variant="ghost" size="icon" onClick={() => onNavigate?.('dashboard')} className="-ml-2 text-stone-600">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <span className="font-bold text-[#1A1F2C]">Edit Company</span>
+          <span className="font-bold text-[#1a1a1a]">Edit Company</span>
         </div>
 
-        <div className="flex-grow p-4 md:p-8 max-w-[1400px] mx-auto w-full space-y-6 md:space-y-8 pb-32">
+        <div className="flex-grow p-6 md:p-12 max-w-[1400px] mx-auto w-full space-y-8 md:space-y-10 pb-32">
           
           {/* Page Header (Desktop) */}
           <div className="hidden md:flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-[#1A1F2C] tracking-tight">Edit Company Profile</h1>
-              <p className="text-[#7A8191] mt-2 font-medium text-lg">Manage your company's public information and business details.</p>
+              <h1 className="text-4xl font-serif font-medium text-[#1a1a1a] tracking-tight">Company Profile</h1>
+              <p className="text-stone-600 mt-3 text-lg leading-relaxed">Manage your company's public information and business details.</p>
             </div>
             <Button 
               variant="outline" 
               onClick={() => onNavigate?.('dashboard')}
-              className="bg-white border-[#E3E7EE] text-[#6B7280] hover:text-[#1A1F2C] hover:bg-[#FAFBFE] shadow-sm rounded-xl font-bold px-6 h-11 transition-all"
+              className="bg-white border-stone-300 text-stone-700 hover:text-[#1a1a1a] hover:bg-stone-50 rounded-xl font-medium px-6 h-11 transition-all"
             >
               Back to Dashboard
             </Button>
@@ -268,8 +268,8 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
               exit={{ y: 100, opacity: 0 }}
               className="fixed bottom-0 left-0 right-0 z-40 p-4 md:pb-6 pointer-events-none flex justify-center"
             >
-              <div className="bg-white/90 backdrop-blur-md border border-[#E3E7EE] shadow-lg shadow-[#E3E7EE] rounded-2xl p-3 pl-6 pr-3 flex items-center gap-6 pointer-events-auto max-w-xl w-full mx-4 md:mx-auto">
-                <span className="text-sm font-medium text-[#4A4F5B] hidden sm:block">
+              <div className="bg-white/90 backdrop-blur-md border border-stone-200 shadow-lg rounded-2xl p-3 pl-6 pr-3 flex items-center gap-6 pointer-events-auto max-w-xl w-full mx-4 md:mx-auto">
+                <span className="text-sm font-medium text-stone-700 hidden sm:block">
                   You have unsaved changes to your company profile
                 </span>
                 <div className="flex items-center gap-3 ml-auto">
@@ -277,14 +277,14 @@ export const CompanyProfileEditor: React.FC<CompanyProfileEditorProps> = ({ onNa
                     type="button" 
                     variant="ghost" 
                     onClick={() => reset()}
-                    className="hover:bg-[#FAFBFE] text-[#7A8191] font-bold rounded-xl"
+                    className="hover:bg-stone-50 text-stone-600 font-medium rounded-xl"
                   >
                     Cancel
                   </Button>
                   <Button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="bg-[#6F7EBC] hover:bg-[#5A69A6] text-white shadow-sm rounded-xl px-6 font-bold"
+                    className="bg-[#0d5f4e] hover:bg-[#0a4d3f] text-white rounded-xl px-6 font-medium"
                   >
                     {isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>
@@ -320,11 +320,11 @@ const CompIdentityCard = () => {
   };
 
   return (
-    <Card className="border-[#E3E7EE] shadow-sm bg-white rounded-[20px] overflow-hidden group hover:shadow-md transition-all duration-300">
+    <Card className="border-stone-200 shadow-sm bg-white rounded-xl overflow-hidden group hover:shadow-md transition-all duration-300">
       
       {/* Cover Image */}
       <div 
-        className="h-40 bg-[#F2F4FF] relative group cursor-pointer border-b border-[#E3E7EE] bg-cover bg-center transition-all"
+        className="h-40 bg-stone-100 relative group cursor-pointer border-b border-stone-200 bg-cover bg-center transition-all"
         style={coverPreview ? { backgroundImage: `url(${coverPreview})` } : {}}
         onClick={() => coverInputRef.current?.click()}
       >
@@ -336,7 +336,7 @@ const CompIdentityCard = () => {
           onChange={(e) => handleFileChange(e, 'cover')}
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="secondary" size="sm" className="gap-2 pointer-events-none bg-white/90 text-[#4A4F5B] hover:bg-white rounded-xl font-bold shadow-sm">
+          <Button variant="secondary" size="sm" className="gap-2 pointer-events-none bg-white/90 text-stone-700 hover:bg-white rounded-xl font-medium shadow-sm">
             <Upload className="w-4 h-4" /> Change Cover
           </Button>
         </div>
@@ -357,7 +357,7 @@ const CompIdentityCard = () => {
               {logoPreview ? (
                 <img src={logoPreview} alt="Company Logo" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-[#E8EEF5] flex items-center justify-center text-[#6F7EBC] font-bold text-3xl">
+                <div className="w-full h-full bg-emerald-50 flex items-center justify-center text-emerald-700 font-bold text-3xl">
                   S
                 </div>
               )}
@@ -371,20 +371,20 @@ const CompIdentityCard = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-[#4A4F5B] font-bold text-sm">Company Name <span className="text-[#F2B6B6]">*</span></Label>
+              <Label className="text-stone-700 font-medium text-sm">Company Name <span className="text-red-500">*</span></Label>
               <Input 
                 {...register("companyName", { required: "Company name is required" })}
-                className={cn("h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium", errors.companyName && "border-[#F2B6B6]")}
+                className={cn("h-11 rounded-xl bg-stone-50 border-stone-200 focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/20 text-[#1a1a1a] font-medium", errors.companyName && "border-red-300")}
               />
-              {errors.companyName && <span className="text-xs text-[#F2B6B6]">{errors.companyName.message}</span>}
+              {errors.companyName && <span className="text-xs text-red-500">{errors.companyName.message}</span>}
             </div>
             <div className="space-y-2">
-              <Label className="text-[#4A4F5B] font-bold text-sm">Founded Year</Label>
+              <Label className="text-stone-700 font-medium text-sm">Founded Year</Label>
               <div className="relative">
-                 <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+                 <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-stone-400" strokeWidth={2} />
                  <Input 
                    {...register("foundedYear")}
-                   className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium"
+                   className="pl-10 h-11 rounded-xl bg-stone-50 border-stone-200 focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/20 text-[#1a1a1a] font-medium"
                    placeholder="YYYY"
                  />
               </div>
@@ -392,29 +392,29 @@ const CompIdentityCard = () => {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-[#4A4F5B] font-bold text-sm">Tagline</Label>
+            <Label className="text-stone-700 font-medium text-sm">Tagline</Label>
             <Input 
               {...register("tagline")}
-              className="h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium"
+              className="h-11 rounded-xl bg-stone-50 border-stone-200 focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/20 text-[#1a1a1a] font-medium"
               placeholder="e.g. The AI-powered CRM..."
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-[#4A4F5B] font-bold text-sm">Short Description</Label>
+            <Label className="text-stone-700 font-medium text-sm">Short Description</Label>
             <Textarea 
               {...register("description")}
-              className="min-h-[100px] rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 resize-none p-4 text-[#1A1F2C] font-medium"
+              className="min-h-[100px] rounded-xl bg-stone-50 border-stone-200 focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/20 resize-none p-4 text-[#1a1a1a] font-medium leading-relaxed"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-[#4A4F5B] font-bold text-sm">Headquarters</Label>
+            <Label className="text-stone-700 font-medium text-sm">Headquarters</Label>
             <div className="relative">
-              <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9CA3AF]" strokeWidth={2} />
+              <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-stone-400" strokeWidth={2} />
               <Input 
                 {...register("headquarters")}
-                className="pl-10 h-11 rounded-xl bg-[#FAFBFE] border-[#E3E7EE] focus:bg-white focus:border-[#6F7EBC] focus:ring-1 focus:ring-[#6F7EBC]/20 text-[#1A1F2C] font-medium"
+                className="pl-10 h-11 rounded-xl bg-stone-50 border-stone-200 focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/20 text-[#1a1a1a] font-medium"
                 placeholder="City, Country"
               />
             </div>

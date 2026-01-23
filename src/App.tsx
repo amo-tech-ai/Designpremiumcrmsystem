@@ -38,6 +38,7 @@ const HowItWorksPage = lazy(() => import('./components/landing/HowItWorksPage').
 const BusinessModelPage = lazy(() => import('./components/landing/BusinessModelPage').then(m => ({ default: m.BusinessModelPage })));
 const LandingPage = lazy(() => import('./components/landing/LandingPage').then(m => ({ default: m.LandingPage })));
 const LandingPageV2 = lazy(() => import('./components/landing/LandingPageV2').then(m => ({ default: m.LandingPageV2 })));
+const LandingPageV5 = lazy(() => import('./components/landing/LandingPageV5').then(m => ({ default: m.LandingPageV5 })));
 const StyleGuidePage = lazy(() => import('./components/style-guide/StyleGuidePage').then(m => ({ default: m.StyleGuidePage })));
 const StandardPage = lazy(() => import('./components/landing/StandardPage').then(m => ({ default: m.StandardPage })));
 const UserProfile = lazy(() => import('./components/user-profile/UserProfile').then(m => ({ default: m.UserProfile })));
@@ -57,7 +58,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-type View = 'dashboard' | 'projects' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'contact-detail' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'event-wizard' | 'startup-profile' | 'company-profile' | 'editor' | 'landing' | 'landing-v2' | 'style-guide' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile' | 'settings-account' | 'settings-billing' | 'settings-workspaces' | 'support';
+type View = 'dashboard' | 'projects' | 'documents' | 'pipeline' | 'tasks' | 'activities' | 'contacts' | 'contact-detail' | 'insights' | 'discovery' | 'gtm' | 'lean-canvas' | 'wizard' | 'event-wizard' | 'startup-profile' | 'company-profile' | 'editor' | 'landing' | 'landing-v2' | 'landing-v5' | 'style-guide' | 'how-it-works' | 'business-model' | 'settings' | 'about' | 'careers' | 'legal' | 'contact' | 'blog' | 'community' | 'help' | 'templates' | 'pricing' | 'profile' | 'settings-account' | 'settings-billing' | 'settings-workspaces' | 'support';
 type PipelineMode = 'sales' | 'investor';
 
 export default function App() {
@@ -127,6 +128,7 @@ export default function App() {
     const viewToPath: Record<View, string> = {
       'landing': '/',
       'landing-v2': '/landing-v2',
+      'landing-v5': '/landing-v5',
       'style-guide': '/style-guide',
       'how-it-works': '/how-it-works',
       'business-model': '/business-model',
@@ -175,6 +177,7 @@ export default function App() {
     const pathToView = (pathname: string): View => {
       if (pathname === '/') return 'landing';
       if (pathname === '/landing-v2') return 'landing-v2';
+      if (pathname === '/landing-v5') return 'landing-v5';
       if (pathname === '/style-guide') return 'style-guide';
       if (pathname === '/how-it-works') return 'how-it-works';
       if (pathname === '/business-model') return 'business-model';
@@ -253,6 +256,14 @@ export default function App() {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <LandingPageV2 onNavigate={(view) => setCurrentView(view as View)} />
+      </Suspense>
+    );
+  }
+
+  if (currentView === 'landing-v5') {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <LandingPageV5 onNavigate={(view) => setCurrentView(view as View)} />
       </Suspense>
     );
   }

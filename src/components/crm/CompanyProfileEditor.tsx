@@ -66,7 +66,7 @@ const CollapsibleSection: React.FC<SectionProps> = ({ title, description, icon: 
       >
         <div className="flex items-center gap-4">
           {Icon && (
-            <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
               <Icon className="w-5 h-5" />
             </div>
           )}
@@ -101,7 +101,7 @@ export const CompanyProfileEditor = ({ onSave, onCancel }: { onSave?: () => void
       {/* Sticky Header */}
       <div className="sticky top-0 z-40 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
+          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold">
             S
           </div>
           <div>
@@ -111,7 +111,7 @@ export const CompanyProfileEditor = ({ onSave, onCancel }: { onSave?: () => void
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={onCancel}>Cancel</Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2" onClick={() => { toast.success('Profile saved successfully'); onSave?.(); }}>
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2" onClick={() => { toast.success('Profile saved successfully'); onSave?.(); }}>
             <Save className="w-4 h-4" /> Save Changes
           </Button>
         </div>
@@ -126,7 +126,7 @@ export const CompanyProfileEditor = ({ onSave, onCancel }: { onSave?: () => void
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="space-y-3">
                 <Label>Logo</Label>
-                <div className="w-32 h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center text-slate-400 hover:border-indigo-300 hover:text-indigo-600 cursor-pointer transition-colors">
+                <div className="w-32 h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center text-slate-400 hover:border-emerald-300 hover:text-emerald-600 cursor-pointer transition-colors">
                    <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-2">
                       <UploadCloud className="w-5 h-5" />
                    </div>
@@ -135,7 +135,7 @@ export const CompanyProfileEditor = ({ onSave, onCancel }: { onSave?: () => void
               </div>
               <div className="md:col-span-3 space-y-3">
                 <Label>Cover Image</Label>
-                <div className="h-32 w-full rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center text-slate-400 hover:border-indigo-300 hover:text-indigo-600 cursor-pointer transition-colors">
+                <div className="h-32 w-full rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center text-slate-400 hover:border-emerald-300 hover:text-emerald-600 cursor-pointer transition-colors">
                    <div className="flex items-center gap-2">
                       <ImageIcon className="w-5 h-5" />
                       <span className="text-sm font-medium">Upload Cover Banner (1200x400)</span>
@@ -371,7 +371,7 @@ export const CompanyProfileEditor = ({ onSave, onCancel }: { onSave?: () => void
                        <Label>Use of Funds</Label>
                        <div className="flex flex-wrap gap-2">
                           {['Engineering', 'Marketing', 'Sales'].map(tag => (
-                             <Badge key={tag} className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 cursor-pointer">{tag}</Badge>
+                             <Badge key={tag} className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 cursor-pointer">{tag}</Badge>
                           ))}
                           <Badge variant="outline" className="border-dashed cursor-pointer hover:bg-slate-50 text-slate-500">+ Add</Badge>
                        </div>
@@ -408,7 +408,7 @@ export const CompanyProfileEditor = ({ onSave, onCancel }: { onSave?: () => void
               <div className="space-y-3">
                  <Label>Pitch Deck</Label>
                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors cursor-pointer">
-                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3">
+                    <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3">
                        <FileText className="w-6 h-6" />
                     </div>
                     <h4 className="text-sm font-bold text-slate-900">Upload Pitch Deck</h4>

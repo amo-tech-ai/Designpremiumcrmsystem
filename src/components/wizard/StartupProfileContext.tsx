@@ -34,6 +34,11 @@ interface StartupProfileData {
   stage: string;
   raiseAmount: string;
   useOfFunds: string[];
+  
+  // Smart Interview
+  interviewAnswers?: any[];
+  interviewSignals?: string[];
+  interviewConfidence?: number;
 }
 
 interface StartupProfileContextType {

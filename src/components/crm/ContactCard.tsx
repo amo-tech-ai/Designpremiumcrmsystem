@@ -36,19 +36,19 @@ export const ContactCard: React.FC<ContactCardProps> = ({ contact, onClick, isSe
       className={cn(
         "group relative bg-white rounded-xl border p-5 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between h-full",
         isSelected 
-          ? "border-indigo-500 ring-1 ring-indigo-500 shadow-md bg-indigo-50/10" 
-          : "border-slate-200 hover:border-indigo-200"
+          ? "border-emerald-500 ring-1 ring-emerald-500 shadow-md bg-emerald-50/10" 
+          : "border-slate-200 hover:border-emerald-200"
       )}
     >
       {/* Header Actions */}
       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex gap-1">
-        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 backdrop-blur-sm hover:bg-indigo-50 hover:text-indigo-600 rounded-full shadow-sm" title="Send Message">
+        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 backdrop-blur-sm hover:bg-emerald-50 hover:text-emerald-600 rounded-full shadow-sm" title="Send Message">
            <Mail className="w-4 h-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 backdrop-blur-sm hover:bg-indigo-50 hover:text-indigo-600 rounded-full shadow-sm" title="Add Task">
+        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 backdrop-blur-sm hover:bg-emerald-50 hover:text-emerald-600 rounded-full shadow-sm" title="Add Task">
            <CheckSquare className="w-4 h-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 backdrop-blur-sm hover:bg-indigo-50 hover:text-indigo-600 rounded-full shadow-sm">
+        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 backdrop-blur-sm hover:bg-emerald-50 hover:text-emerald-600 rounded-full shadow-sm">
           <MoreHorizontal className="w-4 h-4" />
         </Button>
       </div>
@@ -59,7 +59,7 @@ export const ContactCard: React.FC<ContactCardProps> = ({ contact, onClick, isSe
           <div className="relative">
             <Avatar className="h-14 w-14 border-2 border-white shadow-sm ring-2 ring-slate-50">
               <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${contact.avatarSeed || contact.name}`} />
-              <AvatarFallback className="bg-indigo-100 text-indigo-700 font-bold">{contact.name.substring(0,2)}</AvatarFallback>
+              <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold">{contact.name.substring(0,2)}</AvatarFallback>
             </Avatar>
             {contact.type === 'linkedin' && (
               <div className="absolute -bottom-1 -right-1 bg-white p-0.5 rounded-full shadow-sm">
@@ -72,7 +72,7 @@ export const ContactCard: React.FC<ContactCardProps> = ({ contact, onClick, isSe
           </div>
           
           <div className="pt-1">
-            <h3 className="font-bold text-slate-900 group-hover:text-indigo-700 transition-colors line-clamp-1">{contact.name}</h3>
+            <h3 className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-1">{contact.name}</h3>
             <div className="text-sm text-slate-500 flex items-center gap-1.5 mb-1">
                <Building className="w-3 h-3 text-slate-400" />
                <span className="line-clamp-1">{contact.company}</span>
@@ -83,9 +83,9 @@ export const ContactCard: React.FC<ContactCardProps> = ({ contact, onClick, isSe
 
         {/* AI Insight Bubble */}
         {contact.aiInsight && (
-          <div className="bg-violet-50 border border-violet-100 rounded-lg p-2.5 flex items-start gap-2.5">
-             <Sparkles className="w-3.5 h-3.5 text-violet-600 mt-0.5 flex-shrink-0" />
-             <p className="text-xs text-violet-700 leading-relaxed font-medium">
+          <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-2.5 flex items-start gap-2.5">
+             <Sparkles className="w-3.5 h-3.5 text-emerald-600 mt-0.5 flex-shrink-0" />
+             <p className="text-xs text-emerald-700 leading-relaxed font-medium">
                {contact.aiInsight}
              </p>
           </div>
@@ -120,7 +120,7 @@ export const ContactCard: React.FC<ContactCardProps> = ({ contact, onClick, isSe
                   className={cn(
                     "w-1 h-3 rounded-full", 
                     (contact.relationshipStrength || 3) >= i 
-                      ? "bg-indigo-500" 
+                      ? "bg-emerald-500" 
                       : "bg-slate-200"
                   )} 
                 />

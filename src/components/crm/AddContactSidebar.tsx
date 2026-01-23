@@ -183,7 +183,7 @@ export const AddContactSidebar: React.FC<AddContactSidebarProps> = ({
                  <Input 
                    id="linkedin" 
                    placeholder="https://linkedin.com/in/..." 
-                   className="pl-9 bg-white border-slate-200 focus:border-indigo-300 focus:ring-indigo-100"
+                   className="pl-9 bg-white border-slate-200 focus:border-emerald-300 focus:ring-emerald-100"
                    value={formData.linkedinUrl}
                    onChange={(e) => handleChange('linkedinUrl', e.target.value)}
                  />
@@ -191,7 +191,7 @@ export const AddContactSidebar: React.FC<AddContactSidebarProps> = ({
                <Button 
                  onClick={handleEnrichment}
                  disabled={enriching || !formData.linkedinUrl}
-                 className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm whitespace-nowrap"
+                 className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm whitespace-nowrap"
                >
                  {enriching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
                  {enriching ? 'Enriching...' : 'Run AI Enrichment'}
@@ -205,11 +205,11 @@ export const AddContactSidebar: React.FC<AddContactSidebarProps> = ({
                    initial={{ opacity: 0, y: -10 }}
                    animate={{ opacity: 1, y: 0 }}
                    exit={{ opacity: 0, height: 0 }}
-                   className="mt-4 bg-white rounded-xl border border-indigo-100 shadow-sm overflow-hidden"
+                   className="mt-4 bg-white rounded-xl border border-emerald-100 shadow-sm overflow-hidden"
                  >
-                   <div className="bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-2 border-b border-indigo-100 flex items-center gap-2">
-                     <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                     <span className="text-xs font-bold text-indigo-800 uppercase tracking-wide">Gemini Analysis</span>
+                   <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-4 py-2 border-b border-emerald-100 flex items-center gap-2">
+                     <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                     <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">Gemini Analysis</span>
                    </div>
                    <div className="p-4 space-y-3">
                       <div className="flex items-start gap-3">
@@ -236,8 +236,8 @@ export const AddContactSidebar: React.FC<AddContactSidebarProps> = ({
                          ))}
                       </div>
                    </div>
-                   <div className="bg-indigo-50/50 p-2 text-center border-t border-indigo-100">
-                     <Button variant="ghost" size="sm" className="h-auto py-1 text-xs text-indigo-600 hover:text-indigo-700 hover:bg-transparent">
+                   <div className="bg-emerald-50/50 p-2 text-center border-t border-emerald-100">
+                     <Button variant="ghost" size="sm" className="h-auto py-1 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-transparent">
                        Generate Suggested Tasks <ArrowRight className="w-3 h-3 ml-1" />
                      </Button>
                    </div>
@@ -367,7 +367,7 @@ export const AddContactSidebar: React.FC<AddContactSidebarProps> = ({
         <div className="p-6 bg-white border-t border-slate-200 flex items-center justify-end gap-3 sticky bottom-0 z-10">
            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
            <Button 
-             className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 min-w-[120px]"
+             className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 min-w-[120px]"
              onClick={handleSubmit}
              disabled={loading}
            >

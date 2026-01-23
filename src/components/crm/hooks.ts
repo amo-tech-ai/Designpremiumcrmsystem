@@ -23,7 +23,7 @@ export const useContacts = () => {
 
       if (error) {
         // If table doesn't exist or fetch fails, use demo data
-        console.warn('Could not fetch contacts from database, using demo data:', error.message);
+        console.log('Using demo data for contacts');
         const demoContacts = sampleContacts.map((contact, index) => ({
           ...contact,
           id: `demo-${index + 1}`,
@@ -32,17 +32,25 @@ export const useContacts = () => {
         }));
         setContacts(demoContacts as Contact[]);
         setError(null); // Clear error since we're showing demo data
+      } else if (!data || data.length === 0) {
+        // If no contacts in database, show demo data
+        console.log('No contacts in database, showing demo data');
+        const demoContacts = sampleContacts.map((contact, index) => ({
+          ...contact,
+          id: `demo-${index + 1}`,
+          created_at: new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString()
+        }));
+        setContacts(demoContacts as Contact[]);
+        setError(null);
       } else {
         // Log first contact to check ID format
-        if (data && data.length > 0) {
-          console.log('Sample contact ID:', data[0].id, 'Type:', typeof data[0].id);
-        }
-        
+        console.log('Sample contact ID:', data[0].id, 'Type:', typeof data[0].id);
         setContacts(data || []);
         setError(null);
       }
     } catch (err: any) {
-      console.error('Error fetching contacts:', err);
+      console.log('Using demo data for contacts');
       // Fallback to demo data on any error
       const demoContacts = sampleContacts.map((contact, index) => ({
         ...contact,
@@ -72,23 +80,52 @@ export const useContactDetail = (contactId: string | null) => {
   const fetchDetail = useCallback(async () => {
     if (!contactId) return;
 
-    // Handle Demo/Mock ID "1"
-    if (contactId === '1') {
+    // Handle Demo/Mock IDs (demo-1, demo-2, etc.)
+    if (contactId === '1' || contactId.startsWith('demo-')) {
       setLoading(false);
+      
+      // Find the specific demo contact from sampleContacts
+      const demoIndex = contactId.startsWith('demo-') 
+        ? parseInt(contactId.replace('demo-', '')) - 1 
+        : 0;
+      
+      const demoContact = sampleContacts[demoIndex] || sampleContacts[0];
+      
       setContact({
-        id: '1',
-        first_name: 'Sarah',
-        last_name: 'Thompson',
-        email: 'sarah@technova.com',
-        phone: '+1 (312) 555-0184',
-        title: 'Head of Procurement',
-        account: { name: 'TechNova Solutions' },
-        tags: ['AI Buyer', 'High Priority'],
-        lead_score: 86
+        id: contactId,
+        first_name: demoContact.first_name,
+        last_name: demoContact.last_name,
+        email: demoContact.email,
+        phone: demoContact.phone,
+        title: demoContact.title,
+        account_name: demoContact.account_name,
+        linkedin_url: demoContact.linkedin_url,
+        tags: demoContact.tags,
+        overall_score: demoContact.overall_score,
+        notes: demoContact.notes,
+        last_interaction_at: demoContact.last_interaction_at
       });
+      
+      // Generate mock activities for demo contacts
       setActivities([
-        { id: '1', type: 'email', summary: 'Follow-up on proposal', occurred_at: new Date().toISOString() },
-        { id: '2', type: 'call', summary: 'Discussed budget constraints', occurred_at: new Date(Date.now() - 86400000).toISOString() }
+        { 
+          id: `${contactId}-1`, 
+          type: 'email', 
+          summary: 'Follow-up on initial conversation', 
+          occurred_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() 
+        },
+        { 
+          id: `${contactId}-2`, 
+          type: 'call', 
+          summary: 'Discussed partnership opportunities', 
+          occurred_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() 
+        },
+        { 
+          id: `${contactId}-3`, 
+          type: 'meeting', 
+          summary: 'Intro call scheduled', 
+          occurred_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() 
+        }
       ]);
       return;
     }
@@ -145,6 +182,14 @@ export const useContactDetail = (contactId: string | null) => {
 
   const updateContact = async (fields: Partial<Contact>) => {
     if (!contactId) return;
+    
+    // Handle demo contacts - just update local state
+    if (contactId === '1' || contactId.startsWith('demo-')) {
+      setContact((prev: any) => ({ ...prev, ...fields }));
+      toast.success('Contact updated (demo mode)');
+      return true;
+    }
+    
     try {
       const { error } = await supabase
         .from('crm_contacts')
@@ -476,18 +521,53 @@ export const useStartupProfile = () => {
   const fetchProfile = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || publicAnonKey;
-
-      const res = await fetch(`${SERVER_URL}/startup-profile`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
       
-      if (res.ok) {
-        const data = await res.json();
-        setProfile(data);
+      // Database-first approach: Always try database first
+      const { data: dbProfile, error: dbError } = await supabase
+        .from('startups')
+        .select('*')
+        .eq('user_id', session?.user?.id || '')
+        .single();
+
+      // If we have database profile, use it immediately
+      if (dbProfile && !dbError) {
+        setProfile(dbProfile);
+        setLoading(false);
+        return;
+      }
+
+      // If no database profile and user is authenticated, try edge function as fallback
+      if (session?.access_token) {
+        try {
+          const res = await fetch(`${SERVER_URL}/startup-profile`, {
+            headers: { 'Authorization': `Bearer ${session.access_token}` }
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            setProfile(data);
+          } else {
+            // Edge function not available, use database result (might be null)
+            setProfile(dbProfile);
+          }
+        } catch (fetchErr) {
+          // Edge function failed, silently use database result
+          setProfile(dbProfile);
+        }
+      } else {
+        // No session, profile is null
+        setProfile(null);
       }
     } catch (err) {
-      console.error("Error fetching startup profile:", err);
+      // Only log if it's not a network error
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        // Silently handle network errors in development
+        console.warn('Startup profile service unavailable (development mode)');
+      } else {
+        console.error("Error fetching startup profile:", err);
+      }
+      // Graceful degradation - profile will be null
+      setProfile(null);
     } finally {
       setLoading(false);
     }

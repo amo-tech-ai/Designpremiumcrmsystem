@@ -40,7 +40,7 @@ export const WizardFooter: React.FC<WizardFooterProps> = ({
            onClick={onBack} 
            disabled={currentStep === 0 || isSaving}
            className={cn(
-             "h-14 w-14 rounded-full border-[#E5E5E5] bg-white text-[#1A1A1A] shadow-lg hover:bg-[#F7F7F5] p-0 flex items-center justify-center transition-all",
+             "h-14 w-14 rounded-full border-stone-300 bg-white text-[#1a1a1a] shadow-lg hover:bg-stone-50 p-0 flex items-center justify-center transition-all",
              (currentStep === 0) && "hidden"
            )}
          >
@@ -53,7 +53,7 @@ export const WizardFooter: React.FC<WizardFooterProps> = ({
             disabled={!canNext || isSaving}
             className={cn(
               "h-14 px-8 rounded-full font-sans font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-base",
-              "bg-[#1A1A1A] hover:bg-black text-white"
+              "bg-[#0d5f4e] hover:bg-[#094438] text-white"
             )}
           >
             {isSaving ? (
@@ -73,30 +73,30 @@ export const WizardFooter: React.FC<WizardFooterProps> = ({
   }
 
   return (
-    <div className={cn("fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E5E5] p-5 md:px-10 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]", className)}>
+    <div className={cn("fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-stone-200 p-5 md:px-10 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.03)]", className)}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
            <Button 
              variant="ghost" 
              onClick={onBack} 
              disabled={currentStep === 0 || isSaving}
-             className="text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F7F7F5] font-sans font-medium"
+             className="text-stone-600 hover:text-[#1a1a1a] hover:bg-stone-50 font-sans font-medium"
            >
              <ChevronLeft className="w-4 h-4 mr-1" /> Back
            </Button>
            
-           <div className="hidden md:flex items-center gap-2 text-xs font-medium text-[#9CA3AF] font-sans">
+           <div className="hidden md:flex items-center gap-2 text-xs font-medium text-stone-500 font-sans">
              {isSaving ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1A1A1A]" />
-                  <span className="text-[#6B7280]">{loadingLabel}</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0d5f4e]" />
+                  <span className="text-stone-600">{loadingLabel}</span>
                 </>
              ) : (
                 <>
                   {currentStep > 0 && (
                     <>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#166534]" />
-                      <span className="text-[#6B7280]">Changes saved</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#0d5f4e]" />
+                      <span className="text-stone-600">Changes saved</span>
                     </>
                   )}
                 </>
@@ -108,8 +108,8 @@ export const WizardFooter: React.FC<WizardFooterProps> = ({
           onClick={onNext} 
           disabled={!canNext || isSaving}
           className={cn(
-            "min-w-[140px] transition-all h-11 rounded-xl font-sans font-bold shadow-md hover:shadow-lg",
-            isLastStep ? "bg-[#1A1A1A] hover:bg-black text-white" : "bg-[#1A1A1A] hover:bg-black text-white"
+            "min-w-[140px] transition-all h-11 rounded-xl font-sans font-bold shadow-sm hover:shadow-md",
+            "bg-[#0d5f4e] hover:bg-[#094438] text-white"
           )}
         >
           {isSaving ? (

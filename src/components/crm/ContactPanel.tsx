@@ -31,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useContactDetail, useAIActions } from './hooks';
 import { EditContactSidebar } from './EditContactSidebar';
 import { toast } from "sonner@2.0.3";
+import { cn } from '../ui/utils';
 
 interface ContactPanelProps {
   lead: any;

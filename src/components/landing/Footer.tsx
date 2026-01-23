@@ -49,6 +49,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, currentView }) => {
               <li className={linkClass('insights')} onClick={() => handleNav('insights')}>Market Research</li>
               <li className={linkClass('pricing')} onClick={() => handleNav('pricing')}>Pricing</li>
               <li className={linkClass('landing-v2')} onClick={() => handleNav('landing-v2')}>Home v2 (New)</li>
+              <li className={linkClass('landing-v5')} onClick={() => handleNav('landing-v5')}>Home v5 ✓</li>
             </ul>
           </div>
 

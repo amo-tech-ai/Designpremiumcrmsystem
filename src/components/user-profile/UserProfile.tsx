@@ -250,7 +250,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onNavigate }) => {
                   <Button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 rounded-xl px-6"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 rounded-xl px-6"
                   >
                     {isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>
@@ -327,7 +327,7 @@ const ProfileCard = () => {
 
   return (
     <Card className="border-none shadow-sm bg-white overflow-hidden rounded-[20px]">
-      <div className="h-24 bg-gradient-to-r from-indigo-50 to-violet-50 relative">
+      <div className="h-24 bg-gradient-to-r from-emerald-50 to-green-50 relative">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
       </div>
       <CardContent className="pt-0 relative flex flex-col items-center pb-8">
@@ -340,7 +340,7 @@ const ProfileCard = () => {
             <Camera className="w-8 h-8 text-white drop-shadow-md" />
             <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} disabled={uploading} />
           </label>
-          <label className="absolute bottom-0 right-0 rounded-full h-8 w-8 border-2 border-white bg-indigo-600 hover:bg-indigo-700 text-white shadow-md flex items-center justify-center cursor-pointer transition-colors">
+          <label className="absolute bottom-0 right-0 rounded-full h-8 w-8 border-2 border-white bg-emerald-600 hover:bg-emerald-700 text-white shadow-md flex items-center justify-center cursor-pointer transition-colors">
             {uploading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Camera className="w-4 h-4" />}
             <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} disabled={uploading} />
           </label>
@@ -458,7 +458,7 @@ const PersonalInfoCard = () => {
               size="sm" 
               onClick={handleRewriteBio}
               disabled={isAiLoading}
-              className="h-7 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+              className="h-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
             >
               {isAiLoading ? (
                 <span className="flex items-center gap-1.5">
@@ -555,7 +555,7 @@ const PreferencesCard = () => {
                 onClick={() => setValue('theme', 'light', { shouldDirty: true })}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                  theme === 'light' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  theme === 'light' ? "bg-white text-emerald-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
                 )}
              >
                 <Sun className="w-4 h-4" />
@@ -577,7 +577,7 @@ const PreferencesCard = () => {
                 onClick={() => setValue('theme', 'system', { shouldDirty: true })}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                  theme === 'system' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  theme === 'system' ? "bg-white text-emerald-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
                 )}
              >
                 <Smartphone className="w-4 h-4" />
@@ -593,14 +593,14 @@ const PreferencesCard = () => {
           <div className="space-y-1 flex-grow">
             <div className="flex items-center gap-2">
                <Label className="text-base font-medium">AI Copilot Mode</Label>
-               <Badge className="bg-indigo-100 text-indigo-700 border-none px-2 h-5 text-[10px] hover:bg-indigo-100">BETA</Badge>
+               <Badge className="bg-emerald-100 text-emerald-700 border-none px-2 h-5 text-[10px] hover:bg-emerald-100">BETA</Badge>
             </div>
             <p className="text-sm text-slate-500 max-w-md">Enable proactive suggestions and automated insights across your workflow.</p>
           </div>
           <Switch 
             checked={aiCopilot} 
             onCheckedChange={(val) => setValue('aiCopilot', val, { shouldDirty: true })}
-            className="data-[state=checked]:bg-indigo-600"
+            className="data-[state=checked]:bg-emerald-600"
           />
         </div>
 
